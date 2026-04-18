@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/cliente", "destination": "/" },
+    { "source": "/admin", "destination": "/" }
+  ]
+}

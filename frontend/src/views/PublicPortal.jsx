@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, MessageCircle, Phone, Instagram } from 'lucide-react';
+import { X, MessageCircle, Phone, Camera } from 'lucide-react';
 
 export default function PublicPortal() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -65,7 +65,7 @@ export default function PublicPortal() {
               <Phone size={24} />
             </a>
             <a href="#" className="social-icon instagram">
-              <Instagram size={24} />
+              <Camera size={24} />
             </a>
           </div>
 
