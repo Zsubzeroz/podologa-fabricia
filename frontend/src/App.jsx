@@ -46,6 +46,16 @@ function App() {
     const saved = window.localStorage.getItem('adminAuth');
     return saved ? JSON.parse(saved) : null;
   });
+  const [appointments, setAppointments] = useState([
+    {
+      id: 1,
+      clientName: 'Poliana',
+      service: 'Avaliação',
+      date: '2026-04-16',
+      startTime: '16:00',
+      endTime: '17:00'
+    }
+  ]);
 
   useEffect(() => {
     if (auth) {
@@ -61,7 +71,8 @@ function App() {
 
   const handleLogout = () => {
     setAuth(null);
-    window.location.pathname = '/admin';
+    window.localStorage.removeItem('adminAuth');
+    window.location.href = '/';
   };
 
   const HomePage = () => (
@@ -79,18 +90,55 @@ function App() {
 
   if (isClientPath) return <PublicPortal />;
   if (isAdminPath && !auth) return <Login onLogin={setAuth} />;
+  if (isAdminPath && auth) {
+    return (
+      <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
+        {currentView === 'agenda' && (
+          <Agenda 
+            appointments={appointments} 
+            onCancelAppointment={(id) => setAppointments(appointments.filter(appt => appt.id !== id))}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+          />
+        )}
+        {currentView === 'caixa' && <Caixa />}
+        {currentView === 'produtos' && <Produtos />}
+        {currentView === 'clientes' && <Clientes />}
+        {currentView === 'anamnese' && <Anamnese />}
+        {currentView === 'profissional' && <Profissional />}
+        {currentView === 'lancamentos' && <Financeiro />}
+        {currentView === 'meus_caixas' && <FinanceiroMeusCaixas />}
+        {currentView === 'categoria' && <FinanceiroCategoria />}
+        {currentView === 'conta' && <FinanceiroConta />}
+        {currentView === 'formas_pagamento' && <FinanceiroFormasPagamento />}
+        {currentView === 'fluxo_anual' && <AnaliseFluxoAnual />}
+        {currentView === 'fluxo_mensal' && <AnaliseFluxoMensal />}
+        {currentView === 'compra' && <ComprasCompra />}
+        {currentView === 'fornecedor' && <ComprasFornecedor />}
+        {currentView === 'campo_personalizado' && <CadastrosCampoPersonalizado />}
+        {currentView === 'como_conheceu' && <CadastrosComoConheceu />}
+        {currentView === 'feriado' && <CadastrosFeriado />}
+        {currentView === 'grupos' && <CadastrosGrupos />}
+        {currentView === 'marcas' && <CadastrosMarcas />}
+        {currentView === 'operadoras' && <CadastrosOperadoras />}
+        {currentView === 'sala' && <CadastrosSala />}
+        {currentView === 'consulta_agendas' && <ConsultaAgendas />}
+        {currentView === 'consulta_analise' && <ConsultaAnalise />}
+        {currentView === 'comissao' && <ComissaoProfissional />}
+        {currentView === 'estoque' && <ProdutosEstoque />}
+        {currentView === 'pacotes' && <ConsultaPacotes />}
+        {currentView === 'orcamentos' && <ConsultaOrcamentos />}
+        {currentView === 'previsao_retorno' && <ConsultaPrevisaoRetorno />}
+        {currentView === 'vendas' && <ConsultaVendas />}
+        {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
+        {currentView === 'permissoes_grupos' && <PermissoesGrupos />}
+        {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
+        {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
+        {currentView === 'alterar_senha' && <AlterarSenha />}
+      </Layout>
+    );
+  }
   if (currentPath !== '/' && !isClientPath && !isAdminPath) return HomePage();
-
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      clientName: 'Poliana',
-      service: 'Avaliação',
-      date: '2026-04-16',
-      startTime: '16:00',
-      endTime: '17:00'
-    }
-  ]);
 
   const cancelAppointment = (id) => {
     setAppointments(appointments.filter(appt => appt.id !== id));
