@@ -32,7 +32,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
       {/* HEADER TOP SITE */}
       <header className="sa-topbar">
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>SIMPLES AGENDA</span>
+          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>AGENDA ONLINE</span>
         </div>
         <div className="sa-topbar-right">
           <div className="badge-support">
