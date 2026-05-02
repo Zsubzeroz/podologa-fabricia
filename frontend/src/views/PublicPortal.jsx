@@ -136,7 +136,7 @@ export default function PublicPortal() {
                 }}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#0f3d2e', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
               >
-                <Calendar size={18} />
+                <img src="/IMG/agndamento.jpg" alt="Agendamentos" style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
                 <span>Agendar</span>
               </button>
             </div>
