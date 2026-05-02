@@ -116,11 +116,8 @@ export default function PublicPortal() {
                   <span className="service-duration">{service.duration}</span>
                   <span className="service-price">{service.price}</span>
                 </div>
-                <div className="professional-select">
-                  <label>com</label>
-                  <select value={selectedProfessional} onChange={(e) => setSelectedProfessional(e.target.value)}>
-                    <option>{service.professional}</option>
-                  </select>
+                <div className="professional-info" style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '6px' }}>
+                  <span>com {service.professional}</span>
                 </div>
               </div>
               <button 
