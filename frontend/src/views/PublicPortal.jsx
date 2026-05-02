@@ -55,20 +55,19 @@ export default function PublicPortal() {
           <div style={{ width: '100%', height: '180px', position: 'relative' }}>
             <img src="/IMG/banner2.jpeg" alt="Banner Clínica" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{
-              position: 'absolute', bottom: '-60px', left: '50%', transform: 'translateX(-50%)',
+              position: 'absolute', bottom: '-60px', left: '20px',
               width: '120px', height: '120px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}>
               <img src="/Logo.jpeg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
 
-          <div style={{ padding: '70px 20px 20px 20px', textAlign: 'center' }}>
+          <div style={{ padding: '70px 20px 20px 20px', textAlign: 'left' }}>
             <h1>Clínica Fabrícia Rodrigues</h1>
             <p className="clinic-phone" style={{ margin: '5px 0' }}>(19) 99727-0910</p>
-            <p className="clinic-address" style={{ margin: '2px 0' }}>Rua Papa João Paulo II, 256</p>
-            <p className="clinic-address" style={{ margin: '2px 0' }}>Artur Nogueira / SP</p>
+            <p className="clinic-address" style={{ margin: '2px 0' }}>Rua Papa João Paulo II, 256 • Artur Nogueira / SP</p>
             
-            <div className="social-icons" style={{ marginTop: '15px', marginBottom: '15px' }}>
+            <div className="social-icons" style={{ marginTop: '15px', marginBottom: '15px', justifyContent: 'flex-start' }}>
               <a href="#" className="social-icon whatsapp">
                 <MessageCircle size={24} />
               </a>
