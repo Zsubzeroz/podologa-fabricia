@@ -123,8 +123,10 @@ export default function PublicPortal() {
                   <span>com {service.professional}</span>
                 </div>
               </div>
-              <button 
-                className="btn-schedule"
+              <img 
+                src="/IMG/agndamento.jpg" 
+                alt="Agendar" 
+                title="Agendar"
                 onClick={() => {
                   setSelectedService(service);
                   setIsConfirmed(false);
@@ -134,11 +136,10 @@ export default function PublicPortal() {
                   setSelectedTime('');
                   setShowScheduleModal(true);
                 }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#0f3d2e', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
-              >
-                <img src="/IMG/agndamento.jpg" alt="Agendamentos" style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
-                <span>Agendar</span>
-              </button>
+                style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 8px rgba(0,0,0,0.15)', border: '2px solid #0f3d2e' }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
+              />
             </div>
           ))}
         </div>
