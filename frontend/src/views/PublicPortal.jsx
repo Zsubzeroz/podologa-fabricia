@@ -210,7 +210,7 @@ export default function PublicPortal() {
       {/* Footer */}
       <footer className="public-footer">
         <img src="/Logo.jpeg" alt="Clínica Fabrícia" className="footer-logo" />
-        <p>2016-2026 © Simples Agenda - Copyright™ - Todos os direitos reservados.</p>
+        <p>2016-2026 © Luan Estifer Rodrigues Pereira (Zsubzeroz) - Copyright™ - Todos os direitos reservados.</p>
       </footer>
     </div>
   );
