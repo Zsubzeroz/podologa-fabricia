@@ -7,6 +7,7 @@ export default function PublicPortal() {
   const [phone, setPhone] = useState('');
   const [selectedService, setSelectedService] = useState(null);
   const [selectedProfessional, setSelectedProfessional] = useState('FABRICIA RODRIGUES');
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const services = [
     {
@@ -95,13 +96,7 @@ export default function PublicPortal() {
 
       </header>
 
-      {/* Important Notice */}
-      <div className="important-notice">
-        <h3>IMPORTANTE</h3>
-        <p>
-          Prezados clientes Solicitamos pontualidade. Lembramos que a tolerância máxima de atraso é de 10 minutos, visando o bom andamento da agenda e o respeito aos demais clientes. Agradecemos a compreensão.
-        </p>
-      </div>
+
 
       {/* Services Section */}
       <div className="services-section">
@@ -124,6 +119,7 @@ export default function PublicPortal() {
                 className="btn-schedule"
                 onClick={() => {
                   setSelectedService(service);
+                  setIsConfirmed(false);
                   setShowScheduleModal(true);
                 }}
               >
@@ -175,31 +171,59 @@ export default function PublicPortal() {
               <X size={24} />
             </button>
             
-            <h2>Agendar: {selectedService.name}</h2>
-            
-            <div className="form-group">
-              <label>Seu Nome</label>
-              <input type="text" placeholder="Digite seu nome..." />
-            </div>
+            {isConfirmed ? (
+              <div style={{ textAlign: 'center', padding: '10px' }}>
+                <div style={{ fontSize: '3.5rem', color: '#10b981', marginBottom: '10px' }}>✓</div>
+                <h2 style={{ color: '#0f3d2e', marginBottom: '15px' }}>Agendamento Confirmado!</h2>
+                
+                <div style={{ background: '#fdfaf3', border: '2px dashed #c6a75e', borderRadius: '8px', padding: '1.2rem', marginBottom: '20px', textAlign: 'left' }}>
+                  <h3 style={{ color: '#c6a75e', margin: '0 0 8px 0', textAlign: 'center', fontWeight: 'bold' }}>IMPORTANTE</h3>
+                  <p style={{ color: '#374151', margin: 0, lineHeight: 1.5, fontSize: '0.95rem' }}>
+                    Prezados clientes. Solicitamos pontualidade. Lembramos que a tolerância máxima de atraso é de 10 minutos, visando o bom andamento da agenda e o respeito aos demais clientes. Agradecemos a compreensão.
+                  </p>
+                </div>
 
-            <div className="form-group">
-              <label>Seu Celular</label>
-              <input type="tel" placeholder="(XX) XXXXX-XXXX" />
-            </div>
+                <button 
+                  className="btn-confirm" 
+                  onClick={() => setShowScheduleModal(false)}
+                  style={{ background: '#0f3d2e', color: 'white', width: '100%', padding: '12px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  OK, ENTENDIDO
+                </button>
+              </div>
+            ) : (
+              <>
+                <h2>Agendar: {selectedService.name}</h2>
+                
+                <div className="form-group">
+                  <label>Seu Nome</label>
+                  <input type="text" placeholder="Digite seu nome..." />
+                </div>
 
-            <div className="form-group">
-              <label>Data Preferida</label>
-              <input type="date" />
-            </div>
+                <div className="form-group">
+                  <label>Seu Celular</label>
+                  <input type="tel" placeholder="(XX) XXXXX-XXXX" />
+                </div>
 
-            <div className="form-group">
-              <label>Horário Preferido</label>
-              <input type="time" />
-            </div>
+                <div className="form-group">
+                  <label>Data Preferida</label>
+                  <input type="date" />
+                </div>
 
-            <button className="btn-confirm">
-              ✓ CONFIRMAR AGENDAMENTO
-            </button>
+                <div className="form-group">
+                  <label>Horário Preferido</label>
+                  <input type="time" />
+                </div>
+
+                <button 
+                  className="btn-confirm"
+                  onClick={() => setIsConfirmed(true)}
+                  style={{ background: '#c6a75e', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: '100%', marginTop: '10px' }}
+                >
+                  ✓ CONFIRMAR AGENDAMENTO
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
