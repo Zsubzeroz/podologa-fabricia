@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+  background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
   padding: 1rem;
 }
 
@@ -65,8 +65,8 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #1e88e5;
-  box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.1);
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.1);
 }
 
 .error-message {
@@ -81,7 +81,7 @@
 .login-button {
   width: 100%;
   padding: 0.75rem;
-  background: #1e88e5;
+  background: #0f766e;
   color: white;
   border: none;
   border-radius: 6px;
@@ -92,7 +92,7 @@
 }
 
 .login-button:hover {
-  background: #1565c0;
+  background: #115e59;
 }
 
 .login-info {
@@ -110,7 +110,7 @@
 /* Public Portal Styles */
 .public-portal {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1e88e5 0%, #00bcd4 100%);
+  background: linear-gradient(135deg, #115e59 0%, #0d9488 100%);
 }
 
 .public-header {
@@ -130,7 +130,7 @@
 .clinic-logo {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -186,7 +186,7 @@
 }
 
 .social-icon.phone {
-  background: #2196f3;
+  background: #0f766e;
 }
 
 .social-icon.instagram {
@@ -194,7 +194,7 @@
 }
 
 .btn-schedule-check {
-  background: #2196f3;
+  background: #0f766e;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -206,12 +206,12 @@
 }
 
 .btn-schedule-check:hover {
-  background: #1976d2;
+  background: #115e59;
 }
 
 .important-notice {
-  background: #fff3e0;
-  border: 2px dashed #ff9800;
+  background: #f0fdf4;
+  border: 2px dashed #10b981;
   border-radius: 8px;
   padding: 1.5rem;
   max-width: 800px;
@@ -220,12 +220,12 @@
 }
 
 .important-notice h3 {
-  color: #e91e63;
+  color: #047857;
   margin: 0 0 0.5rem 0;
 }
 
 .important-notice p {
-  color: #666;
+  color: #374151;
   margin: 0;
   line-height: 1.5;
 }
@@ -237,7 +237,7 @@
 }
 
 .services-title {
-  background: #4caf50;
+  background: #115e59;
   color: white;
   padding: 1rem;
   margin: 0;
@@ -270,7 +270,7 @@
 
 .service-item h3 {
   margin: 0 0 0.5rem 0;
-  color: #333;
+  color: #111827;
   font-size: 1rem;
 }
 
@@ -283,11 +283,11 @@
 }
 
 .service-duration {
-  color: #999;
+  color: #6b7280;
 }
 
 .service-price {
-  color: #4caf50;
+  color: #0d9488;
   font-weight: 600;
 }
 
@@ -298,7 +298,7 @@
 }
 
 .professional-select label {
-  color: #999;
+  color: #6b7280;
   font-size: 0.85rem;
 }
 
@@ -306,12 +306,12 @@
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  color: #1e88e5;
+  color: #0f766e;
   font-weight: 600;
 }
 
 .btn-schedule {
-  background: #ff9800;
+  background: #14b8a6;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -323,7 +323,7 @@
 }
 
 .btn-schedule:hover {
-  background: #f57c00;
+  background: #0d9488;
 }
 
 /* Modals */
@@ -385,7 +385,7 @@
 .btn-confirm {
   width: 100%;
   padding: 0.75rem;
-  background: #2196f3;
+  background: #0f766e;
   color: white;
   border: none;
   border-radius: 6px;
@@ -397,7 +397,7 @@
 
 .btn-consult:hover,
 .btn-confirm:hover {
-  background: #1976d2;
+  background: #115e59;
 }
 
 .public-footer {

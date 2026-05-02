@@ -69,6 +69,19 @@ export default function PublicPortal() {
             </a>
           </div>
 
+          {/* Banner Images Carousel/Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '12px',
+            marginTop: '20px',
+            marginBottom: '15px'
+          }}>
+            <img src="/IMG/banner.jpeg" alt="Clínica" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
+            <img src="/IMG/banner2.jpeg" alt="Atendimento" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
+            <img src="/IMG/cartaz.jpeg" alt="Cartaz" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
+          </div>
+
           <button 
             className="btn-schedule-check"
             onClick={() => setShowCheckModal(true)}
@@ -192,7 +205,7 @@ export default function PublicPortal() {
 
       {/* Footer */}
       <footer className="public-footer">
-        <img src="/Logo.jpeg" alt="Simplesmente Agenda" className="footer-logo" />
+        <img src="/Logo.jpeg" alt="Clínica Fabrícia" className="footer-logo" />
         <p>2016-2026 © Simples Agenda - Copyright™ - Todos os direitos reservados.</p>
       </footer>
     </div>

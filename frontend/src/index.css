@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 
 :root {
-  --sa-header-bg: #4b84b5;
-  --sa-sidebar-bg: #f9f9f9;
-  --sa-sidebar-border: #e7e7e7;
-  --sa-sidebar-hover: #eeeeee;
-  --sa-active-green: #2ab27b;
-  --sa-text: #555555;
+  --sa-header-bg: #115e59;
+  --sa-sidebar-bg: #fcfcfc;
+  --sa-sidebar-border: #f1f1f1;
+  --sa-sidebar-hover: #f3f4f6;
+  --sa-active-green: #0d9488;
+  --sa-text: #1f2937;
   --sa-bg: #ffffff;
-  --sa-border: #ddd;
-  --sa-blue: #337ab7;
-  --sa-red: #d9534f;
+  --sa-border: #e5e7eb;
+  --sa-blue: #0f766e;
+  --sa-red: #dc2626;
   
-  --radius: 3px;
+  --radius: 6px;
   --sidebar-width: 230px;
 }
 
@@ -37,7 +37,7 @@ ul { list-style: none; }
 
 /* Header */
 .sa-topbar {
-  height: 50px;
+  height: 55px;
   background-color: var(--sa-header-bg);
   display: flex;
   align-items: center;
@@ -45,6 +45,7 @@ ul { list-style: none; }
   padding: 0 15px;
   color: white;
   z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .sa-brand {
@@ -70,8 +71,8 @@ ul { list-style: none; }
 }
 
 .badge-support {
-  background-color: #3bbcb2;
-  padding: 3px 10px;
+  background-color: #14b8a6;
+  padding: 4px 12px;
   border-radius: 12px;
   font-weight: 600;
   display: flex;
@@ -101,7 +102,7 @@ ul { list-style: none; }
   align-items: center;
   justify-content: space-between;
   padding: 12px 15px;
-  color: #666;
+  color: #4b5563;
   font-size: 0.9rem;
   cursor: pointer;
   border-bottom: 1px solid var(--sa-sidebar-border);
@@ -132,17 +133,17 @@ ul { list-style: none; }
 .sa-submenu-item {
   padding: 10px 15px 10px 40px;
   font-size: 0.85rem;
-  color: #666;
+  color: #4b5563;
   border-bottom: 1px solid var(--sa-sidebar-border);
   cursor: pointer;
 }
-.sa-submenu-item:hover { background-color: #f5f5f5; }
+.sa-submenu-item:hover { background-color: #f3f4f6; }
 .sa-submenu-item.active { color: var(--sa-active-green); font-weight: 600; }
 
 /* Area de Conteudo */
 .sa-content {
   flex: 1;
-  background-color: #f9f9f9;
+  background-color: #f9fafb;
   overflow-y: auto;
   padding: 20px;
 }
@@ -151,7 +152,7 @@ ul { list-style: none; }
   background-color: white;
   border: 1px solid var(--sa-border);
   border-radius: var(--radius);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   min-height: 500px;
 }
 
@@ -182,16 +183,21 @@ ul { list-style: none; }
   font-weight: 600;
 }
 
-.btn-primary { background-color: var(--sa-blue); color: white; border-color: #2e6da4; }
-.btn-success { background-color: #26b99a; color: white; border-color: #169f85; }
-.btn-warning { background-color: #f0ad4e; color: white; border-color: #eea236; }
-.btn-danger { background-color: var(--sa-red); color: white; border-color: #d43f3a; }
-.btn-default { background-color: #fff; color: #333; border-color: #ccc; }
+.btn-primary { background-color: var(--sa-blue); color: white; border-color: #0d6861; }
+.btn-primary:hover { background-color: #0d6861; }
+.btn-success { background-color: #10b981; color: white; border-color: #059669; }
+.btn-success:hover { background-color: #059669; }
+.btn-warning { background-color: #f59e0b; color: white; border-color: #d97706; }
+.btn-warning:hover { background-color: #d97706; }
+.btn-danger { background-color: var(--sa-red); color: white; border-color: #b91c1c; }
+.btn-danger:hover { background-color: #b91c1c; }
+.btn-default { background-color: #fff; color: #374151; border-color: #d1d5db; }
+.btn-default:hover { background-color: #f3f4f6; }
 
 .form-control {
   width: 100%;
   padding: 6px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #d1d5db;
   border-radius: var(--radius);
   font-size: 0.9rem;
 }
@@ -209,7 +215,7 @@ table.sa-table {
 }
 
 .sa-table th {
-  color: #333;
+  color: #111827;
   font-weight: 600;
 }
 
@@ -238,4 +244,4 @@ table.sa-table {
 .info-box-header {
   background: var(--sa-blue); color: white; padding: 8px 15px; margin: -15px -15px 15px -15px; font-weight: 600; font-size: 0.9rem;
 }
-.info-box-header.green { background: #37b58c; }
+.info-box-header.green { background: #0d9488; }
