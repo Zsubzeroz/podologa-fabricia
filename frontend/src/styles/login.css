@@ -194,7 +194,7 @@
 }
 
 .btn-schedule-check {
-  background: #0f766e;
+  background: #c6a75e;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -206,12 +206,12 @@
 }
 
 .btn-schedule-check:hover {
-  background: #115e59;
+  background: #b1944e;
 }
 
 .important-notice {
-  background: #f0fdf4;
-  border: 2px dashed #10b981;
+  background: #fdfaf3;
+  border: 2px dashed #c6a75e;
   border-radius: 8px;
   padding: 1.5rem;
   max-width: 800px;
@@ -220,7 +220,7 @@
 }
 
 .important-notice h3 {
-  color: #047857;
+  color: #c6a75e;
   margin: 0 0 0.5rem 0;
 }
 
@@ -311,7 +311,7 @@
 }
 
 .btn-schedule {
-  background: #14b8a6;
+  background: #c6a75e;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -323,7 +323,7 @@
 }
 
 .btn-schedule:hover {
-  background: #0d9488;
+  background: #b1944e;
 }
 
 /* Modals */
