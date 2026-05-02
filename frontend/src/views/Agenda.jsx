@@ -92,6 +92,43 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
           </tbody>
         </table>
       </div>
+
+      {/* Pacientes de Hoje List */}
+      <div style={{ marginTop: '20px', background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '15px' }}>
+        <h3 style={{ margin: '0 0 10px 0', color: '#0f3d2e' }}>Pacientes de Hoje ({formatDateForDisplay(currentDate)})</h3>
+        {appointments.filter(a => a.date === currentYMD).length === 0 ? (
+          <p style={{ color: '#6b7280', margin: 0 }}>Nenhum atendimento agendado para este dia.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {appointments.filter(a => a.date === currentYMD).map(appt => (
+              <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px' }}>
+                <div>
+                  <span style={{ fontWeight: 'bold', color: '#1f2937' }}>{appt.startTime}</span> - <span style={{ fontWeight: 'bold', color: '#0f3d2e' }}>{appt.clientName}</span> ({appt.service})
+                  {appt.clientPhone && <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '2px' }}>Contato: {appt.clientPhone}</div>}
+                </div>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button 
+                    onClick={() => {
+                      const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
+                      const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
+                      window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                    }}
+                    style={{ background: '#25d366', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                  >
+                    WhatsApp
+                  </button>
+                  <button 
+                    onClick={() => onCancelAppointment(appt.id)}
+                    style={{ background: '#ef4444', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
