@@ -37,6 +37,7 @@ import PermissoesGrupos from './views/PermissoesGrupos';
 import ConfiguracoesDadosEmpresa from './views/ConfiguracoesDadosEmpresa';
 import ConfiguracoesGeral from './views/ConfiguracoesGeral';
 import AlterarSenha from './views/AlterarSenha';
+import Dashboard from './views/Dashboard';
 
 function App() {
   const [currentView, setCurrentView] = useState('produtos');
@@ -100,6 +101,7 @@ function App() {
   if (isAdminPath && auth) {
     return (
       <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
+        {currentView === 'dashboard' && <Dashboard />}
         {currentView === 'agenda' && (
           <Agenda 
             appointments={appointments} 
@@ -153,6 +155,7 @@ function App() {
 
   return (
     <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu}>
+      {currentView === 'dashboard' && <Dashboard />}
       {currentView === 'agenda' && (
         <Agenda 
           appointments={appointments} 
