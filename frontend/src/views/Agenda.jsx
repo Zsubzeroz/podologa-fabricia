@@ -57,9 +57,11 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
             {hours.map(hour => {
               const hourSt = `${hour.toString().padStart(2, '0')}:00`;
               
-              const apptsInHour = appointments.filter(a => 
-                a.date === currentYMD && a.startTime.startsWith(hour.toString().padStart(2, '0'))
-              );
+              const apptsInHour = appointments.filter(a => {
+                if (a.date !== currentYMD) return false;
+                const h = parseInt(a.startTime.split(':')[0], 10);
+                return h === hour;
+              });
               
               return (
                 <tr key={hour}>
