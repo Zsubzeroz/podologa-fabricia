@@ -51,39 +51,27 @@ export default function PublicPortal() {
       {/* Header */}
       <header className="public-header">
         <div className="clinic-card" style={{ padding: 0, overflow: 'hidden', maxWidth: '600px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.15)', display: 'flex', flexDirection: 'column' }}>
-          {/* Banner Inteiro sem mudar o tamanho */}
+          {/* Banner Inteiro */}
           <div style={{ width: '100%', height: 'auto' }}>
-            <img src="/IMG/banner2.jpeg" alt="Banner Clínica" style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
+            <img src="/IMG/banner.jpeg" alt="Banner Clínica" style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
           </div>
 
-          {/* Área Branca */}
-          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', position: 'relative' }}>
-            {/* Logo Centralizado sem tocar no banner */}
-            <div style={{
-              width: '120px', height: '120px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', margin: '0 auto'
-            }}>
-              <img src="/Logo.jpeg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            {/* Número de Telefone */}
-            <p className="clinic-phone" style={{ textAlign: 'center', margin: 0, fontSize: '1.05rem', color: '#4b5563', fontWeight: 'bold' }}>
-              (19) 99727-0910
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '5px' }}>
+          {/* Área Branca Compacta proporcional aos ícones */}
+          <div style={{ padding: '12px 15px', background: '#fff', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               {/* Ícones de Contato inferior esquerda */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {/* WhatsApp */}
-                <a href="https://wa.me/5519997270910" target="_blank" rel="noreferrer" className="social-icon whatsapp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#25d366', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-                  <MessageCircle size={24} />
+                <a href="https://wa.me/5519997270910" target="_blank" rel="noreferrer" className="social-icon whatsapp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#25d366', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
+                  <MessageCircle size={22} />
                 </a>
                 {/* Instagram */}
-                <a href="https://www.instagram.com/fabriciapodologa/" target="_blank" rel="noreferrer" className="social-icon instagram" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e1306c', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-                  <Camera size={24} />
+                <a href="https://www.instagram.com/fabriciapodologa/" target="_blank" rel="noreferrer" className="social-icon instagram" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e1306c', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
+                  <Camera size={22} />
                 </a>
                 {/* Telefone */}
-                <a href="tel:19997270910" className="social-icon phone" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#3b82f6', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-                  <Phone size={24} />
+                <a href="tel:19997270910" className="social-icon phone" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#3b82f6', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
+                  <Phone size={22} />
                 </a>
               </div>
 
@@ -91,14 +79,14 @@ export default function PublicPortal() {
               <button 
                 className="btn-schedule-check"
                 onClick={() => setShowCheckModal(true)}
-                style={{ margin: 0 }}
+                style={{ margin: 0, padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}
               >
                 Consultar Agendamento
               </button>
             </div>
-
+            
             {/* Endereço embaixo de tudo */}
-            <p className="clinic-address" style={{ textAlign: 'center', margin: '5px 0 0 0', fontSize: '0.85rem', color: '#6b7280', borderTop: '1px solid #f3f4f6', paddingTop: '10px' }}>
+            <p className="clinic-address" style={{ textAlign: 'center', margin: '8px 0 0 0', fontSize: '0.8rem', color: '#6b7280', borderTop: '1px solid #f3f4f6', paddingTop: '6px' }}>
               Rua Papa João Paulo II, 256 • Artur Nogueira / SP
             </p>
           </div>
