@@ -137,7 +137,7 @@ export default function PublicPortal() {
                 title="Agendar"
               >
                 <img 
-                  src="/IMG/agndamento.jpg" 
+                  src="/IMG/agendamento.png" 
                   alt="Agendar" 
                   style={{ width: '80px', height: '80px', borderRadius: '8px', objectFit: 'cover', transition: 'transform 0.2s', boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }}
                   onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
