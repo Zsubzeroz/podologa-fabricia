@@ -123,10 +123,7 @@ export default function PublicPortal() {
                   <span>com {service.professional}</span>
                 </div>
               </div>
-              <img 
-                src="/IMG/agndamento.jpg" 
-                alt="Agendar" 
-                title="Agendar"
+              <div 
                 onClick={() => {
                   setSelectedService(service);
                   setIsConfirmed(false);
@@ -136,10 +133,18 @@ export default function PublicPortal() {
                   setSelectedTime('');
                   setShowScheduleModal(true);
                 }}
-                style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 8px rgba(0,0,0,0.15)', border: '2px solid #0f3d2e' }}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
-              />
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                title="Agendar"
+              >
+                <img 
+                  src="/IMG/agndamento.jpg" 
+                  alt="Agendar" 
+                  style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', transition: 'transform 0.2s', boxShadow: '0 4px 8px rgba(0,0,0,0.15)', border: '2px solid #0f3d2e' }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
+                />
+                <span style={{ fontSize: '0.85rem', color: '#0f3d2e', fontWeight: 'bold' }}>Agendar</span>
+              </div>
             </div>
           ))}
         </div>
