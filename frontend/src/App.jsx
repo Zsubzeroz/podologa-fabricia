@@ -46,16 +46,19 @@ function App() {
     const saved = window.localStorage.getItem('adminAuth');
     return saved ? JSON.parse(saved) : null;
   });
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      clientName: 'Poliana',
-      service: 'Avaliação',
-      date: '2026-04-16',
-      startTime: '16:00',
-      endTime: '17:00'
-    }
-  ]);
+  const [appointments, setAppointments] = useState(() => {
+    const saved = window.localStorage.getItem('appointments');
+    return saved ? JSON.parse(saved) : [
+      {
+        id: 1,
+        clientName: 'Poliana',
+        service: 'Avaliação',
+        date: '2026-04-16',
+        startTime: '16:00',
+        endTime: '17:00'
+      }
+    ];
+  });
 
   useEffect(() => {
     if (auth) {
@@ -64,6 +67,10 @@ function App() {
       window.localStorage.removeItem('adminAuth');
     }
   }, [auth]);
+
+  useEffect(() => {
+    window.localStorage.setItem('appointments', JSON.stringify(appointments));
+  }, [appointments]);
 
   const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
   const isClientPath = currentPath === '/cliente';

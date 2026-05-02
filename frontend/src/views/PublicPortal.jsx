@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, MessageCircle, Phone, Camera } from 'lucide-react';
+import { X, MessageCircle, Phone, Camera, Calendar } from 'lucide-react';
 
 export default function PublicPortal() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -9,43 +9,51 @@ export default function PublicPortal() {
   const [selectedProfessional, setSelectedProfessional] = useState('FABRICIA RODRIGUES');
   const [isConfirmed, setIsConfirmed] = useState(false);
 
-  const services = [
-    {
-      id: 1,
-      name: 'AVALIAÇÃO',
-      duration: '1h 00min',
-      price: 'R$ 50,00',
-      professional: 'FABRICIA RODRIGUES'
-    },
-    {
-      id: 2,
-      name: 'CALOS E CALOSIDADE',
-      duration: '1h 00min',
-      price: 'Consulte',
-      professional: 'FABRICIA RODRIGUES'
-    },
-    {
-      id: 3,
-      name: 'ONICOCRIPTOSE (UNHA ENCRAVADA)',
-      duration: '1h 00min',
-      price: 'Consulte',
-      professional: 'FABRICIA RODRIGUES'
-    },
-    {
-      id: 4,
-      name: 'PODOROFILAXIA (limpeza)',
-      duration: '30min',
-      price: 'R$ 70,00',
-      professional: 'FABRICIA RODRIGUES'
-    },
-    {
-      id: 5,
-      name: 'VERRUGA PLANTAR (olho de peixe)',
-      duration: '30min',
-      price: 'Consulte',
-      professional: 'FABRICIA RODRIGUES'
-    }
-  ];
+  const [clientName, setClientName] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+
+  const [services, setServices] = useState(() => {
+    const saved = window.localStorage.getItem('services');
+    return saved ? JSON.parse(saved) : [
+      {
+        id: 1,
+        name: 'AVALIAÇÃO',
+        duration: '1h 00min',
+        price: 'R$ 50,00',
+        professional: 'FABRICIA RODRIGUES'
+      },
+      {
+        id: 2,
+        name: 'CALOS E CALOSIDADE',
+        duration: '1h 00min',
+        price: 'Consulte',
+        professional: 'FABRICIA RODRIGUES'
+      },
+      {
+        id: 3,
+        name: 'ONICOCRIPTOSE (UNHA ENCRAVADA)',
+        duration: '1h 00min',
+        price: 'Consulte',
+        professional: 'FABRICIA RODRIGUES'
+      },
+      {
+        id: 4,
+        name: 'PODOROFILAXIA (limpeza)',
+        duration: '30min',
+        price: 'R$ 70,00',
+        professional: 'FABRICIA RODRIGUES'
+      },
+      {
+        id: 5,
+        name: 'VERRUGA PLANTAR (olho de peixe)',
+        duration: '30min',
+        price: 'Consulte',
+        professional: 'FABRICIA RODRIGUES'
+      }
+    ];
+  });
 
   return (
     <div className="public-portal">
@@ -120,10 +128,16 @@ export default function PublicPortal() {
                 onClick={() => {
                   setSelectedService(service);
                   setIsConfirmed(false);
+                  setClientName('');
+                  setClientPhone('');
+                  setSelectedDate('');
+                  setSelectedTime('');
                   setShowScheduleModal(true);
                 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#0f3d2e', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
               >
-                AGENDAR
+                <Calendar size={18} />
+                <span>Agendar</span>
               </button>
             </div>
           ))}
@@ -197,27 +211,67 @@ export default function PublicPortal() {
                 
                 <div className="form-group">
                   <label>Seu Nome</label>
-                  <input type="text" placeholder="Digite seu nome..." />
+                  <input 
+                    type="text" 
+                    placeholder="Digite seu nome..." 
+                    value={clientName} 
+                    onChange={(e) => setClientName(e.target.value)} 
+                    style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>Seu Celular</label>
-                  <input type="tel" placeholder="(XX) XXXXX-XXXX" />
+                  <input 
+                    type="tel" 
+                    placeholder="(XX) XXXXX-XXXX" 
+                    value={clientPhone} 
+                    onChange={(e) => setClientPhone(e.target.value)} 
+                    style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>Data Preferida</label>
-                  <input type="date" />
+                  <input 
+                    type="date" 
+                    value={selectedDate} 
+                    onChange={(e) => setSelectedDate(e.target.value)} 
+                    style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>Horário Preferido</label>
-                  <input type="time" />
+                  <input 
+                    type="time" 
+                    value={selectedTime} 
+                    onChange={(e) => setSelectedTime(e.target.value)} 
+                    style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
                 </div>
 
                 <button 
                   className="btn-confirm"
-                  onClick={() => setIsConfirmed(true)}
+                  onClick={() => {
+                    if (!clientName || !clientPhone || !selectedDate || !selectedTime) {
+                      alert('Por favor, preencha todos os campos do formulário.');
+                      return;
+                    }
+                    const newAppointment = {
+                      id: Date.now(),
+                      clientName,
+                      clientPhone,
+                      service: selectedService.name,
+                      date: selectedDate,
+                      startTime: selectedTime,
+                      endTime: selectedTime
+                    };
+                    const currentAppts = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+                    const updated = [...currentAppts, newAppointment];
+                    window.localStorage.setItem('appointments', JSON.stringify(updated));
+                    setIsConfirmed(true);
+                  }}
                   style={{ background: '#c6a75e', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: '100%', marginTop: '10px' }}
                 >
                   ✓ CONFIRMAR AGENDAMENTO

@@ -62,11 +62,23 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
                   <td className="time-header">{hour}</td>
                   <td className="time-cell" onClick={() => onSlotClick(hourSt)}>
                     {apptsInHour.map(appt => (
-                      <div key={appt.id} className="appt-block" onClick={(e) => {e.stopPropagation();}}>
+                      <div key={appt.id} className="appt-block" onClick={(e) => {e.stopPropagation();}} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
                         <div>
                            <strong>{appt.startTime} - {appt.endTime}</strong> | {appt.clientName} - {appt.service}
                         </div>
-                        <button className="btn-cancel-mini" onClick={() => onCancelAppointment(appt.id)}>X</button>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          <button 
+                            onClick={() => {
+                              const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
+                              const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
+                              window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                            }}
+                            style={{ background: '#25d366', border: 'none', color: 'white', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
+                          >
+                            WhatsApp
+                          </button>
+                          <button className="btn-cancel-mini" onClick={() => onCancelAppointment(appt.id)}>X</button>
+                        </div>
                       </div>
                     ))}
                   </td>
