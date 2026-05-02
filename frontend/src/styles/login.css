@@ -110,7 +110,7 @@
 /* Public Portal Styles */
 .public-portal {
   min-height: 100vh;
-  background: linear-gradient(135deg, #115e59 0%, #0d9488 100%);
+  background: #0f3d2e;
 }
 
 .public-header {
