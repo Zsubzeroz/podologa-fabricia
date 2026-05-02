@@ -2,12 +2,21 @@ import { useState } from 'react';
 import { HelpCircle, RefreshCcw, Plus } from 'lucide-react';
 
 export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
+  const formatDateForInput = (d) => {
+    if (!d) return '';
+    const dateObj = typeof d === 'string' ? new Date(d) : d;
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [formData, setFormData] = useState({
     clientName: '',
     phone: '',
     birthdate: '',
     service: 'Avaliação',
-    date: currentDate ? currentDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    date: currentDate ? formatDateForInput(currentDate) : formatDateForInput(new Date()),
     startTime: preSelectedTime || '10:00',
     duration: '01:00',
     repeat: 'Nunca',

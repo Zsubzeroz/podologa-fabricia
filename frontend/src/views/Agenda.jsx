@@ -9,7 +9,11 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
     return dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   };
   const formatDateForInput = (dateObj) => {
-    return dateObj.toISOString().split('T')[0];
+    if (!dateObj || !(dateObj instanceof Date)) return '';
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const changeDate = (days) => {
