@@ -42,7 +42,7 @@ import Dashboard from './views/Dashboard';
 function App() {
   const [currentView, setCurrentView] = useState('produtos');
   const [openMenu, setOpenMenu] = useState('cadastros'); 
-  const [currentDate, setCurrentDate] = useState(new Date('2026-04-16T12:00:00'));
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [auth, setAuth] = useState(() => {
     const saved = window.localStorage.getItem('adminAuth');
     return saved ? JSON.parse(saved) : null;
@@ -62,6 +62,22 @@ function App() {
   });
 
   useEffect(() => {
+    const load = () => {
+      const saved = window.localStorage.getItem('appointments');
+      if (saved) {
+        setAppointments(JSON.parse(saved));
+      }
+    };
+    load();
+    window.addEventListener('storage', load);
+    const interval = setInterval(load, 2000);
+    return () => {
+      window.removeEventListener('storage', load);
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
     if (auth) {
       window.localStorage.setItem('adminAuth', JSON.stringify(auth));
     } else {
@@ -69,9 +85,6 @@ function App() {
     }
   }, [auth]);
 
-  useEffect(() => {
-    window.localStorage.setItem('appointments', JSON.stringify(appointments));
-  }, [appointments]);
 
   const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
   const isClientPath = currentPath === '/cliente';
@@ -105,7 +118,11 @@ function App() {
         {currentView === 'agenda' && (
           <Agenda 
             appointments={appointments} 
-            onCancelAppointment={(id) => setAppointments(appointments.filter(appt => appt.id !== id))}
+            onCancelAppointment={(id) => {
+              const updated = appointments.filter(appt => appt.id !== id);
+              setAppointments(updated);
+              window.localStorage.setItem('appointments', JSON.stringify(updated));
+            }}
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
           />
@@ -150,7 +167,9 @@ function App() {
   if (currentPath !== '/' && !isClientPath && !isAdminPath) return HomePage();
 
   const cancelAppointment = (id) => {
-    setAppointments(appointments.filter(appt => appt.id !== id));
+    const updated = appointments.filter(appt => appt.id !== id);
+    setAppointments(updated);
+    window.localStorage.setItem('appointments', JSON.stringify(updated));
   };
 
   return (
