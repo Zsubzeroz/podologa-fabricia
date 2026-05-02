@@ -70,12 +70,22 @@ export default function PublicPortal() {
               (19) 99727-0910
             </p>
 
-            {/* Botões e Ícones: WhatsApp na esquerda inferior, Consulta na direita inferior */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '5px' }}>
-              {/* WhatsApp inferior esquerda */}
-              <a href="https://wa.me/5519997270910" target="_blank" rel="noreferrer" className="social-icon whatsapp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#25d366', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-                <MessageCircle size={24} />
-              </a>
+              {/* Ícones de Contato inferior esquerda */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {/* WhatsApp */}
+                <a href="https://wa.me/5519997270910" target="_blank" rel="noreferrer" className="social-icon whatsapp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#25d366', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                  <MessageCircle size={24} />
+                </a>
+                {/* Instagram */}
+                <a href="https://www.instagram.com/fabriciapodologa/" target="_blank" rel="noreferrer" className="social-icon instagram" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e1306c', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                  <Camera size={24} />
+                </a>
+                {/* Telefone */}
+                <a href="tel:19997270910" className="social-icon phone" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#3b82f6', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                  <Phone size={24} />
+                </a>
+              </div>
 
               {/* Botão de Consulta inferior direita */}
               <button 
