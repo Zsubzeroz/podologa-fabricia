@@ -50,41 +50,47 @@ export default function PublicPortal() {
     <div className="public-portal">
       {/* Header */}
       <header className="public-header">
-        <div className="clinic-card" style={{ padding: 0, overflow: 'hidden', maxWidth: '600px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.15)' }}>
-          {/* Banner Principal Responsivo */}
-          <div style={{ width: '100%', height: '180px', position: 'relative' }}>
-            <img src="/IMG/banner2.jpeg" alt="Banner Clínica" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div className="clinic-card" style={{ padding: 0, overflow: 'hidden', maxWidth: '600px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.15)', display: 'flex', flexDirection: 'column' }}>
+          {/* Banner Inteiro sem mudar o tamanho */}
+          <div style={{ width: '100%', height: 'auto' }}>
+            <img src="/IMG/banner2.jpeg" alt="Banner Clínica" style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
+          </div>
+
+          {/* Área Branca */}
+          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', position: 'relative' }}>
+            {/* Logo Centralizado sem tocar no banner */}
             <div style={{
-              position: 'absolute', bottom: '-60px', left: '20px',
-              width: '120px', height: '120px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              width: '120px', height: '120px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', margin: '0 auto'
             }}>
               <img src="/Logo.jpeg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-          </div>
 
-          <div style={{ padding: '70px 20px 20px 20px', textAlign: 'left' }}>
-            <h1>Clínica Fabrícia Rodrigues</h1>
-            <p className="clinic-phone" style={{ margin: '5px 0' }}>(19) 99727-0910</p>
-            <p className="clinic-address" style={{ margin: '2px 0' }}>Rua Papa João Paulo II, 256 • Artur Nogueira / SP</p>
-            
-            <div className="social-icons" style={{ marginTop: '15px', marginBottom: '15px', justifyContent: 'flex-start' }}>
-              <a href="#" className="social-icon whatsapp">
+            {/* Número de Telefone */}
+            <p className="clinic-phone" style={{ textAlign: 'center', margin: 0, fontSize: '1.05rem', color: '#4b5563', fontWeight: 'bold' }}>
+              (19) 99727-0910
+            </p>
+
+            {/* Botões e Ícones: WhatsApp na esquerda inferior, Consulta na direita inferior */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '5px' }}>
+              {/* WhatsApp inferior esquerda */}
+              <a href="https://wa.me/5519997270910" target="_blank" rel="noreferrer" className="social-icon whatsapp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#25d366', width: '45px', height: '45px', borderRadius: '50%', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
                 <MessageCircle size={24} />
               </a>
-              <a href="#" className="social-icon phone">
-                <Phone size={24} />
-              </a>
-              <a href="#" className="social-icon instagram">
-                <Camera size={24} />
-              </a>
+
+              {/* Botão de Consulta inferior direita */}
+              <button 
+                className="btn-schedule-check"
+                onClick={() => setShowCheckModal(true)}
+                style={{ margin: 0 }}
+              >
+                Consultar Agendamento
+              </button>
             </div>
 
-            <button 
-              className="btn-schedule-check"
-              onClick={() => setShowCheckModal(true)}
-            >
-              Consultar Agendamento
-            </button>
+            {/* Endereço embaixo de tudo */}
+            <p className="clinic-address" style={{ textAlign: 'center', margin: '5px 0 0 0', fontSize: '0.85rem', color: '#6b7280', borderTop: '1px solid #f3f4f6', paddingTop: '10px' }}>
+              Rua Papa João Paulo II, 256 • Artur Nogueira / SP
+            </p>
           </div>
         </div>
 
