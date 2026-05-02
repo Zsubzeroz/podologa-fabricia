@@ -38,7 +38,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
           <div className="badge-support">
              SUPORTE: (19) 99722-2694
           </div>
-          <HelpCircle size={18} />
+          <HelpCircle size={18} style={{ cursor: 'pointer' }} title="Precisa de ajuda? Ligue para o engenheiro Luan Estifer" onClick={() => alert('Precisa de ajuda? Ligue para o engenheiro Luan Estifer')} />
           <div style={{cursor: 'pointer'}} onClick={()=>setCurrentView('alterar_senha')}>
             Fabricia Rodrigues Pereira | Clínica Fabricia Rodrigues <span style={{fontSize:'0.7rem'}}>▼</span>
           </div>
