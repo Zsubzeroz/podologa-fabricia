@@ -38,6 +38,7 @@ import ConfiguracoesDadosEmpresa from './views/ConfiguracoesDadosEmpresa';
 import ConfiguracoesGeral from './views/ConfiguracoesGeral';
 import AlterarSenha from './views/AlterarSenha';
 import Dashboard from './views/Dashboard';
+import AgendarTab from './views/AgendarTab';
 
 function App() {
   const [currentView, setCurrentView] = useState('produtos');
@@ -127,6 +128,17 @@ function App() {
             setCurrentDate={setCurrentDate}
           />
         )}
+        {currentView === 'agendamento' && (
+          <AgendarTab 
+            currentDate={currentDate} 
+            onSave={(newAppt) => {
+              const updated = [...appointments, { ...newAppt, id: Date.now() }];
+              setAppointments(updated);
+              window.localStorage.setItem('appointments', JSON.stringify(updated));
+              setCurrentView('agenda');
+            }} 
+          />
+        )}
         {currentView === 'caixa' && <Caixa />}
         {currentView === 'produtos' && <Produtos />}
         {currentView === 'clientes' && <Clientes />}
@@ -181,6 +193,17 @@ function App() {
           onCancelAppointment={cancelAppointment}
           currentDate={currentDate}
           setCurrentDate={setCurrentDate}
+        />
+      )}
+      {currentView === 'agendamento' && (
+        <AgendarTab 
+          currentDate={currentDate} 
+          onSave={(newAppt) => {
+            const updated = [...appointments, { ...newAppt, id: Date.now() }];
+            setAppointments(updated);
+            window.localStorage.setItem('appointments', JSON.stringify(updated));
+            setCurrentView('agenda');
+          }} 
         />
       )}
       {currentView === 'caixa' && <Caixa />}
