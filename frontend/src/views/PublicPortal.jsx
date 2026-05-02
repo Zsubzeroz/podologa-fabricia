@@ -70,7 +70,7 @@ export default function PublicPortal() {
                   <Camera size={22} />
                 </a>
                 {/* Telefone */}
-                <a href="tel:19997270910" className="social-icon phone" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#3b82f6', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
+                <a href="tel:+5519997270910" className="social-icon phone" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#3b82f6', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
                   <Phone size={22} />
                 </a>
               </div>
