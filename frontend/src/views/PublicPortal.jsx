@@ -50,45 +50,46 @@ export default function PublicPortal() {
     <div className="public-portal">
       {/* Header */}
       <header className="public-header">
-        <div className="clinic-card">
-          <div className="clinic-logo">FR</div>
-          <h1>Clínica Fabrícia Rodrigues</h1>
-          <p className="clinic-phone">(19) 99727-0910</p>
-          <p className="clinic-address">Rua Papa João Paulo II, 256</p>
-          <p className="clinic-address">Artur Nogueira / SP</p>
-          
-          <div className="social-icons">
-            <a href="#" className="social-icon whatsapp">
-              <MessageCircle size={24} />
-            </a>
-            <a href="#" className="social-icon phone">
-              <Phone size={24} />
-            </a>
-            <a href="#" className="social-icon instagram">
-              <Camera size={24} />
-            </a>
+        <div className="clinic-card" style={{ padding: 0, overflow: 'hidden', maxWidth: '600px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.15)' }}>
+          {/* Banner Principal Responsivo */}
+          <div style={{ width: '100%', height: '180px', position: 'relative' }}>
+            <img src="/IMG/banner.jpeg" alt="Banner Clínica" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{
+              position: 'absolute', bottom: '-40px', left: '50%', transform: 'translateX(-50%)',
+              width: '80px', height: '80px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}>
+              <img src="/Logo.jpeg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
           </div>
 
-          {/* Banner Images Carousel/Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: '12px',
-            marginTop: '20px',
-            marginBottom: '15px'
-          }}>
-            <img src="/IMG/banner.jpeg" alt="Clínica" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
-            <img src="/IMG/banner2.jpeg" alt="Atendimento" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
-            <img src="/IMG/cartaz.jpeg" alt="Cartaz" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px' }} />
-          </div>
+          <div style={{ padding: '50px 20px 20px 20px', textAlign: 'center' }}>
+            <h1>Clínica Fabrícia Rodrigues</h1>
+            <p className="clinic-phone" style={{ margin: '5px 0' }}>(19) 99727-0910</p>
+            <p className="clinic-address" style={{ margin: '2px 0' }}>Rua Papa João Paulo II, 256</p>
+            <p className="clinic-address" style={{ margin: '2px 0' }}>Artur Nogueira / SP</p>
+            
+            <div className="social-icons" style={{ marginTop: '15px', marginBottom: '15px' }}>
+              <a href="#" className="social-icon whatsapp">
+                <MessageCircle size={24} />
+              </a>
+              <a href="#" className="social-icon phone">
+                <Phone size={24} />
+              </a>
+              <a href="#" className="social-icon instagram">
+                <Camera size={24} />
+              </a>
+            </div>
 
-          <button 
-            className="btn-schedule-check"
-            onClick={() => setShowCheckModal(true)}
-          >
-            Consultar Agendamento
-          </button>
+            <button 
+              className="btn-schedule-check"
+              onClick={() => setShowCheckModal(true)}
+            >
+              Consultar Agendamento
+            </button>
+          </div>
         </div>
+
+
       </header>
 
       {/* Important Notice */}
