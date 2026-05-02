@@ -31,11 +31,11 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
     <div className="sa-app-container">
       {/* HEADER TOP SITE */}
       <header className="sa-topbar">
-        <div className="sa-logo-area">
-          <Clock className="sa-logo-icon" />
-          <div className="sa-logo-text">
-            Clínica<br/>Fabrícia Rodrigues
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/Logo.jpeg" alt="Logo" style={{ height: '36px', width: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid white' }} />
+          <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'white', whiteSpace: 'nowrap' }}>
+            Clínica Fabrícia Rodrigues
+          </span>
         </div>
         <div className="sa-topbar-right">
           <div className="badge-support">
