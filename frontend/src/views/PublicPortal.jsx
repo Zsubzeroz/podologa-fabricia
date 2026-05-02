@@ -53,7 +53,7 @@ export default function PublicPortal() {
         <div className="clinic-card" style={{ padding: 0, overflow: 'hidden', maxWidth: '600px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.15)' }}>
           {/* Banner Principal Responsivo */}
           <div style={{ width: '100%', height: '180px', position: 'relative' }}>
-            <img src="/IMG/banner.jpeg" alt="Banner Clínica" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src="/IMG/banner2.jpeg" alt="Banner Clínica" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{
               position: 'absolute', bottom: '-60px', left: '50%', transform: 'translateX(-50%)',
               width: '120px', height: '120px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
