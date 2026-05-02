@@ -32,11 +32,11 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
       {/* HEADER TOP SITE */}
       <header className="sa-topbar">
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/IMG/banner2.jpeg" alt="Banner Clínica" style={{ height: '44px', width: 'auto', objectFit: 'contain', borderRadius: '4px' }} />
+          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>SIMPLES AGENDA</span>
         </div>
         <div className="sa-topbar-right">
           <div className="badge-support">
-             SUPORTE: (47) 98834-0478
+             SUPORTE: (19) 99722-2694
           </div>
           <HelpCircle size={18} />
           <div style={{cursor: 'pointer'}} onClick={()=>setCurrentView('alterar_senha')}>
