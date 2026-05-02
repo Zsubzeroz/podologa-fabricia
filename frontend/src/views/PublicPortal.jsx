@@ -143,7 +143,6 @@ export default function PublicPortal() {
                   onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                   onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
                 />
-                <span style={{ fontSize: '0.85rem', color: '#0f3d2e', fontWeight: 'bold' }}>Agendar</span>
               </div>
             </div>
           ))}
