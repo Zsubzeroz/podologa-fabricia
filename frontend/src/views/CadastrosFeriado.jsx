@@ -25,9 +25,18 @@ export default function CadastrosFeriado() {
 
   const [search, setSearch] = useState('');
 
+  const [workingHours, setWorkingHours] = useState(() => {
+    const saved = window.localStorage.getItem('workingHours');
+    return saved ? JSON.parse(saved) : { start: '08:00', end: '19:00' };
+  });
+
   useEffect(() => {
     window.localStorage.setItem('blockedDays', JSON.stringify(blockedDays));
   }, [blockedDays]);
+
+  useEffect(() => {
+    window.localStorage.setItem('workingHours', JSON.stringify(workingHours));
+  }, [workingHours]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -100,6 +109,34 @@ export default function CadastrosFeriado() {
       </div>
       
       <div style={{ padding: '20px' }}>
+        {/* Working Hours configuration form */}
+        <div style={{ background: '#fff', padding: '15px', borderRadius: '4px', border: '1px solid #ddd', marginBottom: '20px' }}>
+          <h4 style={{ color: '#555', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>⏰ Configuração do Horário de Trabalho</h4>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div>
+              <label style={{ fontSize: '12px', color: '#666' }}>Início do Expediente</label>
+              <input 
+                type="time" 
+                className="form-control" 
+                value={workingHours.start} 
+                onChange={(e) => setWorkingHours({ ...workingHours, start: e.target.value })} 
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '12px', color: '#666' }}>Fim do Expediente</label>
+              <input 
+                type="time" 
+                className="form-control" 
+                value={workingHours.end} 
+                onChange={(e) => setWorkingHours({ ...workingHours, end: e.target.value })} 
+              />
+            </div>
+            <p style={{ margin: 0, color: '#666', fontSize: '13px' }}>
+              Este horário define os limites do expediente exibidos na Agenda e no Portal do Cliente.
+            </p>
+          </div>
+        </div>
+
         {/* Form to add a new block */}
         <form onSubmit={handleSave} style={{ background: '#fff', padding: '15px', borderRadius: '4px', border: '1px solid #ddd', marginBottom: '20px' }}>
           <h4 style={{ color: '#555', marginBottom: '15px' }}>Adicionar Bloqueio / Férias / Folga</h4>

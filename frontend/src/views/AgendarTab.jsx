@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HelpCircle, RefreshCcw, Plus } from 'lucide-react';
+import { Calendar, User, Phone, Clock, FileText, CheckCircle } from 'lucide-react';
 
 export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
   const formatDateForInput = (d) => {
@@ -11,11 +11,19 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
     return `${year}-${month}-${day}`;
   };
 
+  const services = (() => {
+    const saved = window.localStorage.getItem('services');
+    return saved ? JSON.parse(saved) : [
+      { name: 'Avaliação', duration: '1h 00min' },
+      { name: 'Podoprofilaxia Completa', duration: '1h 00min' }
+    ];
+  })();
+
   const [formData, setFormData] = useState({
     clientName: '',
     phone: '',
     birthdate: '',
-    service: 'Avaliação',
+    service: services[0]?.name || 'Avaliação',
     date: currentDate ? formatDateForInput(currentDate) : formatDateForInput(new Date()),
     startTime: preSelectedTime || '10:00',
     duration: '01:00',
@@ -104,95 +112,188 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
     }
 
     onSave({ ...formData, endTime });
+    alert('Agendamento realizado com sucesso!');
+    setFormData({
+      clientName: '',
+      phone: '',
+      birthdate: '',
+      service: services[0]?.name || 'Avaliação',
+      date: currentDate ? formatDateForInput(currentDate) : formatDateForInput(new Date()),
+      startTime: preSelectedTime || '10:00',
+      duration: '01:00',
+      repeat: 'Nunca',
+      status: 'Agendado',
+      notifySms: 'SIM',
+      notes: '',
+    });
   };
 
   return (
-    <div style={{maxWidth: '800px'}}>
-      
-      <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem'}}>
-        <CalendarIcon /> <h2 style={{fontWeight: 400, color: '#555', fontSize: '1.3rem'}}>Agendar <HelpCircle size={16} color="#aaa"/></h2>
-        <div style={{marginLeft: 'auto', display: 'flex', gap: '0.5rem'}}>
-           <button className="btn btn-primary"><RefreshCcw size={16}/></button>
-           <button className="btn btn-primary"><Plus size={16}/></button>
-        </div>
+    <div style={{ maxWidth: '850px', margin: '0 auto', padding: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
+        <Calendar size={28} color="#0f3d2e" />
+        <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
+          Novo Agendamento Manual
+        </h2>
       </div>
 
-      <form onSubmit={handleSubmit} style={{border: '1px solid var(--sa-border)', padding: '1.5rem', background: '#fff', borderRadius: '4px'}}>
-        
-        <div className="grid-cols-2">
-          <div className="input-group form-group" style={{gridColumn: '1 / -1'}}>
-             <input type="text" name="clientName" className="form-control" placeholder="Cliente..." value={formData.clientName} onChange={handleChange} required />
-             <div className="input-group-addon" style={{borderLeft: 'none'}}><UserIcon/></div>
-             <button type="button" className="btn btn-success" style={{borderRadius: '0 4px 4px 0'}}><SearchIcon/></button>
+      <form 
+        onSubmit={handleSubmit} 
+        style={{ 
+          border: '1px solid #e5e7eb', 
+          padding: '2rem', 
+          background: '#fff', 
+          borderRadius: '12px', 
+          boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.5rem'
+        }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+          <div>
+            <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <User size={16} /> Nome do Cliente
+            </label>
+            <input 
+              type="text" 
+              name="clientName" 
+              className="form-control" 
+              placeholder="Digite o nome..." 
+              value={formData.clientName} 
+              onChange={handleChange} 
+              required 
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Phone size={16} /> Telefone / WhatsApp
+            </label>
+            <input 
+              type="tel" 
+              name="phone" 
+              className="form-control" 
+              placeholder="(XX) XXXXX-XXXX" 
+              value={formData.phone} 
+              onChange={(e) => {
+                let val = e.target.value;
+                let cleaned = val.replace(/\D/g, '');
+                if (cleaned.length > 11) cleaned = cleaned.slice(0, 11);
+                let masked = '';
+                if (cleaned.length > 0) masked += `(${cleaned.slice(0, 2)}`;
+                if (cleaned.length > 2) masked += `) ${cleaned.slice(2, 7)}`;
+                if (cleaned.length > 7) masked += `-${cleaned.slice(7, 11)}`;
+                setFormData({ ...formData, phone: masked });
+              }}
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            />
           </div>
         </div>
 
-        <div className="grid-cols-2">
-          <div className="input-group form-group">
-            <div className="input-group-addon">( _ ) ___ - ____</div>
-            <input type="tel" name="phone" className="form-control" value={formData.phone} onChange={handleChange} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+          <div>
+            <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <FileText size={16} /> Serviço Desejado
+            </label>
+            <select 
+              name="service" 
+              className="form-control" 
+              value={formData.service} 
+              onChange={handleChange}
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            >
+              {services.map((srv, index) => (
+                <option key={index} value={srv.name}>{srv.name}</option>
+              ))}
+            </select>
           </div>
-          <div className="form-group">
-            <input type="date" name="birthdate" className="form-control" placeholder="Nascimento" value={formData.birthdate} onChange={handleChange} title="Nascimento"/>
+
+          <div>
+            <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Calendar size={16} /> Data do Atendimento
+            </label>
+            <input 
+              type="date" 
+              name="date" 
+              className="form-control" 
+              value={formData.date} 
+              onChange={handleChange} 
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            />
           </div>
         </div>
 
-        <div className="input-group form-group">
-          <select name="service" className="form-control" value={formData.service} onChange={handleChange}>
-            <option>Avaliação</option>
-            <option>Podoprofilaxia Completa</option>
-          </select>
-          <button type="button" className="btn btn-primary" style={{borderRadius: 0}}><Plus size={16}/></button>
-          <button type="button" className="btn btn-success" style={{borderRadius: '0 4px 4px 0'}}><SearchIcon/></button>
-        </div>
-
-        <div className="grid-cols-2">
-          <div className="form-group">
-             <input type="date" name="date" className="form-control" value={formData.date} onChange={handleChange} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+          <div>
+            <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Clock size={16} /> Horário de Início
+            </label>
+            <input 
+              type="time" 
+              name="startTime" 
+              className="form-control" 
+              value={formData.startTime} 
+              onChange={handleChange} 
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            />
           </div>
-          <div className="grid-cols-2" style={{gap: '0.5rem'}}>
-             <input type="time" name="startTime" className="form-control" value={formData.startTime} onChange={handleChange} />
-             <input type="time" name="duration" className="form-control" value={formData.duration} onChange={handleChange} title="Duração"/>
+
+          <div>
+            <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Clock size={16} /> Duração (horas:minutos)
+            </label>
+            <input 
+              type="time" 
+              name="duration" 
+              className="form-control" 
+              value={formData.duration} 
+              onChange={handleChange} 
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            />
           </div>
         </div>
 
-        <div className="form-group">
-           <select className="form-control" disabled><option>Fabricia Rodrigues Pereira</option></select>
+        <div>
+          <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <FileText size={16} /> Observações / Anotações
+          </label>
+          <textarea 
+            name="notes" 
+            className="form-control" 
+            rows="3" 
+            placeholder="Anotações adicionais..." 
+            value={formData.notes} 
+            onChange={handleChange}
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+          ></textarea>
         </div>
 
-        <div className="form-group">
-           <textarea name="notes" className="form-control" rows="2" placeholder="Observação..." value={formData.notes} onChange={handleChange}></textarea>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.5rem', marginTop: '0.5rem', borderTop: '1px solid #f3f4f6', paddingTop: '1.5rem' }}>
+          <button 
+            type="submit" 
+            className="btn-confirm" 
+            style={{ 
+              backgroundColor: '#0f3d2e', 
+              color: '#fff', 
+              padding: '12px 32px', 
+              fontSize: '1rem', 
+              borderRadius: '6px', 
+              border: 'none', 
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'background 0.2s',
+              boxShadow: '0 4px 12px rgba(15,61,46,0.15)'
+            }}
+          >
+            <CheckCircle size={20} /> AGENDAR AGORA
+          </button>
         </div>
-
-        <div className="grid-cols-2">
-           <div className="input-group form-group">
-              <div className="input-group-addon">Repetir?</div>
-              <select name="repeat" className="form-control" value={formData.repeat} onChange={handleChange}>
-                <option>Nunca</option>
-              </select>
-           </div>
-           <div className="form-group">
-              <select name="status" className="form-control" value={formData.status} onChange={handleChange}>
-                <option>Agendado</option>
-                <option>Confirmado</option>
-              </select>
-           </div>
-        </div>
-        
-        <div style={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem'}}>
-           <span style={{marginRight: '1rem'}}>Enviar SMS</span>
-           <div style={{display: 'flex', border: '1px solid #ccc', borderRadius: '4px', overflow: 'hidden', marginRight: '1rem'}}>
-              <button type="button" style={{padding: '0.5rem 1rem', border: 'none', background: formData.notifySms==='SIM'?'#e6e6e6':'white'}} onClick={()=>setFormData({...formData, notifySms:'SIM'})}>SIM</button>
-              <button type="button" style={{padding: '0.5rem 1rem', border: 'none', background: formData.notifySms==='NÃO'?'#d9534f':'white', color: formData.notifySms==='NÃO'?'white':'#333'}} onClick={()=>setFormData({...formData, notifySms:'NÃO'})}>NÃO</button>
-           </div>
-           <button type="submit" className="btn btn-success" style={{padding: '0.6rem 1.5rem'}}><b style={{fontWeight: 700}}>✓ SALVAR</b></button>
-        </div>
-
       </form>
     </div>
   );
 }
-
-const CalendarIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
-const UserIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
-const SearchIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;

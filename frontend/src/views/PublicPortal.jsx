@@ -286,8 +286,12 @@ export default function PublicPortal() {
                         durationMinutes = parseInt(serviceDuration.replace('min', '').trim());
                       }
 
+                      const workingHours = JSON.parse(window.localStorage.getItem('workingHours') || '{"start":"08:00","end":"19:00"}');
+                      const startH = parseInt(workingHours.start.split(':')[0], 10) || 8;
+                      const endH = parseInt(workingHours.end.split(':')[0], 10) || 19;
+
                       const slots = [];
-                      for (let h = 8; h <= 19; h++) {
+                      for (let h = startH; h <= endH; h++) {
                         slots.push(`${h.toString().padStart(2, '0')}:00`);
                         slots.push(`${h.toString().padStart(2, '0')}:30`);
                       }

@@ -3,7 +3,11 @@ import { useState } from 'react';
 export default function Agenda({ appointments, onCancelAppointment, currentDate, setCurrentDate, onSlotClick }) {
   const [viewMode, setViewMode] = useState('Dia');
 
-  const hours = Array.from({ length: 12 }, (_, i) => i + 8);
+  const workingHours = JSON.parse(window.localStorage.getItem('workingHours') || '{"start":"08:00","end":"19:00"}');
+  const startH = parseInt(workingHours.start.split(':')[0], 10) || 8;
+  const endH = parseInt(workingHours.end.split(':')[0], 10) || 19;
+  const totalHours = Math.max(1, endH - startH + 1);
+  const hours = Array.from({ length: totalHours }, (_, i) => i + startH);
   
   const formatDateForDisplay = (dateObj) => {
     return dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
