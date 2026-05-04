@@ -189,6 +189,12 @@ export default function PublicPortal() {
               <div style={{ textAlign: 'center', padding: '10px' }}>
                 <div style={{ fontSize: '3.5rem', color: '#10b981', marginBottom: '10px' }}>✓</div>
                 <h2 style={{ color: '#0f3d2e', marginBottom: '15px' }}>Agendamento Confirmado!</h2>
+
+                <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem', marginBottom: '15px', textAlign: 'left', fontSize: '0.95rem' }}>
+                  <p style={{ margin: '0 0 5px 0' }}><b>Serviço:</b> {selectedService.name}</p>
+                  <p style={{ margin: '0 0 5px 0' }}><b>Data:</b> {selectedDate.split('-').reverse().join('/')}</p>
+                  <p style={{ margin: 0 }}><b>Horário:</b> {selectedTime}</p>
+                </div>
                 
                 <div style={{ background: '#fdfaf3', border: '2px dashed #c6a75e', borderRadius: '8px', padding: '1.2rem', marginBottom: '20px', textAlign: 'left' }}>
                   <h3 style={{ color: '#c6a75e', margin: '0 0 8px 0', textAlign: 'center', fontWeight: 'bold' }}>IMPORTANTE</h3>
