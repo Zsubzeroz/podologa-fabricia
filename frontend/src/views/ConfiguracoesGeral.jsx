@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, Smartphone, MessageCircle, Layout as LayoutIcon, CheckCircle2 } from 'lucide-react';
+import { Settings, Save, Smartphone, MessageCircle, Layout as LayoutIcon, CheckCircle2, Clock } from 'lucide-react';
 
 export default function ConfiguracoesGeral() {
   const [config, setConfig] = useState(() => {
@@ -7,11 +7,9 @@ export default function ConfiguracoesGeral() {
     return saved ? JSON.parse(saved) : {
       calendarioVertical: false,
       obrigarSala: false,
-      enviarSms: false,
-      tempoSms: '06:00',
-      mensagemSms: 'Ola @Cliente, voce tem @NomeServico com @NomeEmpresa, dia @Dia as @Hora, caso tenha qualquer imprevisto por favor nos avise.',
-      enviarWhatsapp: true,
-      tempoWhatsapp: '24:00',
+      enviarLembrete: true,
+      tempoLembrete: '24', // em horas (24 = 1 dia antes)
+      mensagemLembrete: 'Olá @CLIENTE, passando para confirmar seu atendimento de @NOMESERVICO amanhã, dia @DIA às @HORA. Se precisar desmarcar, nos avise com antecedência. Atenciosamente, @NOMEEMPRESA.',
       whatsappConectado: true
     };
   });
@@ -28,11 +26,42 @@ export default function ConfiguracoesGeral() {
     setSaved(false);
   };
 
+  const insertTag = (tag) => {
+    const textarea = document.getElementById('mensagem-lembrete');
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = config.mensagemLembrete;
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+    
+    const newText = before + tag + after;
+    handleChange('mensagemLembrete', newText);
+    
+    // Devolve o foco ao textarea
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + tag.length, start + tag.length);
+    }, 0);
+  };
+
   const handleSave = (e) => {
     if (e) e.preventDefault();
     window.localStorage.setItem('configuracoes_gerais', JSON.stringify(config));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  // Simulação de preview
+  const getPreview = () => {
+    let msg = config.mensagemLembrete;
+    msg = msg.replace(/@CLIENTE/g, 'Maria Silva');
+    msg = msg.replace(/@NOMEEMPRESA/g, 'Clínica Fabrícia Rodrigues');
+    msg = msg.replace(/@NOMESERVICO/g, 'Podoprofilaxia');
+    msg = msg.replace(/@DIA/g, '15/05');
+    msg = msg.replace(/@HORA/g, '14:30');
+    return msg;
   };
 
   return (
@@ -52,7 +81,7 @@ export default function ConfiguracoesGeral() {
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
             <LayoutIcon size={20} color="#0f3d2e" />
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Interface do Sistema</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Interface da Agenda</h3>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
@@ -96,89 +125,110 @@ export default function ConfiguracoesGeral() {
           </div>
         </div>
 
-        {/* Messaging Section (SMS/WhatsApp) */}
+        {/* Messaging Section (WhatsApp) */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
             <MessageCircle size={20} color="#0f3d2e" />
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Notificações Automáticas</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Lembretes de WhatsApp</h3>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            {/* WhatsApp */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+            
             <div style={{ background: '#f0fdf4', padding: '20px', borderRadius: '12px', border: '1px solid #dcfce7' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ backgroundColor: '#22c55e', color: 'white', padding: '8px', borderRadius: '8px' }}>
-                    <Smartphone size={20} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ backgroundColor: '#22c55e', color: 'white', padding: '10px', borderRadius: '10px' }}>
+                    <Smartphone size={24} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: '700', color: '#065f46' }}>WhatsApp Automático</div>
-                    <div style={{ fontSize: '0.8rem', color: '#047857' }}>{config.whatsappConectado ? '✓ Conectado e Ativo' : '⚠ Desconectado'}</div>
+                    <div style={{ fontWeight: '800', color: '#065f46', fontSize: '1.1rem' }}>WhatsApp Automático</div>
+                    <div style={{ fontSize: '0.85rem', color: '#047857', fontWeight: '600' }}>
+                      {config.whatsappConectado ? '✓ Servidor Conectado' : '⚠ Desconectado'}
+                    </div>
                   </div>
                 </div>
-                <button 
-                  type="button"
-                  onClick={() => handleToggle('enviarWhatsapp')}
-                  style={{ 
-                    backgroundColor: config.enviarWhatsapp ? '#16a34a' : '#d1d5db', 
-                    color: 'white',
-                    border: 'none', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {config.enviarWhatsapp ? 'ATIVADO' : 'DESATIVADO'}
-                </button>
-              </div>
-              <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: '200px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#065f46', marginBottom: '5px' }}>ANTECEDÊNCIA DO ENVIO (HORAS)</label>
-                  <input 
-                    type="text" 
-                    value={config.tempoWhatsapp} 
-                    onChange={(e) => handleChange('tempoWhatsapp', e.target.value)} 
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #bbf7d0', width: '100px', outline: 'none' }} 
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                   <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#065f46' }}>Status:</span>
+                   <button 
+                    type="button"
+                    onClick={() => handleToggle('enviarLembrete')}
+                    style={{ 
+                      backgroundColor: config.enviarLembrete ? '#16a34a' : '#d1d5db', 
+                      color: 'white',
+                      border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '900', cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: config.enviarLembrete ? '0 4px 10px rgba(22,163,74,0.3)' : 'none'
+                    }}
+                  >
+                    {config.enviarLembrete ? 'ATIVADO' : 'DESATIVADO'}
+                  </button>
                 </div>
-                <button 
-                  type="button"
-                  onClick={() => alert('Gerando novo QR Code...')} 
-                  style={{ backgroundColor: '#fff', color: '#16a34a', border: '1px solid #16a34a', padding: '8px 15px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  RECONECTAR WHATSAPP
-                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '25px', alignItems: 'center', padding: '15px', background: 'rgba(255,255,255,0.5)', borderRadius: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Clock size={18} color="#065f46" />
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: '#065f46' }}>ANTECEDÊNCIA DO ENVIO:</label>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input 
+                    type="number" 
+                    value={config.tempoLembrete} 
+                    onChange={(e) => handleChange('tempoLembrete', e.target.value)} 
+                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid #bbf7d0', width: '70px', outline: 'none', fontWeight: 'bold', textAlign: 'center' }} 
+                  />
+                  <span style={{ fontWeight: '700', color: '#065f46' }}>Horas antes (24h = 1 dia)</span>
+                </div>
               </div>
             </div>
 
-            {/* Message Template */}
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '10px' }}>MODELO DE MENSAGEM PARA CLIENTES</label>
-              <textarea 
-                value={config.mensagemSms}
-                onChange={(e) => handleChange('mensagemSms', e.target.value)}
-                style={{ width: '100%', padding: '15px', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '100px', fontSize: '0.9rem', color: '#374151', lineHeight: '1.5', outline: 'none' }}
-              />
-              <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
-                {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@HORA'].map(tag => (
-                  <span 
-                    key={tag} 
-                    onClick={() => handleChange('mensagemSms', config.mensagemSms + ' ' + tag)}
-                    style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', cursor: 'pointer', transition: 'background 0.2s' }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#e5e7eb'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                  >
-                    {tag}
-                  </span>
-                ))}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '25px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#374151', marginBottom: '12px', textTransform: 'uppercase' }}>
+                  Mensagem Personalizada
+                </label>
+                <textarea 
+                  id="mensagem-lembrete"
+                  value={config.mensagemLembrete}
+                  onChange={(e) => handleChange('mensagemLembrete', e.target.value)}
+                  style={{ width: '100%', padding: '15px', borderRadius: '10px', border: '1px solid #d1d5db', minHeight: '140px', fontSize: '1rem', color: '#1f2937', lineHeight: '1.6', outline: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}
+                  placeholder="Escreva aqui a mensagem que o cliente receberá..."
+                />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                  {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@HORA'].map(tag => (
+                    <button 
+                      key={tag} 
+                      type="button"
+                      onClick={() => insertTag(tag)}
+                      style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer', border: '1px solid #e5e7eb', transition: 'all 0.2s' }}
+                    >
+                      + {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#374151', marginBottom: '12px', textTransform: 'uppercase' }}>
+                  Visualização (Exemplo)
+                </label>
+                <div style={{ background: '#e5ddd5', borderRadius: '15px', padding: '15px', position: 'relative', minHeight: '200px', border: '1px solid #d1d5db' }}>
+                  <div style={{ background: '#dcf8c6', padding: '12px', borderRadius: '10px', fontSize: '0.9rem', color: '#303030', maxWidth: '90%', position: 'relative', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+                    {getPreview()}
+                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>10:30 ✓✓</div>
+                  </div>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '10px', fontStyle: 'italic' }}>* As tags em @AZUL serão substituídas pelos dados reais do cliente e do agendamento.</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Save Button */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', marginTop: '10px' }}>
           {saved && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#16a34a', fontWeight: 'bold', fontSize: '0.9rem' }}>
-              <CheckCircle2 size={18} /> Configurações salvas!
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: '800', fontSize: '1rem' }}>
+              <CheckCircle2 size={24} /> Configurações salvas com sucesso!
             </div>
           )}
           <button 
@@ -188,21 +238,19 @@ export default function ConfiguracoesGeral() {
               backgroundColor: '#0f3d2e', 
               color: 'white', 
               border: 'none', 
-              padding: '15px 40px', 
-              borderRadius: '10px', 
-              fontWeight: 'bold', 
+              padding: '18px 50px', 
+              borderRadius: '12px', 
+              fontWeight: '900', 
               cursor: 'pointer', 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '10px', 
-              fontSize: '1rem', 
-              boxShadow: '0 4px 12px rgba(15,61,46,0.2)',
-              transition: 'transform 0.1s active'
+              gap: '12px', 
+              fontSize: '1.1rem', 
+              boxShadow: '0 6px 15px rgba(15,61,46,0.3)',
+              transition: 'all 0.2s'
             }}
-            onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-            onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
           >
-            <Save size={20} /> SALVAR ALTERAÇÕES
+            <Save size={22} /> SALVAR CONFIGURAÇÕES
           </button>
         </div>
 

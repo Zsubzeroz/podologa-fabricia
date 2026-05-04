@@ -41,14 +41,23 @@ import AgendarTab from './views/AgendarTab';
 import NfsE from './views/NfsE';
 
 function App() {
-  const [currentView, setCurrentView] = useState('produtos');
+  const [currentView, setCurrentView] = useState('dashboard');
   const [openMenu, setOpenMenu] = useState('cadastros'); 
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [preSelectedTime, setPreSelectedTime] = useState('10:00');
+  const [preSelectedClient, setPreSelectedClient] = useState(null);
+  const [preSelectedService, setPreSelectedService] = useState(null);
+
+  const resetPreSelections = () => {
+    setPreSelectedClient(null);
+    setPreSelectedService(null);
+  };
+
   const [auth, setAuth] = useState(() => {
     const saved = window.localStorage.getItem('adminAuth');
     return saved ? JSON.parse(saved) : null;
   });
+
   const [appointments, setAppointments] = useState(() => {
     const saved = window.localStorage.getItem('appointments');
     return saved ? JSON.parse(saved) : [
@@ -87,7 +96,6 @@ function App() {
     }
   }, [auth]);
 
-
   const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
   const isClientPath = currentPath === '/cliente';
   const isAdminPath = currentPath === '/admin';
@@ -98,57 +106,64 @@ function App() {
     window.location.href = '/';
   };
 
-  const HomePage = () => (
-    <div className="home-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f7fb', padding: '2rem' }}>
-      <div style={{ maxWidth: '500px', width: '100%', background: 'white', borderRadius: '18px', boxShadow: '0 24px 48px rgba(0,0,0,0.08)', padding: '3rem', textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '1rem' }}>Clínica Fabrícia Rodrigues</h1>
-        <p style={{ marginBottom: '2rem', color: '#555' }}>Escolha o acesso abaixo:</p>
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          <a href="/cliente" style={{ padding: '1rem 1.5rem', borderRadius: '12px', background: '#22c55e', color: 'white', textDecoration: 'none', fontWeight: '700' }}>Portal do Cliente</a>
-          <a href="/admin" style={{ padding: '1rem 1.5rem', borderRadius: '12px', background: '#2563eb', color: 'white', textDecoration: 'none', fontWeight: '700' }}>Área da Clínica</a>
-        </div>
-      </div>
-    </div>
-  );
-
-  const handleAddAppointment = (date, time) => {
+  const handleAddAppointment = (date, time, clientName = null) => {
     setCurrentDate(date);
     setPreSelectedTime(time);
+    setPreSelectedClient(clientName);
     setCurrentView('agendamento');
+  };
+
+  const handleGenerateReceipt = (clientName, serviceName) => {
+    setPreSelectedClient(clientName);
+    setPreSelectedService(serviceName);
+    setCurrentView('nfs');
+  };
+
+  const cancelAppointment = (id) => {
+    const updated = appointments.filter(appt => appt.id !== id);
+    setAppointments(updated);
+    window.localStorage.setItem('appointments', JSON.stringify(updated));
   };
 
   if (isClientPath) return <PublicPortal />;
   if (isAdminPath && !auth) return <Login onLogin={setAuth} />;
+  
   if (isAdminPath && auth) {
     return (
       <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
         {currentView === 'dashboard' && <Dashboard />}
+        {currentView === 'agenda' && (
           <Agenda 
             appointments={appointments} 
-            onCancelAppointment={(id) => {
-              const updated = appointments.filter(appt => appt.id !== id);
-              setAppointments(updated);
-              window.localStorage.setItem('appointments', JSON.stringify(updated));
-            }}
+            onCancelAppointment={cancelAppointment}
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
             onAddAppointment={handleAddAppointment}
+            onGenerateReceipt={handleGenerateReceipt}
           />
+        )}
         {currentView === 'agendamento' && (
           <AgendarTab 
             currentDate={currentDate} 
             preSelectedTime={preSelectedTime}
+            preSelectedClient={preSelectedClient}
             onSave={(newAppt) => {
               const updated = [...appointments, { ...newAppt, id: Date.now() }];
               setAppointments(updated);
               window.localStorage.setItem('appointments', JSON.stringify(updated));
+              resetPreSelections();
               setCurrentView('agenda');
             }} 
           />
         )}
         {currentView === 'caixa' && <Caixa />}
         {currentView === 'produtos' && <Produtos />}
-        {currentView === 'clientes' && <Clientes />}
+        {currentView === 'clientes' && (
+          <Clientes 
+            onSchedule={(clientName) => handleAddAppointment(new Date(), '10:00', clientName)}
+            onGenerateReceipt={(clientName) => handleGenerateReceipt(clientName, '')}
+          />
+        )}
         {currentView === 'anamnese' && <Anamnese />}
         {currentView === 'profissional' && <Profissional />}
         {currentView === 'lancamentos' && <Financeiro />}
@@ -179,77 +194,29 @@ function App() {
         {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
         {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
         {currentView === 'alterar_senha' && <AlterarSenha />}
-        {currentView === 'nfs' && <NfsE />}
+        {currentView === 'nfs' && (
+          <NfsE 
+            preSelectedClient={preSelectedClient} 
+            preSelectedService={preSelectedService} 
+            onResetSelections={resetPreSelections} 
+          />
+        )}
       </Layout>
     );
   }
-  if (currentPath !== '/' && !isClientPath && !isAdminPath) return HomePage();
 
-  const cancelAppointment = (id) => {
-    const updated = appointments.filter(appt => appt.id !== id);
-    setAppointments(updated);
-    window.localStorage.setItem('appointments', JSON.stringify(updated));
-  };
-
+  // Fallback for non-admin paths
   return (
-    <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu}>
-      {currentView === 'dashboard' && <Dashboard />}
-      {currentView === 'agenda' && (
-        <Agenda 
-          appointments={appointments} 
-          onCancelAppointment={cancelAppointment}
-          currentDate={currentDate}
-          setCurrentDate={setCurrentDate}
-          onAddAppointment={handleAddAppointment}
-        />
-      )}
-      {currentView === 'agendamento' && (
-        <AgendarTab 
-          currentDate={currentDate} 
-          preSelectedTime={preSelectedTime}
-          onSave={(newAppt) => {
-            const updated = [...appointments, { ...newAppt, id: Date.now() }];
-            setAppointments(updated);
-            window.localStorage.setItem('appointments', JSON.stringify(updated));
-            setCurrentView('agenda');
-          }} 
-        />
-      )}
-      {currentView === 'caixa' && <Caixa />}
-      {currentView === 'produtos' && <Produtos />}
-      {currentView === 'clientes' && <Clientes />}
-      {currentView === 'anamnese' && <Anamnese />}
-      {currentView === 'profissional' && <Profissional />}
-      {currentView === 'lancamentos' && <Financeiro />}
-      {currentView === 'meus_caixas' && <FinanceiroMeusCaixas />}
-      {currentView === 'categoria' && <FinanceiroCategoria />}
-      {currentView === 'conta' && <FinanceiroConta />}
-      {currentView === 'formas_pagamento' && <FinanceiroFormasPagamento />}
-      {currentView === 'fluxo_anual' && <AnaliseFluxoAnual />}
-      {currentView === 'fluxo_mensal' && <AnaliseFluxoMensal />}
-      {currentView === 'compra' && <ComprasCompra />}
-      {currentView === 'fornecedor' && <ComprasFornecedor />}
-      {currentView === 'campo_personalizado' && <CadastrosCampoPersonalizado />}
-      {currentView === 'como_conheceu' && <CadastrosComoConheceu />}
-      {currentView === 'feriado' && <CadastrosFeriado />}
-      {currentView === 'grupos' && <CadastrosGrupos />}
-      {currentView === 'marcas' && <CadastrosMarcas />}
-      {currentView === 'equipamentos' && <CadastrosEquipamentos />}
-      {currentView === 'consulta_agendas' && <ConsultaAgendas />}
-      {currentView === 'consulta_analise' && <ConsultaAnalise />}
-      {currentView === 'comissao' && <ComissaoProfissional />}
-      {currentView === 'estoque' && <ProdutosEstoque />}
-      {currentView === 'pacotes' && <ConsultaPacotes />}
-      {currentView === 'auditoria_agenda' && <AuditoriaAgenda />}
-      {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
-      {currentView === 'orcamentos' && <ConsultaOrcamentos />}
-      {currentView === 'vendas' && <ConsultaVendas />}
-      {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
-      {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
-      {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
-      {currentView === 'alterar_senha' && <AlterarSenha />}
-      {currentView === 'nfs' && <NfsE />}
-    </Layout>
+    <div className="home-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f7fb', padding: '2rem' }}>
+      <div style={{ maxWidth: '500px', width: '100%', background: 'white', borderRadius: '18px', boxShadow: '0 24px 48px rgba(0,0,0,0.08)', padding: '3rem', textAlign: 'center' }}>
+        <h1 style={{ marginBottom: '1rem' }}>Clínica Fabrícia Rodrigues</h1>
+        <p style={{ marginBottom: '2rem', color: '#555' }}>Escolha o acesso abaixo:</p>
+        <div style={{ display: 'grid', gap: '1rem' }}>
+          <a href="/cliente" style={{ padding: '1rem 1.5rem', borderRadius: '12px', background: '#22c55e', color: 'white', textDecoration: 'none', fontWeight: '700' }}>Portal do Cliente</a>
+          <a href="/admin" style={{ padding: '1rem 1.5rem', borderRadius: '12px', background: '#2563eb', color: 'white', textDecoration: 'none', fontWeight: '700' }}>Área da Clínica</a>
+        </div>
+      </div>
+    </div>
   );
 }
 

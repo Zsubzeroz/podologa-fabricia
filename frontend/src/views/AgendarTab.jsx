@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, User, Phone, Clock, FileText, CheckCircle } from 'lucide-react';
+import { AppointmentManager, ServiceManager } from '../utils/EntityManager';
 
-export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
+export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSelectedClient }) {
   const formatDateForInput = (d) => {
     if (!d) return '';
     const dateObj = typeof d === 'string' ? new Date(d) : d;
@@ -11,16 +12,10 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
     return `${year}-${month}-${day}`;
   };
 
-  const services = (() => {
-    const saved = window.localStorage.getItem('services');
-    return saved ? JSON.parse(saved) : [
-      { name: 'Avaliação', duration: '1h 00min' },
-      { name: 'Podoprofilaxia Completa', duration: '1h 00min' }
-    ];
-  })();
+  const services = ServiceManager.getAll();
 
   const [formData, setFormData] = useState({
-    clientName: '',
+    clientName: preSelectedClient || '',
     phone: '',
     birthdate: '',
     service: services[0]?.name || 'Avaliação',
@@ -32,6 +27,12 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
     notifySms: 'SIM',
     notes: '',
   });
+
+  useEffect(() => {
+    if (preSelectedClient) {
+      setFormData(prev => ({ ...prev, clientName: preSelectedClient }));
+    }
+  }, [preSelectedClient]);
 
   const handleChange = (e) => setFormData({...formData, [e.target.name]: e.target.value});
 
@@ -98,7 +99,7 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
     }
 
     // Validate against existing appointments
-    const appointments = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+    const appointments = AppointmentManager.getAll();
     const hasConflict = appointments.some(appt => {
       if (appt.date !== formData.date) return false;
       const aStart = getMinutes(appt.startTime);
@@ -113,19 +114,6 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
 
     onSave({ ...formData, endTime });
     alert('Agendamento realizado com sucesso!');
-    setFormData({
-      clientName: '',
-      phone: '',
-      birthdate: '',
-      service: services[0]?.name || 'Avaliação',
-      date: currentDate ? formatDateForInput(currentDate) : formatDateForInput(new Date()),
-      startTime: preSelectedTime || '10:00',
-      duration: '01:00',
-      repeat: 'Nunca',
-      status: 'Agendado',
-      notifySms: 'SIM',
-      notes: '',
-    });
   };
 
   return (

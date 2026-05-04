@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, Search, Trash2, FileText, Printer, X, ClipboardList, Edit } from 'lucide-react';
+import { Users, Plus, Search, Trash2, FileText, Printer, X, ClipboardList, Edit, Calendar } from 'lucide-react';
+import { ClientManager } from '../utils/EntityManager';
 
-export default function Clientes() {
-  const [clientes, setClientes] = useState(() => {
-    const saved = window.localStorage.getItem('clientes');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, nome: 'Adriano Rangel', data: '23/10/2025', contato: '(19) 99381-8556', status: 'ATIVO' },
-      { id: 2, nome: 'Alessandra Rodrigues dos Santos', data: '16/03/2026', contato: '(19) 99574-5363', status: 'CADASTRO INCOMPLETO' },
-      { id: 3, nome: 'Amanda', data: '11/12/2025', contato: '(19) 99246-0623', status: 'CADASTRO INCOMPLETO' }
-    ];
-  });
+export default function Clientes({ onSchedule, onGenerateReceipt }) {
+  const [clientes, setClientes] = useState(() => ClientManager.getAll());
 
   // Local storage for filled files
   const [clientFichas, setClientFichas] = useState(() => {
@@ -62,10 +56,6 @@ export default function Clientes() {
   const templates = JSON.parse(window.localStorage.getItem('anamneses_list') || '[]');
 
   useEffect(() => {
-    window.localStorage.setItem('clientes', JSON.stringify(clientes));
-  }, [clientes]);
-
-  useEffect(() => {
     window.localStorage.setItem('client_fichas', JSON.stringify(clientFichas));
   }, [clientFichas]);
 
@@ -83,21 +73,21 @@ export default function Clientes() {
 
     const today = new Date().toLocaleDateString('pt-BR');
     const newClient = {
-      id: Date.now(),
       nome: formData.nome,
       data: formData.data || today,
       contato: formData.contato,
       status: formData.status || 'ATIVO'
     };
 
-    setClientes([...clientes, newClient]);
+    const added = ClientManager.add(newClient);
+    setClientes(ClientManager.getAll());
     setFormData({ nome: '', data: '', contato: '', status: 'ATIVO' });
     setShowNewModal(false);
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Tem certeza de que deseja excluir este cliente?')) {
-      const updated = clientes.filter(c => c.id !== id);
+      const updated = ClientManager.remove(id);
       setClientes(updated);
     }
   };
@@ -147,7 +137,6 @@ export default function Clientes() {
     
     if (anamneseTemplate) {
       let content = anamneseTemplate.conteudo;
-      // Replace the first long line after "Nome:" with the client's name
       content = content.replace(/Nome: __________________________________________________/, `Nome: ${cliente.nome}`);
       
       newFichas.push({
@@ -176,7 +165,6 @@ export default function Clientes() {
     
     if (termoTemplate) {
       let content = termoTemplate.conteudo;
-      // Replace the first long line after "Eu," with the client's name
       content = content.replace(/Eu, _________________________________/, `Eu, ${cliente.nome}`);
       
       newFichas.push({
@@ -351,7 +339,6 @@ export default function Clientes() {
           {renderTestRow('Tibial', d.testes.tibialPD, d.testes.tibialPE)}
         </div>
 
-        {/* OUTRAS OBS */}
         {ficha.conteudo && (
           <div style={{ marginTop: '5px', fontSize: '12px', color: '#444', fontStyle: 'italic', border: '1px solid #eee', padding: '8px', borderRadius: '4px' }}>
             <strong>Observações Adicionais:</strong><br/>
@@ -376,7 +363,6 @@ export default function Clientes() {
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       <div className="no-print">
       
-      {/* Header section with icon */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
         <Users size={28} color="#0f3d2e" />
         <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
@@ -386,7 +372,6 @@ export default function Clientes() {
 
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
         
-        {/* Toolbar */}
         <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button 
             onClick={() => setShowNewModal(true)}
@@ -428,7 +413,6 @@ export default function Clientes() {
           </div>
         </div>
 
-        {/* Client Table List */}
         <div style={{ overflowX: 'auto' }}>
           <table className="sa-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #f3f4f6' }}>
             <thead>
@@ -437,8 +421,8 @@ export default function Clientes() {
                 <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>FICHA</th>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>CADASTRO</th>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>CONTATO</th>
-                <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>STATUS</th>
-                <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>AÇÕES</th>
+                <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>AÇÕES RÁPIDAS</th>
+                <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>OPÇÕES</th>
               </tr>
             </thead>
             <tbody>
@@ -448,7 +432,7 @@ export default function Clientes() {
                 </tr>
               ) : (
                 filtered.map((c) => (
-                  <tr key={c.id || c.nome} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <tr key={c.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
                       <span style={{ color: '#111827', fontWeight: 'bold', fontSize: '1rem' }}>{c.nome}</span>
                     </td>
@@ -468,32 +452,30 @@ export default function Clientes() {
                             <FileText size={12} /> VER FICHAS
                           </button>
                         </div>
-                        <button 
-                          onClick={() => handleAutoGenerateFichas(c)}
-                          style={{ background: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' }}
-                        >
-                          ⚡ GERAR FICHAS PADRÃO
-                        </button>
                       </div>
                     </td>
                     <td style={{ padding: '14px', color: '#4b5563', verticalAlign: 'middle' }}>{c.data}</td>
                     <td style={{ padding: '14px', color: '#4b5563', verticalAlign: 'middle' }}>{c.contato}</td>
                     <td style={{ padding: '14px', textAlign: 'center', verticalAlign: 'middle' }}>
-                      <span style={{ 
-                        background: c.status === 'ATIVO' ? '#ecfdf5' : '#fef2f2', 
-                        color: c.status === 'ATIVO' ? '#047857' : '#b91c1c', 
-                        padding: '4px 12px', 
-                        borderRadius: '6px', 
-                        fontWeight: 'bold',
-                        fontSize: '0.85rem'
-                      }}>
-                        {c.status || 'ATIVO'}
-                      </span>
+                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                          <button 
+                            onClick={() => onSchedule(c.nome)}
+                            style={{ background: '#22c55e', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
+                          >
+                            <Calendar size={14} /> AGENDAR
+                          </button>
+                          <button 
+                            onClick={() => onGenerateReceipt(c.nome)}
+                            style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
+                          >
+                            <FileText size={14} /> RECIBO
+                          </button>
+                       </div>
                     </td>
                     <td style={{ padding: '14px', textAlign: 'center', verticalAlign: 'middle' }}>
                       <button 
                         onClick={() => handleDelete(c.id)}
-                        style={{ padding: '6px 12px', cursor: 'pointer', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', margin: '0 auto' }}
+                        style={{ padding: '6px 12px', cursor: 'pointer', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', margin: '0 auto' }}
                       >
                         <Trash2 size={14} /> Excluir
                       </button>
@@ -542,30 +524,6 @@ export default function Clientes() {
                 placeholder="(XX) XXXXX-XXXX"
                 style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', outline: 'none' }}
               />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600' }}>Data do Cadastro (Opcional)</label>
-              <input 
-                type="text" 
-                value={formData.data}
-                onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                placeholder="Ex: 23/10/2026"
-                style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', outline: 'none' }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600' }}>Status</label>
-              <select 
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', outline: 'none' }}
-              >
-                <option value="ATIVO">ATIVO</option>
-                <option value="CADASTRO INCOMPLETO">CADASTRO INCOMPLETO</option>
-                <option value="CADASTRO-AGENDA-ONLINE">CADASTRO-AGENDA-ONLINE</option>
-              </select>
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -654,300 +612,14 @@ export default function Clientes() {
                 </tbody>
               </table>
             </div>
-
             <div style={{ display: 'flex', marginTop: '10px' }}>
-              <button 
-                type="button" 
-                onClick={() => setShowFichasModal(false)}
-                style={{ flex: 1, padding: '12px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                Fechar
-              </button>
+              <button type="button" onClick={() => setShowFichasModal(false)} style={{ flex: 1, padding: '12px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Fechar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Create Ficha */}
-      {showCreateFichaModal && activeClient && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <form 
-            onSubmit={handleSaveFicha} 
-            style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '750px', width: '100%', maxHeight: '95vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: '0 10px 25px rgba(0,0,0,0.25)' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '12px' }}>
-              <h3 style={{ margin: 0, color: '#111827', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                {isEditingFicha ? 'Editar Ficha' : 'Nova Ficha'} para: {activeClient.nome}
-              </h3>
-              <button type="button" style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }} onClick={() => setShowCreateFichaModal(false)}>✕</button>
-            </div>
-            
-            {!isEditingFicha && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600' }}>Escolher Modelo</label>
-                <select 
-                  value={fichaFormData.templateId}
-                  onChange={handleTemplateChange}
-                  style={{ padding: '12px', border: '1px solid #d1d5db', borderRadius: '6px', outline: 'none', background: '#f9fafb' }}
-                >
-                  <option value="">-- Personalizar Do Zero ou Selecione um Modelo --</option>
-                  {templates.map(t => (
-                    <option key={t.id} value={t.id}>{t.nome}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600' }}>Título da Ficha do Cliente</label>
-              <input 
-                type="text" 
-                required 
-                placeholder="Ex: Anamnese Podologia - Amanda"
-                value={fichaFormData.nomeFicha}
-                onChange={(e) => setFichaFormData({ ...fichaFormData, nomeFicha: e.target.value })}
-                style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', outline: 'none' }}
-              />
-            </div>
-
-            {fichaFormData.isStructured ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '15px', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', maxHeight: '70vh', overflowY: 'auto' }}>
-                <div style={{ background: '#0f3d2e', color: 'white', padding: '10px', borderRadius: '6px', fontWeight: 'bold' }}>DADOS PESSOAIS</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>Sexo</label>
-                    <select value={fichaFormData.structuredData.sexo} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, sexo: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}>
-                      <option value="">Selecione</option>
-                      <option value="M">Masculino</option>
-                      <option value="F">Feminino</option>
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>Data Nasc.</label>
-                    <input type="text" placeholder="dd/mm/aaaa" value={fichaFormData.structuredData.dataNasc} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, dataNasc: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>RG</label>
-                    <input type="text" value={fichaFormData.structuredData.rg} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, rg: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>CPF</label>
-                    <input type="text" value={fichaFormData.structuredData.cpf} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, cpf: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>WhatsApp</label>
-                    <input type="text" value={fichaFormData.structuredData.whatsapp} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, whatsapp: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>Profissão</label>
-                    <input type="text" value={fichaFormData.structuredData.profissao} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, profissao: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }} />
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Endereço</label>
-                  <input type="text" value={fichaFormData.structuredData.endereco} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, endereco: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }} />
-                </div>
-
-                <div style={{ background: '#0f3d2e', color: 'white', padding: '10px', borderRadius: '6px', fontWeight: 'bold' }}>AVALIAÇÃO</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>Tipo de Meia</label>
-                    <select value={fichaFormData.structuredData.meia} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, meia: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}>
-                      <option value="">Selecione</option>
-                      <option value="Social">Social</option>
-                      <option value="Esportiva">Esportiva</option>
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>Tipo de Calçado</label>
-                    <select value={fichaFormData.structuredData.calcado} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, calcado: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}>
-                      <option value="">Selecione</option>
-                      <option value="Aberto">Aberto</option>
-                      <option value="Fechado">Fechado</option>
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>Nº Calçado</label>
-                    <input type="text" value={fichaFormData.structuredData.numCalcado} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, numCalcado: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600' }}>Sensibilidade a Dor</label>
-                    <select value={fichaFormData.structuredData.sensibilidade} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, sensibilidade: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}>
-                      <option value="">Selecione</option>
-                      <option value="Muita">Muita</option>
-                      <option value="Suportável">Suportável</option>
-                      <option value="Pouca">Pouca</option>
-                      <option value="Nenhuma">Nenhuma</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ background: '#0f3d2e', color: 'white', padding: '10px', borderRadius: '6px', fontWeight: 'bold' }}>CONDIÇÕES DE SAÚDE (POSSUI)</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                  {[
-                    'Hipo/Hipertensão', 'Diabetes', 'Distúrbios Hormonais', 'Marca passo / Pinos',
-                    'Distúrbio intestinal', 'Tabagismo/Etilismo', 'Doença vascular', 'Hepatite',
-                    'Distúrbio renal', 'Gestante ou Lactante', 'Cardiopatia', 'Neuropatia',
-                    'HIV/DST', 'Doença Oncológica', 'Hanseníase', 'Epilepsia'
-                  ].map(cond => (
-                    <label key={cond} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', cursor: 'pointer' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={fichaFormData.structuredData.possui.includes(cond)}
-                        onChange={(e) => {
-                          const newList = e.target.checked 
-                            ? [...fichaFormData.structuredData.possui, cond]
-                            : fichaFormData.structuredData.possui.filter(c => c !== cond);
-                          setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, possui: newList } });
-                        }}
-                      />
-                      {cond}
-                    </label>
-                  ))}
-                </div>
-
-                <div style={{ background: '#0f3d2e', color: 'white', padding: '10px', borderRadius: '6px', fontWeight: 'bold' }}>TESTES CLÍNICOS</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>Perfusão</div>
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      <input placeholder="P.D" value={fichaFormData.structuredData.testes.perfusaoPD} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, testes: { ...fichaFormData.structuredData.testes, perfusaoPD: e.target.value } } })} style={{ width: '50%', padding: '5px', fontSize: '11px' }} />
-                      <input placeholder="P.E" value={fichaFormData.structuredData.testes.perfusaoPE} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, testes: { ...fichaFormData.structuredData.testes, perfusaoPE: e.target.value } } })} style={{ width: '50%', padding: '5px', fontSize: '11px' }} />
-                    </div>
-                  </div>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>Digito Pressão</div>
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      <input placeholder="P.D" value={fichaFormData.structuredData.testes.digitoPD} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, testes: { ...fichaFormData.structuredData.testes, digitoPD: e.target.value } } })} style={{ width: '50%', padding: '5px', fontSize: '11px' }} />
-                      <input placeholder="P.E" value={fichaFormData.structuredData.testes.digitoPE} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, testes: { ...fichaFormData.structuredData.testes, digitoPE: e.target.value } } })} style={{ width: '50%', padding: '5px', fontSize: '11px' }} />
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Motivo da Consulta / Observações</label>
-                  <textarea value={fichaFormData.structuredData.motivo} onChange={(e) => setFichaFormData({ ...fichaFormData, structuredData: { ...fichaFormData.structuredData, motivo: e.target.value } })} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', minHeight: '60px' }} />
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600' }}>Ficha / Anamnese Personalizada</label>
-                <textarea 
-                  required 
-                  value={fichaFormData.conteudo}
-                  onChange={(e) => setFichaFormData({ ...fichaFormData, conteudo: e.target.value })}
-                  placeholder="O conteúdo do modelo selecionado aparecerá aqui. Você pode preenchê-lo especificamente para o seu cliente..."
-                  style={{ padding: '12px', border: '1px solid #d1d5db', borderRadius: '6px', outline: 'none', minHeight: '300px', resize: 'vertical', fontFamily: 'monospace', fontSize: '13px' }}
-                />
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <button 
-                type="button" 
-                onClick={() => setShowCreateFichaModal(false)}
-                style={{ flex: 1, padding: '12px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                style={{ flex: 1, padding: '12px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                ✓ Salvar Ficha
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Printable Modal (Print Preview) */}
-      {showPrintModal && printFicha && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }} className="no-print">
-          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '750px', width: '100%', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: '0 10px 25px rgba(0,0,0,0.25)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '12px' }}>
-              <h3 style={{ margin: 0, color: '#111827', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                Visualização de Impressão
-              </h3>
-              <X size={22} color="#6b7280" style={{ cursor: 'pointer' }} onClick={() => setShowPrintModal(false)} />
-            </div>
-
-            <div style={{ padding: '20px', border: '1px dashed #d1d5db', background: '#fafafa', borderRadius: '8px', minHeight: '300px', whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '13px', color: '#111827' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #111', paddingBottom: '15px', marginBottom: '20px' }}>
-                <img src="/Logo.jpeg" alt="Logo" style={{ maxHeight: '70px', objectFit: 'contain', marginBottom: '8px' }} />
-                <h1 style={{ fontSize: '18px', margin: '0 0 4px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues</h1>
-                <p style={{ margin: 0, fontSize: '13px', color: '#4b5563', fontFamily: 'sans-serif', textAlign: 'center' }}>Podologia Clínica e Especializada</p>
-              </div>
-              
-              <h2 style={{ fontSize: '15px', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase', marginBottom: '20px', fontFamily: 'sans-serif' }}>
-                {printFicha.nomeFicha}
-              </h2>
-
-              <div style={{ fontSize: '13px', lineHeight: '1.5', color: '#111827' }}>
-                {renderStructuredPrint(printFicha)}
-              </div>
-
-              <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'space-between', gap: '40px' }}>
-                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
-                  <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
-                </div>
-                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
-                  <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <button 
-                type="button" 
-                onClick={() => setShowPrintModal(false)}
-                style={{ flex: 1, padding: '12px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                Fechar
-              </button>
-              <button 
-                type="button" 
-                onClick={() => window.print()}
-                style={{ flex: 1, padding: '12px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-              >
-                <Printer size={16} /> Imprimir Agora
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       </div>
-
-      {/* Dedicated Print-only Section */}
-      {printFicha && (
-        <div style={{ display: 'none' }} className="print-only">
-          <div style={{ padding: '20px', whiteSpace: 'pre-wrap', fontSize: '14px', lineHeight: '1.5', fontFamily: 'serif' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #111', paddingBottom: '15px', marginBottom: '30px' }}>
-              <img src="/Logo.jpeg" alt="Logo" style={{ maxHeight: '90px', objectFit: 'contain', marginBottom: '10px' }} />
-              <h1 style={{ fontSize: '20px', margin: '0 0 5px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues</h1>
-              <p style={{ margin: 0, fontSize: '14px', color: '#4b5563', fontFamily: 'sans-serif', textAlign: 'center' }}>Podologia Clínica e Especializada</p>
-            </div>
-            
-            <h2 style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase', marginBottom: '25px' }}>
-              {printFicha.nomeFicha}
-            </h2>
-
-            <div style={{ minHeight: '400px' }}>
-              {renderStructuredPrint(printFicha)}
-            </div>
-
-            <div style={{ marginTop: '80px', display: 'flex', justifyContent: 'space-between', gap: '60px' }}>
-              <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
-                <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
-              </div>
-              <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
-                <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText } from 'lucide-react';
+import { AppointmentManager } from '../utils/EntityManager';
 
-export default function Agenda({ appointments, onCancelAppointment, currentDate, setCurrentDate, onAddAppointment }) {
+export default function Agenda({ appointments, onCancelAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia');
 
   const getWorkHoursForDay = (dateObj) => {
@@ -105,7 +106,6 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
         {formatDateForDisplay(currentDate)}
       </div>
 
-      {/* Day View Grid */}
       <div style={{ border: '1px solid #e5e7eb', borderRadius: '12px', background: '#fff', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -143,6 +143,15 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
                             <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onGenerateReceipt(appt.clientName, appt.service);
+                              }}
+                              style={{ background: '#fff', border: '1px solid #10b981', color: '#065f46', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
+                            >
+                              <FileText size={14} /> RECIBO
+                            </button>
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -194,7 +203,6 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
         </table>
       </div>
 
-      {/* Style for hover effects */}
       <style>{`
         .agenda-slot-empty:hover {
           color: #0f3d2e;
