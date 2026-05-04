@@ -1,19 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Settings, Save, Smartphone, MessageCircle, Layout as LayoutIcon, CheckCircle2, Clock } from 'lucide-react';
+import { GeneralSettings } from '../utils/EntityManager';
 
 export default function ConfiguracoesGeral() {
-  const [config, setConfig] = useState(() => {
-    const saved = window.localStorage.getItem('configuracoes_gerais');
-    return saved ? JSON.parse(saved) : {
-      calendarioVertical: false,
-      obrigarSala: false,
-      enviarLembrete: true,
-      tempoLembrete: '24', // em horas (24 = 1 dia antes)
-      mensagemLembrete: 'Olá @CLIENTE, passando para confirmar seu atendimento de @NOMESERVICO amanhã, dia @DIA às @HORA. Se precisar desmarcar, nos avise com antecedência. Atenciosamente, @NOMEEMPRESA.',
-      whatsappConectado: true
-    };
-  });
-
+  const [config, setConfig] = useState(() => GeneralSettings.get());
   const [saved, setSaved] = useState(false);
 
   const handleToggle = (key) => {
@@ -48,7 +38,7 @@ export default function ConfiguracoesGeral() {
 
   const handleSave = (e) => {
     if (e) e.preventDefault();
-    window.localStorage.setItem('configuracoes_gerais', JSON.stringify(config));
+    GeneralSettings.save(config);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -67,7 +57,6 @@ export default function ConfiguracoesGeral() {
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      {/* Header section */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
         <Settings size={28} color="#0f3d2e" />
         <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
@@ -77,7 +66,6 @@ export default function ConfiguracoesGeral() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
         
-        {/* Visual / Interface Section */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
             <LayoutIcon size={20} color="#0f3d2e" />
@@ -125,7 +113,6 @@ export default function ConfiguracoesGeral() {
           </div>
         </div>
 
-        {/* Messaging Section (WhatsApp) */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
             <MessageCircle size={20} color="#0f3d2e" />
@@ -224,7 +211,6 @@ export default function ConfiguracoesGeral() {
           </div>
         </div>
 
-        {/* Save Button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', marginTop: '10px' }}>
           {saved && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: '800', fontSize: '1rem' }}>

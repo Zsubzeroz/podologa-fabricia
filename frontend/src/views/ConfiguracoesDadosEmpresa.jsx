@@ -1,24 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Building2, Save, MapPin, Phone, Mail, Globe, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
+import { CompanySettings } from '../utils/EntityManager';
 
 export default function ConfiguracoesDadosEmpresa() {
-  const [empresa, setEmpresa] = useState(() => {
-    const saved = window.localStorage.getItem('dados_empresa');
-    return saved ? JSON.parse(saved) : {
-      nome: 'Clínica Fabrícia Rodrigues',
-      cnpj: '00.000.000/0001-00',
-      email: 'contato@fabriciarodrigues.com.br',
-      telefone: '(19) 99722-2694',
-      site: 'www.fabriciarodrigues.com.br',
-      endereco: 'Rua das Flores, 123',
-      bairro: 'Centro',
-      cidade: 'Campinas',
-      estado: 'SP',
-      cep: '13000-000',
-      logo: '/Logo.jpeg'
-    };
-  });
-
+  const [empresa, setEmpresa] = useState(() => CompanySettings.get());
   const [saved, setSaved] = useState(false);
 
   const handleChange = (e) => {
@@ -28,7 +13,7 @@ export default function ConfiguracoesDadosEmpresa() {
 
   const handleSave = (e) => {
     e.preventDefault();
-    window.localStorage.setItem('dados_empresa', JSON.stringify(empresa));
+    CompanySettings.save(empresa);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -47,7 +32,6 @@ export default function ConfiguracoesDadosEmpresa() {
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      {/* Header section */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
         <Building2 size={28} color="#0f3d2e" />
         <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
@@ -59,7 +43,6 @@ export default function ConfiguracoesDadosEmpresa() {
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '40px' }}>
           
-          {/* Logo Upload Section */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', padding: '20px', background: '#f9fafb', borderRadius: '12px', border: '2px dashed #e5e7eb' }}>
             <div style={{ position: 'relative', width: '150px', height: '150px', background: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <img src={empresa.logo} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
@@ -71,7 +54,6 @@ export default function ConfiguracoesDadosEmpresa() {
             <p style={{ fontSize: '0.75rem', color: '#6b7280', textAlign: 'center' }}>Recomendado: JPG ou PNG, 500x500px.</p>
           </div>
 
-          {/* Form Section */}
           <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
