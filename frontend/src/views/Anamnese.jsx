@@ -345,7 +345,19 @@ Assinatura do Cliente: ___________________________________`
             </div>
 
             <div style={{ padding: '20px', border: '1px dashed #d1d5db', background: '#fafafa', borderRadius: '8px', minHeight: '300px', whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '13px', color: '#111827' }}>
-              {printItem.conteudo || 'Este modelo não possui conteúdo cadastrado.'}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #111', paddingBottom: '15px', marginBottom: '20px' }}>
+                <img src="/Logo.jpeg" alt="Logo" style={{ maxHeight: '70px', objectFit: 'contain', marginBottom: '8px' }} />
+                <h1 style={{ fontSize: '18px', margin: '0 0 4px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues Pereira</h1>
+                <p style={{ margin: 0, fontSize: '13px', color: '#4b5563', fontFamily: 'sans-serif', textAlign: 'center' }}>Podologia Clínica e Especializada</p>
+              </div>
+              
+              <h2 style={{ fontSize: '15px', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase', marginBottom: '20px', fontFamily: 'sans-serif' }}>
+                {printItem.nome}
+              </h2>
+
+              <div style={{ fontSize: '13px', lineHeight: '1.5', color: '#111827' }}>
+                {printItem.conteudo || 'Este modelo não possui conteúdo cadastrado.'}
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -372,9 +384,10 @@ Assinatura do Cliente: ___________________________________`
       {printItem && (
         <div style={{ display: 'none' }} className="print-only">
           <div style={{ padding: '20px', whiteSpace: 'pre-wrap', fontSize: '14px', lineHeight: '1.5', fontFamily: 'serif' }}>
-            <div style={{ textAlign: 'center', borderBottom: '2px solid #111', paddingBottom: '15px', marginBottom: '30px' }}>
-              <h1 style={{ fontSize: '20px', margin: '0 0 5px 0', fontWeight: 'bold' }}>Fabricia Rodrigues Pereira - Podóloga</h1>
-              <p style={{ margin: 0, fontSize: '12px', color: '#4b5563' }}>Atendimento Clínico e Especializado</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #111', paddingBottom: '15px', marginBottom: '30px' }}>
+              <img src="/Logo.jpeg" alt="Logo" style={{ maxHeight: '90px', objectFit: 'contain', marginBottom: '10px' }} />
+              <h1 style={{ fontSize: '20px', margin: '0 0 5px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues Pereira</h1>
+              <p style={{ margin: 0, fontSize: '14px', color: '#4b5563', fontFamily: 'sans-serif', textAlign: 'center' }}>Podologia Clínica e Especializada</p>
             </div>
             
             <h2 style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'center', textTransform: 'uppercase', marginBottom: '25px' }}>
