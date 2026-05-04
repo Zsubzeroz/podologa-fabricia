@@ -49,11 +49,33 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
 
   // Handle Quick Block and Unblock
   const handleBlockHour = (hourSt) => {
-    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
-    // Create new block
+    const appointments = JSON.parse(window.localStorage.getItem('appointments') || '[]');
     const endH = parseInt(hourSt.split(':')[0], 10) + 1;
     const endSt = `${endH.toString().padStart(2, '0')}:00`;
-    
+
+    const getMinutes = (timeStr) => {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const isOverlapping = (startA, endA, startB, endB) => startA < endB && endA > startB;
+
+    const bStart = getMinutes(hourSt);
+    const bEnd = getMinutes(endSt);
+
+    const hasConflict = appointments.find(appt => {
+      if (appt.date !== currentYMD) return false;
+      const aStart = getMinutes(appt.startTime);
+      const aEnd = getMinutes(appt.endTime);
+      return isOverlapping(bStart, bEnd, aStart, aEnd);
+    });
+
+    if (hasConflict) {
+      alert(`Você não pode bloquear este horário pois o cliente ${hasConflict.clientName} já possui um agendamento neste período.`);
+      return;
+    }
+
+    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
     const newBlock = {
       id: Date.now(),
       date: currentYMD,

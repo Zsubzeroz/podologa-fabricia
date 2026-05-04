@@ -45,6 +45,28 @@ export default function CadastrosFeriado() {
       return;
     }
 
+    const appointments = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+    const hasConflict = appointments.find(appt => {
+      if (appt.date !== formData.date) return false;
+      if (!formData.startTime && !formData.endTime) return true;
+      const getMinutes = (timeStr) => {
+        if (!timeStr) return 0;
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+      };
+      const isOverlapping = (startA, endA, startB, endB) => startA < endB && endA > startB;
+      const bStart = getMinutes(formData.startTime);
+      const bEnd = getMinutes(formData.endTime);
+      const aStart = getMinutes(appt.startTime);
+      const aEnd = getMinutes(appt.endTime);
+      return isOverlapping(bStart, bEnd, aStart, aEnd);
+    });
+
+    if (hasConflict) {
+      alert(`Você não pode bloquear este período pois o cliente ${hasConflict.clientName} já possui um agendamento neste horário.`);
+      return;
+    }
+
     const newBlock = {
       id: Date.now(),
       ...formData
