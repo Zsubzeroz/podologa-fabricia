@@ -47,6 +47,43 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
     });
   };
 
+  // Handle Quick Block and Unblock
+  const handleBlockHour = (hourSt) => {
+    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
+    // Create new block
+    const endH = parseInt(hourSt.split(':')[0], 10) + 1;
+    const endSt = `${endH.toString().padStart(2, '0')}:00`;
+    
+    const newBlock = {
+      id: Date.now(),
+      date: currentYMD,
+      description: 'Compromisso / Bloqueio Manual',
+      type: 'Compromisso',
+      startTime: hourSt,
+      endTime: endSt
+    };
+
+    const updated = [...blockedDays, newBlock];
+    window.localStorage.setItem('blockedDays', JSON.stringify(updated));
+    setCurrentDate(new Date(currentDate)); // force reload/re-render
+  };
+
+  const handleUnblockHour = (blockId) => {
+    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
+    const updated = blockedDays.filter(b => b.id !== blockId);
+    window.localStorage.setItem('blockedDays', JSON.stringify(updated));
+    setCurrentDate(new Date(currentDate)); // force reload/re-render
+  };
+
+  const isTimeBlocked = (hourSt) => {
+    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
+    return blockedDays.find(b => {
+      if (b.date !== currentYMD) return false;
+      if (!b.startTime && !b.endTime) return true; // whole day blocked
+      return hourSt >= b.startTime && hourSt < b.endTime;
+    });
+  };
+
   return (
     <div>
       <div className="calendar-toolbar">
@@ -87,31 +124,54 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
                   const h = parseInt(a.startTime.split(':')[0], 10);
                   return h === hour;
                 });
+
+                const block = isTimeBlocked(hourSt);
                 
                 return (
                   <tr key={hour}>
                     <td className="time-header">{hour}h</td>
-                    <td className="time-cell" onClick={() => onSlotClick && onSlotClick(hourSt)}>
-                      {apptsInHour.map(appt => (
-                        <div key={appt.id} className="appt-block" onClick={(e) => { e.stopPropagation(); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
-                          <div>
-                            <strong>{appt.startTime} - {appt.endTime}</strong> | {appt.clientName} - {appt.service}
+                    <td className="time-cell" style={{ position: 'relative' }}>
+                      {apptsInHour.length > 0 ? (
+                        apptsInHour.map(appt => (
+                          <div key={appt.id} className="appt-block" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
+                            <div>
+                              <strong>{appt.startTime} - {appt.endTime}</strong> | {appt.clientName} - {appt.service}
+                            </div>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                              <button 
+                                onClick={() => {
+                                  const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
+                                  const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
+                                  window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                                }}
+                                style={{ background: '#25d366', border: 'none', color: 'white', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
+                              >
+                                WhatsApp
+                              </button>
+                              <button className="btn-cancel-mini" onClick={() => onCancelAppointment(appt.id)}>X</button>
+                            </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '4px' }}>
-                            <button 
-                              onClick={() => {
-                                const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
-                                const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
-                                window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-                              }}
-                              style={{ background: '#25d366', border: 'none', color: 'white', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
-                            >
-                              WhatsApp
-                            </button>
-                            <button className="btn-cancel-mini" onClick={() => onCancelAppointment(appt.id)}>X</button>
-                          </div>
+                        ))
+                      ) : block ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8d7da', border: '1px dashed #f5c6cb', color: '#721c24', padding: '6px 12px', borderRadius: '4px', fontSize: '0.9rem' }}>
+                          <span>⛔ <b>Horário Bloqueado:</b> {block.description}</span>
+                          <button 
+                            onClick={() => handleUnblockHour(block.id)}
+                            style={{ background: '#721c24', border: 'none', color: 'white', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
+                          >
+                            DESBLOQUEAR
+                          </button>
                         </div>
-                      ))}
+                      ) : (
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <button 
+                            onClick={() => handleBlockHour(hourSt)}
+                            style={{ background: '#ef4444', border: 'none', color: 'white', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: '500' }}
+                          >
+                            🚫 Bloquear este horário
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );
