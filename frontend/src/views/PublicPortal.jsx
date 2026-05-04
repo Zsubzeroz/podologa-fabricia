@@ -195,6 +195,9 @@ export default function PublicPortal() {
                   <p style={{ color: '#374151', margin: 0, lineHeight: 1.5, fontSize: '0.95rem' }}>
                     Prezados clientes. Solicitamos pontualidade. Lembramos que a tolerância máxima de atraso é de 10 minutos, visando o bom andamento da agenda e o respeito aos demais clientes. Agradecemos a compreensão.
                   </p>
+                  <p style={{ color: '#0f3d2e', margin: '10px 0 0 0', lineHeight: 1.5, fontSize: '0.95rem', fontWeight: 'bold', borderTop: '1px solid #ddd', paddingTop: '8px' }}>
+                    ✆ Um lembrete será enviado 1 dia antes no seu WhatsApp!
+                  </p>
                 </div>
 
                 <button 
@@ -258,6 +261,72 @@ export default function PublicPortal() {
                       alert('Por favor, preencha todos os campos do formulário.');
                       return;
                     }
+
+                    // 1. Calculate the end time of the new appointment
+                    const serviceDuration = selectedService.duration; // e.g. "1h 00min" or "30min"
+                    let durationMinutes = 60;
+                    if (serviceDuration.includes('h')) {
+                      const parts = serviceDuration.split('h');
+                      durationMinutes = parseInt(parts[0]) * 60;
+                      if (parts[1] && parts[1].includes('min')) {
+                        durationMinutes += parseInt(parts[1].replace('min', '').trim());
+                      }
+                    } else if (serviceDuration.includes('min')) {
+                      durationMinutes = parseInt(serviceDuration.replace('min', '').trim());
+                    }
+
+                    const [sh, sm] = selectedTime.split(':').map(Number);
+                    const startTotal = sh * 60 + sm;
+                    const endTotal = startTotal + durationMinutes;
+
+                    const eh = Math.floor(endTotal / 60);
+                    const em = endTotal % 60;
+                    const endTime = `${eh.toString().padStart(2, '0')}:${em.toString().padStart(2, '0')}`;
+
+                    // Helper to get total minutes from time string
+                    const getMinutes = (timeStr) => {
+                      if (!timeStr) return 0;
+                      const [h, m] = timeStr.split(':').map(Number);
+                      return h * 60 + m;
+                    };
+
+                    // Helper to check for overlap between two time intervals
+                    const isOverlapping = (startA, endA, startB, endB) => {
+                      return startA < endB && endA > startB;
+                    };
+
+                    // 2. Validate against blocked dates and times
+                    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
+                    const matchingBlock = blockedDays.find(b => b.date === selectedDate);
+                    if (matchingBlock) {
+                      if (!matchingBlock.startTime && !matchingBlock.endTime) {
+                        alert(`Nesta data a clínica estará fechada por motivo de: ${matchingBlock.description}`);
+                        return;
+                      } else {
+                        const bStart = getMinutes(matchingBlock.startTime);
+                        const bEnd = getMinutes(matchingBlock.endTime);
+                        if (isOverlapping(startTotal, endTotal, bStart, bEnd)) {
+                          alert(`Este horário não está disponível. O profissional estará ausente das ${matchingBlock.startTime} às ${matchingBlock.endTime} por motivo de: ${matchingBlock.description}`);
+                          return;
+                        }
+                      }
+                    }
+
+                    // 3. Validate against existing appointments on the same date
+                    const currentAppts = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+                    const hasConflict = currentAppts.some(appt => {
+                      if (appt.date !== selectedDate) return false;
+                      const aStart = getMinutes(appt.startTime);
+                      const aEnd = getMinutes(appt.endTime);
+                      return isOverlapping(startTotal, endTotal, aStart, aEnd);
+                    });
+
+                    if (hasConflict) {
+                      alert('Este horário já está reservado por outro cliente. Por favor, escolha outro horário ou outra data.');
+                      return;
+                    }
+
+                    // Save the appointment
                     const newAppointment = {
                       id: Date.now(),
                       clientName,
@@ -265,9 +334,9 @@ export default function PublicPortal() {
                       service: selectedService.name,
                       date: selectedDate,
                       startTime: selectedTime,
-                      endTime: selectedTime
+                      endTime
                     };
-                    const currentAppts = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+
                     const updated = [...currentAppts, newAppointment];
                     window.localStorage.setItem('appointments', JSON.stringify(updated));
                     setIsConfirmed(true);
