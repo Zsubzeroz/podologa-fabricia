@@ -39,7 +39,7 @@ class EntityManager {
 }
 
 export const AppointmentManager = new EntityManager('appointments');
-export const ClientManager = new EntityManager('clientes_list');
+export const ClientManager = new EntityManager('clientes');
 export const ReceiptManager = new EntityManager('nfs_list');
 export const ProductManager = new EntityManager('produtos_list');
 export const ServiceManager = new EntityManager('services');
