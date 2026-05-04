@@ -286,15 +286,31 @@ export default function PublicPortal() {
                         durationMinutes = parseInt(serviceDuration.replace('min', '').trim());
                       }
 
-                      const workingHours = JSON.parse(window.localStorage.getItem('workingHours') || '{"start":"08:00","end":"19:00"}');
-                      const startH = parseInt(workingHours.start.split(':')[0], 10) || 8;
-                      const endH = parseInt(workingHours.end.split(':')[0], 10) || 19;
+                      const getWorkHoursForDay = (dateYMD) => {
+                        if (!dateYMD) return { start: 8, end: 20 };
+                        const d = new Date(dateYMD + 'T00:00:00');
+                        const dow = d.getDay();
+                        if (dow === 0) return { start: 0, end: 0, closed: true };
+                        if (dow === 1 || dow === 2 || dow === 3) return { start: 9, end: 20 };
+                        if (dow === 4 || dow === 5) return { start: 8, end: 20 };
+                        if (dow === 6) return { start: 8, end: 12 };
+                        return { start: 8, end: 20 };
+                      };
+
+                      const workLimits = getWorkHoursForDay(selectedDate);
+                      const startH = workLimits.start;
+                      const endH = workLimits.end;
 
                       const slots = [];
-                      for (let h = startH; h <= endH; h++) {
-                        slots.push(`${h.toString().padStart(2, '0')}:00`);
-                        slots.push(`${h.toString().padStart(2, '0')}:30`);
+                      if (!workLimits.closed) {
+                        for (let h = startH; h <= endH; h++) {
+                          slots.push(`${h.toString().padStart(2, '0')}:00`);
+                          if (!(h === endH && workLimits.end === 12)) {
+                            slots.push(`${h.toString().padStart(2, '0')}:30`);
+                          }
+                        }
                       }
+
 
                       const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
                       const currentAppts = JSON.parse(window.localStorage.getItem('appointments') || '[]');

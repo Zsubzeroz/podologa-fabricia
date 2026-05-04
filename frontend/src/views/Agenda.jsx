@@ -4,11 +4,22 @@ import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartp
 export default function Agenda({ appointments, onCancelAppointment, currentDate, setCurrentDate }) {
   const [viewMode, setViewMode] = useState('Dia');
 
-  const workingHours = JSON.parse(window.localStorage.getItem('workingHours') || '{"start":"08:00","end":"19:00"}');
-  const startH = parseInt(workingHours.start.split(':')[0], 10) || 8;
-  const endH = parseInt(workingHours.end.split(':')[0], 10) || 19;
+  const getWorkHoursForDay = (dateObj) => {
+    if (!dateObj) return { start: 8, end: 20 };
+    const dow = dateObj.getDay();
+    if (dow === 0) return { start: 0, end: 0, closed: true };
+    if (dow === 1 || dow === 2 || dow === 3) return { start: 9, end: 20 };
+    if (dow === 4 || dow === 5) return { start: 8, end: 20 };
+    if (dow === 6) return { start: 8, end: 12 };
+    return { start: 8, end: 20 };
+  };
+
+  const workLimits = getWorkHoursForDay(currentDate);
+  const startH = workLimits.start;
+  const endH = workLimits.end;
   const totalHours = Math.max(1, endH - startH + 1);
-  const hours = Array.from({ length: totalHours }, (_, i) => i + startH);
+  const hours = workLimits.closed ? [] : Array.from({ length: totalHours }, (_, i) => i + startH);
+
   
   const formatDateForDisplay = (dateObj) => {
     return dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
