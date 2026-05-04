@@ -248,26 +248,111 @@ export default function PublicPortal() {
                   <input 
                     type="date" 
                     value={selectedDate} 
-                    onChange={(e) => setSelectedDate(e.target.value)} 
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value);
+                      setSelectedTime(''); // Reset time when date changes
+                    }} 
                     style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Horário Preferido</label>
-                  <input 
-                    type="time" 
-                    value={selectedTime} 
-                    onChange={(e) => setSelectedTime(e.target.value)} 
-                    style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-                  />
-                </div>
+                {selectedDate && (
+                  <div className="form-group">
+                    <label>Horários Disponíveis para este dia</label>
+                    {(() => {
+                      const getMinutes = (timeStr) => {
+                        if (!timeStr) return 0;
+                        const [h, m] = timeStr.split(':').map(Number);
+                        return h * 60 + m;
+                      };
+
+                      const isOverlapping = (startA, endA, startB, endB) => startA < endB && endA > startB;
+
+                      let durationMinutes = 60;
+                      const serviceDuration = selectedService.duration;
+                      if (serviceDuration.includes('h')) {
+                        const parts = serviceDuration.split('h');
+                        durationMinutes = parseInt(parts[0]) * 60;
+                        if (parts[1] && parts[1].includes('min')) {
+                          durationMinutes += parseInt(parts[1].replace('min', '').trim());
+                        }
+                      } else if (serviceDuration.includes('min')) {
+                        durationMinutes = parseInt(serviceDuration.replace('min', '').trim());
+                      }
+
+                      const slots = [];
+                      for (let h = 8; h <= 19; h++) {
+                        slots.push(`${h.toString().padStart(2, '0')}:00`);
+                        slots.push(`${h.toString().padStart(2, '0')}:30`);
+                      }
+
+                      const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
+                      const currentAppts = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+
+                      const availableSlots = slots.filter(slot => {
+                        const [sh, sm] = slot.split(':').map(Number);
+                        const startTotal = sh * 60 + sm;
+                        const endTotal = startTotal + durationMinutes;
+
+                        // 1. Check blocked times
+                        const matchingBlock = blockedDays.find(b => b.date === selectedDate);
+                        if (matchingBlock) {
+                          if (!matchingBlock.startTime && !matchingBlock.endTime) return false;
+                          const bStart = getMinutes(matchingBlock.startTime);
+                          const bEnd = getMinutes(matchingBlock.endTime);
+                          if (isOverlapping(startTotal, endTotal, bStart, bEnd)) return false;
+                        }
+
+                        // 2. Check existing appointments
+                        const hasConflict = currentAppts.some(appt => {
+                          if (appt.date !== selectedDate) return false;
+                          const aStart = getMinutes(appt.startTime);
+                          const aEnd = getMinutes(appt.endTime);
+                          return isOverlapping(startTotal, endTotal, aStart, aEnd);
+                        });
+
+                        if (hasConflict) return false;
+                        return true;
+                      });
+
+                      if (availableSlots.length === 0) {
+                        return <p style={{ color: '#ef4444', marginTop: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Nenhum horário disponível para este dia.</p>;
+                      }
+
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px', marginTop: '8px' }}>
+                          {availableSlots.map(slot => (
+                            <button 
+                              key={slot}
+                              type="button"
+                              onClick={() => setSelectedTime(slot)}
+                              style={{
+                                padding: '8px 4px',
+                                background: selectedTime === slot ? '#0f3d2e' : '#fff',
+                                color: selectedTime === slot ? '#fff' : '#0f3d2e',
+                                border: `1px solid ${selectedTime === slot ? '#0f3d2e' : '#ccc'}`,
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                textAlign: 'center',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
 
                 <button 
                   className="btn-confirm"
                   onClick={() => {
                     if (!clientName || !clientPhone || !selectedDate || !selectedTime) {
-                      alert('Por favor, preencha todos os campos do formulário.');
+                      alert('Por favor, preencha todos os campos do formulário e selecione um horário.');
                       return;
                     }
 
