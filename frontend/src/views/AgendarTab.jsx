@@ -42,6 +42,50 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
     
     const endTime = `${finalHour.toString().padStart(2, '0')}:${finalMins.toString().padStart(2, '0')}`;
     
+    const startTotal = sHour * 60 + sMin;
+    const endTotal = startTotal + dHour * 60 + dMin;
+
+    const getMinutes = (timeStr) => {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const isOverlapping = (startA, endA, startB, endB) => {
+      return startA < endB && endA > startB;
+    };
+
+    // Validate against blocked days/times
+    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
+    const matchingBlock = blockedDays.find(b => b.date === formData.date);
+    if (matchingBlock) {
+      if (!matchingBlock.startTime && !matchingBlock.endTime) {
+        alert(`O profissional está ausente neste dia por motivo de: ${matchingBlock.description}`);
+        return;
+      } else {
+        const bStart = getMinutes(matchingBlock.startTime);
+        const bEnd = getMinutes(matchingBlock.endTime);
+        if (isOverlapping(startTotal, endTotal, bStart, bEnd)) {
+          alert(`Este horário não está disponível. O profissional estará ausente das ${matchingBlock.startTime} às ${matchingBlock.endTime} por motivo de: ${matchingBlock.description}`);
+          return;
+        }
+      }
+    }
+
+    // Validate against existing appointments
+    const appointments = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+    const hasConflict = appointments.some(appt => {
+      if (appt.date !== formData.date) return false;
+      const aStart = getMinutes(appt.startTime);
+      const aEnd = getMinutes(appt.endTime);
+      return isOverlapping(startTotal, endTotal, aStart, aEnd);
+    });
+
+    if (hasConflict) {
+      alert('Atenção: Este horário já possui outro agendamento. Por favor, escolha outro horário ou outra data.');
+      return;
+    }
+
     onSave({ ...formData, endTime });
   };
 
