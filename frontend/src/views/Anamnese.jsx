@@ -7,34 +7,62 @@ export default function Anamnese() {
     return saved ? JSON.parse(saved) : [
       { 
         id: 1, 
-        nome: 'ANAMNESE DADOS CLÍNICOS (PODOLOGIA)', 
+        nome: 'FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA', 
         status: 'ATIVO',
-        conteudo: `FICHA DE ANAMNESE PODOLÓGICA
+        conteudo: `FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA
 
-Cliente: _________________________________________________
-Data de Nascimento: ___/___/______   Telefone: ______________
-Profissão: _________________   Pratica esporte? ( ) Sim ( ) Não
+Nome: __________________________________________________
+E-mail: _________________________________________________
+Endereço: _______________________________________________
+Fone: ( ) _________________ Idade: ______
 
-HISTÓRICO DE SAÚDE
-1. É Diabético? ( ) Sim ( ) Não
-2. Tem problemas circulatórios? ( ) Sim ( ) Não
-3. É hipertenso? ( ) Sim ( ) Não
-4. Possui alergias? ( ) Sim ( ) Não. Se sim, quais: ________________
-5. Tipo de calçado mais utilizado: _________________________
+AVALIAÇÃO FÍSICA
 
-AVALIAÇÃO DOS PÉS E UNHAS
-( ) Onicocriptose (Unha Encravada)
-( ) Onicomicose (Micose)
-( ) Calos e Calosidades
-( ) Verruga Plantar
+Calçado mais utilizado: ( ) Aberto ( ) Fechado  Nº ______
+Meia mais utilizada: ( ) Social ( ) Esportiva
+Cirurgia nos membros inferiores? ( ) SIM ( ) NÃO Especifique: ___________________
+Pratica Esportes? ( ) SIM ( ) NÃO Especifique: _______________________________
+Faz uso de algum medicamento? ( ) SIM ( ) NÃO Especifique: ___________________
+Gestante? ( ) NÃO ( ) SIM / Semanas ________
+Sensibilidade a dor? ( ) NÃO ( ) SIM Especifique: ____________________________
+Tem hipo/hipertensão arterial? ( ) NÃO ( ) SIM
+Diabetes? ( ) NÃO ( ) SIM
+Portador de marcapasso/pinos? ( ) NÃO ( ) SIM
+Hanseníase? ( ) NÃO ( ) SIM
+Cardiopatia? ( ) NÃO ( ) SIM
+Hepatite? ( ) NÃO ( ) SIM
+Distúrbio circulatório? ( ) NÃO ( ) SIM
+Histórico de câncer? ( ) NÃO ( ) SIM
 
-Evolução e Observações:
-__________________________________________________________________
-__________________________________________________________________`
+Observações Profissionais:
+PD: ____________________________________________________________________
+PE: ____________________________________________________________________
+PROCEDIMENTO: __________________________________________________________
+
+PATOLOGIAS DERMATOLÓGICAS PRESENTES:
+( ) FISSURAS  ( ) HIPERIDROSE  ( ) DESIDROSE  ( ) BROMIDOSE  ( ) HIPERQUERATOSE
+( ) PSORÍASE  ( ) TINEA PEDIS  ( ) TINEA INTERDIGITAL  ( ) ONICOMICOSE  ( ) ONICOCRIPTOSE
+( ) ONICOFOSE ( ) EXOSTOSE   ( ) GRANULOMA  ( ) OUTRO: ______________________
+
+FORMATOS UNGUEAIS:
+( ) Normal  ( ) Funil  ( ) Involuta  ( ) Telha  ( ) Cunha  ( ) Gancho  ( ) Torquês  ( ) Caracol
+
+DATA: ____/____/______   Ass.: _______________`
       },
       { 
         id: 2, 
-        nome: 'ANAMNESE DADOS CLÍNICOS DIABETES (PODOLOGIA)', 
+        nome: 'TERMO DE RESPONSABILIDADE', 
+        status: 'ATIVO',
+        conteudo: `TERMO DE RESPONSABILIDADE
+
+Eu, _________________________________ CPF: ________________________________, declaro ter sido informado(a) e esclarecido(a) sobre os procedimentos envolvidos. Declaro que todas as informações sobre minha pessoa e cadastro clínico são de minha inteira veracidade e responsabilidade legal, não omitindo qualquer informação. Declaro também que cumprirei com as normas dos procedimentos indicados para o bom andamento do tratamento podológico. E cumprirei com os horários agendados e na impossibilidade avisarei com antecedência de 24 horas.
+
+Assinatura do Paciente: _________________________________
+Data: ____/____/______`
+      },
+      { 
+        id: 3, 
+        nome: 'ANAMNESE ESPECIAL PARA DIABÉTICOS', 
         status: 'ATIVO',
         conteudo: `ANAMNESE ESPECIAL PARA DIABÉTICOS
 
@@ -52,7 +80,7 @@ Tratamentos propostos:
 __________________________________________________________________`
       },
       { 
-        id: 3, 
+        id: 4, 
         nome: 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 
         status: 'ATIVO',
         conteudo: `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE PODOLOGIA
@@ -69,6 +97,24 @@ A contratada se compromete a realizar os procedimentos com materiais esterilizad
 
 Assinatura do Profissional: _______________________________
 Assinatura do Cliente: ___________________________________`
+      },
+      { 
+        id: 5, 
+        nome: 'TERMO DE CONSENTIMENTO FOTOGRÁFICO', 
+        status: 'ATIVO',
+        conteudo: `TERMO DE CONSENTIMENTO E AUTORIZAÇÃO DE REGISTRO FOTOGRÁFICO
+
+Eu, _________________________________ RG: _________________ CPF: _________________, declaro que as informações acima são verdadeiras, que não omiti em relação a minha saúde ou relações alérgicas e que informei todos os medicamentos que eventualmente faço uso, não cabendo ao profissional quaisquer responsabilidade por informações omitidas nesta consulta.
+
+2 - Declaro que estou ciente sobre os procedimentos a serem realizados e me comprometo em seguir todos os cuidados afim de obter o melhor resultado no tratamento.
+
+3 - Compreendo que durante o procedimento poderão apresentar-se outras situações ainda não diagnosticadas, assim como poderão ocorrer situações imprevisíveis.
+
+4 - Confirmo que recebi explicações, li, compreendo e concordo com tudo que me foi esclarecido e que me foi concedido a oportunidade de anular ou questionar qualquer parágrafo ou palavras com as quais não concordasse.
+
+5 - Autorizo o registro fotográfico do tratamento realizado (Antes e Depois) para efeito de divulgação em redes sociais, ebooks, ou qualquer material publicitário. A presente autorização é concedida gratuitamente, sem que nada a ser reclamado a título de direitos ou qualquer outro.
+
+Data: ____/____/______   Assinatura Paciente: _________________________________`
       },
     ];
   });
@@ -146,7 +192,8 @@ Assinatura do Cliente: ___________________________________`
   );
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }} className="no-print">
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
+      <div className="no-print">
       
       {/* Header section with icon */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
@@ -347,7 +394,7 @@ Assinatura do Cliente: ___________________________________`
             <div style={{ padding: '20px', border: '1px dashed #d1d5db', background: '#fafafa', borderRadius: '8px', minHeight: '300px', whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '13px', color: '#111827' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #111', paddingBottom: '15px', marginBottom: '20px' }}>
                 <img src="/Logo.jpeg" alt="Logo" style={{ maxHeight: '70px', objectFit: 'contain', marginBottom: '8px' }} />
-                <h1 style={{ fontSize: '18px', margin: '0 0 4px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues Pereira</h1>
+                <h1 style={{ fontSize: '18px', margin: '0 0 4px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues</h1>
                 <p style={{ margin: 0, fontSize: '13px', color: '#4b5563', fontFamily: 'sans-serif', textAlign: 'center' }}>Podologia Clínica e Especializada</p>
               </div>
               
@@ -357,6 +404,15 @@ Assinatura do Cliente: ___________________________________`
 
               <div style={{ fontSize: '13px', lineHeight: '1.5', color: '#111827' }}>
                 {printItem.conteudo || 'Este modelo não possui conteúdo cadastrado.'}
+              </div>
+
+              <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'space-between', gap: '40px' }}>
+                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
+                  <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+                </div>
+                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
+                  <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+                </div>
               </div>
             </div>
 
@@ -380,13 +436,15 @@ Assinatura do Cliente: ___________________________________`
         </div>
       )}
 
+      </div>
+
       {/* Dedicated Print-only Section */}
       {printItem && (
         <div style={{ display: 'none' }} className="print-only">
           <div style={{ padding: '20px', whiteSpace: 'pre-wrap', fontSize: '14px', lineHeight: '1.5', fontFamily: 'serif' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '2px solid #111', paddingBottom: '15px', marginBottom: '30px' }}>
               <img src="/Logo.jpeg" alt="Logo" style={{ maxHeight: '90px', objectFit: 'contain', marginBottom: '10px' }} />
-              <h1 style={{ fontSize: '20px', margin: '0 0 5px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues Pereira</h1>
+              <h1 style={{ fontSize: '20px', margin: '0 0 5px 0', fontWeight: 'bold', fontFamily: 'sans-serif', textAlign: 'center' }}>Fabricia Rodrigues</h1>
               <p style={{ margin: 0, fontSize: '14px', color: '#4b5563', fontFamily: 'sans-serif', textAlign: 'center' }}>Podologia Clínica e Especializada</p>
             </div>
             
@@ -397,30 +455,19 @@ Assinatura do Cliente: ___________________________________`
             <div style={{ minHeight: '400px' }}>
               {printItem.conteudo}
             </div>
+
+            <div style={{ marginTop: '80px', display: 'flex', justifyContent: 'space-between', gap: '60px' }}>
+              <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
+                <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+              </div>
+              <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
+                <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .print-only, .print-only * {
-            visibility: visible;
-          }
-          .print-only {
-            display: block !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

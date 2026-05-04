@@ -1,142 +1,163 @@
+import { useState, useEffect } from 'react';
+import { Settings, Save, Smartphone, MessageCircle, Layout as LayoutIcon, CheckCircle2 } from 'lucide-react';
+
 export default function ConfiguracoesGeral() {
+  const [config, setConfig] = useState(() => {
+    const saved = window.localStorage.getItem('configuracoes_gerais');
+    return saved ? JSON.parse(saved) : {
+      calendarioVertical: false,
+      obrigarSala: false,
+      enviarSms: false,
+      tempoSms: '06:00',
+      mensagemSms: 'Ola @Cliente, voce tem @NomeServico com @NomeEmpresa, dia @Dia as @Hora, caso tenha qualquer imprevisto por favor nos avise.',
+      enviarWhatsapp: true,
+      tempoWhatsapp: '24:00',
+      whatsappConectado: true
+    };
+  });
+
+  const [saved, setSaved] = useState(false);
+
+  const handleToggle = (key) => {
+    setConfig({ ...config, [key]: !config[key] });
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    window.localStorage.setItem('configuracoes_gerais', JSON.stringify(config));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
   return (
-    <div style={{padding: '20px', background: '#f9fafc', minHeight: '100vh'}}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      {/* SEÇÃO GERAL */}
-      <div style={{color: '#337ab7', fontSize: '18px', fontWeight: 'bold', marginBottom: '15px'}}>
-        CONFIGURAÇÃO DO SIMPLES AGENDA
+      {/* Header section */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
+        <Settings size={28} color="#0f3d2e" />
+        <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
+          Configurações Gerais
+        </h2>
       </div>
 
-      <div className="card" style={{border: '1px solid #e0e6ed', background: 'white', padding: '20px', marginBottom: '30px', display: 'flex', flexDirection: 'column', gap: '20px'}}>
-         
-         <div style={{display: 'flex', borderBottom: '1px solid #eee', paddingBottom: '20px'}}>
-            <div style={{flex: 1, color: '#666', fontSize: '14px'}}>Mostrar o calendário na vertical ?</div>
-            <div style={{flex: 1}}>
-               <div style={{display: 'inline-flex', borderRadius: '3px', overflow: 'hidden', border: '1px solid #ddd'}}>
-                  <button style={{padding: '5px 15px', border: 'none', background: '#eee'}}>SIM</button>
-                  <button style={{padding: '5px 15px', border: 'none', background: '#d9534f', color: 'white'}}>NÃO</button>
-               </div>
-            </div>
-            <div style={{flex: 2, background: '#fcf8e3', borderLeft: '4px solid #faebcc', padding: '15px', fontSize: '13px', color: '#8a6d3b'}}>
-               Caso marcado como SIM, o calendário mostrará os profissionais na vertical. O padrão utilizado é na horizontal (parâmetro igual NÃO).<br/><br/>
-               Normalmente esta opção é utilizada quando a empresa possui muitos profissionais.
-            </div>
-         </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+        
+        {/* Visual / Interface Section */}
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
+            <LayoutIcon size={20} color="#0f3d2e" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Interface do Sistema</h3>
+          </div>
 
-         <div style={{display: 'flex', borderBottom: '1px solid #eee', paddingBottom: '20px'}}>
-            <div style={{flex: 1, color: '#666', fontSize: '14px'}}>Obrigar o preenchimento da sala?</div>
-            <div style={{flex: 1}}>
-               <div style={{display: 'inline-flex', borderRadius: '3px', overflow: 'hidden', border: '1px solid #ddd'}}>
-                  <button style={{padding: '5px 15px', border: 'none', background: '#eee'}}>SIM</button>
-                  <button style={{padding: '5px 15px', border: 'none', background: '#d9534f', color: 'white'}}>NÃO</button>
-               </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: '600', color: '#374151' }}>Calendário na Vertical</div>
+                <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>Mostrar profissionais no eixo vertical da agenda.</div>
+              </div>
+              <button 
+                onClick={() => handleToggle('calendarioVertical')}
+                style={{ 
+                  backgroundColor: config.calendarioVertical ? '#0f3d2e' : '#e5e7eb', 
+                  color: config.calendarioVertical ? 'white' : '#6b7280',
+                  border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+                }}
+              >
+                {config.calendarioVertical ? 'SIM' : 'NÃO'}
+              </button>
             </div>
-            <div style={{flex: 2, background: '#fcf8e3', borderLeft: '4px solid #faebcc', padding: '15px', fontSize: '13px', color: '#8a6d3b'}}>
-               Caso marcado como SIM, o sistema obrigará o preenchimento da Sala (caso houver alguma).<br/>O cadastro da sala fica no menu Cadastros Gerais {'>'} Salas.
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: '600', color: '#374151' }}>Obrigar Seleção de Sala</div>
+                <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>Impede agendamentos sem definir uma sala.</div>
+              </div>
+              <button 
+                onClick={() => handleToggle('obrigarSala')}
+                style={{ 
+                  backgroundColor: config.obrigarSala ? '#0f3d2e' : '#e5e7eb', 
+                  color: config.obrigarSala ? 'white' : '#6b7280',
+                  border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+                }}
+              >
+                {config.obrigarSala ? 'SIM' : 'NÃO'}
+              </button>
             </div>
-         </div>
+          </div>
+        </div>
 
-      </div>
+        {/* Messaging Section (SMS/WhatsApp) */}
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
+            <MessageCircle size={20} color="#0f3d2e" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Notificações Automáticas</h3>
+          </div>
 
-      {/* SEÇÃO SMS */}
-      <div style={{color: '#337ab7', fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '5px'}}>
-        SMS DOS AGENDAMENTOS <span style={{color: '#3498db', fontSize: '14px', cursor: 'pointer'}}>?</span>
-      </div>
-
-      <div className="card" style={{border: '1px solid #e0e6ed', background: 'white', padding: '20px', marginBottom: '30px'}}>
-         <div style={{display: 'flex', gap: '40px', marginBottom: '30px'}}>
-            <div>
-               <label style={{fontSize: '13px', color: '#666', fontWeight: 'bold'}}>Enviar SMS</label><br/>
-               <div style={{display: 'inline-flex', borderRadius: '3px', overflow: 'hidden', border: '1px solid #ddd', marginTop: '5px'}}>
-                  <button style={{padding: '5px 15px', border: 'none', background: '#eee'}}>SIM</button>
-                  <button style={{padding: '5px 15px', border: 'none', background: '#d9534f', color: 'white'}}>NÃO</button>
-               </div>
-            </div>
-            <div>
-               <label style={{fontSize: '13px', color: '#666', fontWeight: 'bold'}}>Tempo SMS</label><br/>
-               <input type="text" className="form-control" defaultValue="06:00" style={{width: '100px', marginTop: '5px'}}/>
-            </div>
-            <div style={{flex: 1, background: '#fcf8e3', borderLeft: '4px solid #faebcc', padding: '15px', fontSize: '13px', color: '#8a6d3b'}}>
-               <b>Exemplo Tempo SMS:</b> Informando 04:00 - Agendamento para o dia 21/01 às 18h00 o cliente receberá a mensagem no dia 21/01 às 14h00.
-            </div>
-         </div>
-
-         <div style={{color: '#337ab7', fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
-           DEFINA A MENSAGEM QUE SEU CLIENTE RECEBERÁ
-         </div>
-
-         <div style={{display: 'flex', gap: '20px'}}>
-            <div style={{flex: 1}}>
-               <label style={{fontSize: '13px', color: '#666'}}>Mensagem</label>
-               <textarea className="form-control" rows="4" defaultValue="Ola @Cliente, voce tem @NomeServico com @NomeEmpresa, dia @Dia as @Hora, caso tenha qualquer imprevisto por favor nos avise."></textarea>
-               <div style={{display: 'flex', gap: '5px', marginTop: '10px'}}>
-                  <span style={{background: '#26b99a', color: 'white', padding: '3px 8px', borderRadius: '3px', fontSize: '11px'}}>@CLIENTE</span>
-                  <span style={{background: '#26b99a', color: 'white', padding: '3px 8px', borderRadius: '3px', fontSize: '11px'}}>@NOMEEMPRESA</span>
-                  <span style={{background: '#26b99a', color: 'white', padding: '3px 8px', borderRadius: '3px', fontSize: '11px'}}>@NOMESERVICO</span>
-               </div>
-            </div>
-            <div style={{flex: 1}}>
-               <label style={{fontSize: '13px', color: '#666'}}>Exemplo Pré-Visualização</label>
-               <div style={{background: '#f9f9f9', border: '1px solid #eee', padding: '15px', color: '#777', borderRadius: '3px', minHeight: '90px'}}>
-                  Ola Maria, voce tem Consulta com Clínica Fabrícia Rodrigues, dia 16/04 as 18:00 , caso tenha qualquer imprevisto por favor nos avise.
-               </div>
-               <div style={{textAlign: 'right', marginTop: '10px'}}>
-                  <button className="btn btn-primary" style={{backgroundColor: '#3498db'}}>✔ RESTAURAR PADRÃO</button>
-               </div>
-            </div>
-         </div>
-      </div>
-
-      {/* SEÇÃO WHATSAPP */}
-      <div style={{color: '#337ab7', fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '5px'}}>
-        WHATSAPP AUTOMÁTICO DOS AGENDAMENTOS <span style={{color: '#3498db', fontSize: '14px', cursor: 'pointer'}}>?</span>
-      </div>
-
-      <div className="card" style={{border: '1px solid #e0e6ed', background: 'white', padding: '20px', marginBottom: '30px'}}>
-         <div style={{display: 'flex', gap: '30px', marginBottom: '30px'}}>
-            <div style={{flex: 1}}>
-               <div style={{display: 'flex', gap: '20px'}}>
-                  <div>
-                     <label style={{fontSize: '13px', color: '#666', fontWeight: 'bold'}}>Enviar WhatsApp</label><br/>
-                     <div style={{display: 'inline-flex', borderRadius: '3px', overflow: 'hidden', border: '1px solid #ddd', marginTop: '5px'}}>
-                        <button style={{padding: '5px 15px', border: 'none', background: '#26b99a', color: 'white'}}>SIM</button>
-                        <button style={{padding: '5px 15px', border: 'none', background: '#eee'}}>NÃO</button>
-                     </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            {/* WhatsApp */}
+            <div style={{ background: '#f0fdf4', padding: '20px', borderRadius: '12px', border: '1px solid #dcfce7' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ backgroundColor: '#22c55e', color: 'white', padding: '8px', borderRadius: '8px' }}>
+                    <Smartphone size={20} />
                   </div>
                   <div>
-                     <label style={{fontSize: '13px', color: '#666', fontWeight: 'bold'}}>Tempo WhatsApp</label><br/>
-                     <input type="text" className="form-control" defaultValue="24:00" style={{width: '120px', marginTop: '5px'}}/>
+                    <div style={{ fontWeight: '700', color: '#065f46' }}>WhatsApp Automático</div>
+                    <div style={{ fontSize: '0.8rem', color: '#047857' }}>{config.whatsappConectado ? '✓ Conectado e Ativo' : '⚠ Desconectado'}</div>
                   </div>
-               </div>
-
-               <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
-                  <button className="btn btn-success" style={{background: '#26b99a'}}>Gerar QR CODE</button>
-                  <button className="btn btn-default">Status da Integração</button>
-               </div>
-
-               <div style={{background: '#dff0d8', color: '#3c763d', padding: '10px', marginTop: '15px', borderRadius: '3px', fontWeight: 'bold'}}>
-                  <span style={{marginRight: '5px'}}>✆</span> Status: Conectado
-               </div>
+                </div>
+                <button 
+                  onClick={() => handleToggle('enviarWhatsapp')}
+                  style={{ 
+                    backgroundColor: config.enviarWhatsapp ? '#16a34a' : '#d1d5db', 
+                    color: 'white',
+                    border: 'none', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
+                  }}
+                >
+                  {config.enviarWhatsapp ? 'ATIVADO' : 'DESATIVADO'}
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#065f46', marginBottom: '5px' }}>ANTECEDÊNCIA DO ENVIO (HORAS)</label>
+                  <input type="text" value={config.tempoWhatsapp} onChange={(e) => setConfig({...config, tempoWhatsapp: e.target.value})} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #bbf7d0', width: '100px', outline: 'none' }} />
+                </div>
+                <button onClick={() => alert('Gerando novo QR Code...')} style={{ backgroundColor: '#fff', color: '#16a34a', border: '1px solid #16a34a', padding: '8px 15px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>RECONECTAR WHATSAPP</button>
+              </div>
             </div>
 
-            <div style={{flex: 1.5, display: 'flex', flexDirection: 'column', gap: '10px'}}>
-               <div style={{background: '#fcf8e3', borderLeft: '4px solid #faebcc', padding: '10px', fontSize: '13px', color: '#8a6d3b'}}>
-                  <b>Exemplo Tempo WhatsApp:</b> Informando 04:00, caso o agendamento seja para 18h00, o cliente receberá a mensagem às 14h00.
-               </div>
-               <div style={{background: '#f2dede', borderLeft: '4px solid #ebccd1', padding: '10px', fontSize: '13px', color: '#a94442'}}>
-                  <b>IMPORTANTE:</b> Os agendamentos realizados antes de ativar o envio de WhatsApp...
-               </div>
-               <div style={{background: '#d9edf7', borderLeft: '4px solid #bce8f1', padding: '10px', fontSize: '13px', color: '#31708f'}}>
-                  <b>DICAS:</b> Coloque o seu Telefone e também o Endereço do seu estabelecimento na mensagem.
-               </div>
+            {/* Message Template */}
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '10px' }}>MODELO DE MENSAGEM PARA CLIENTES</label>
+              <textarea 
+                value={config.mensagemSms}
+                onChange={(e) => { setConfig({...config, mensagemSms: e.target.value}); setSaved(false); }}
+                style={{ width: '100%', padding: '15px', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '100px', fontSize: '0.9rem', color: '#374151', lineHeight: '1.5', outline: 'none' }}
+              />
+              <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@HORA'].map(tag => (
+                  <span key={tag} style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', cursor: 'pointer' }}>{tag}</span>
+                ))}
+              </div>
             </div>
-         </div>
-      </div>
-      
-      <div style={{marginTop: '20px'}}>
-         <button className="btn btn-success" style={{backgroundColor: '#26b99a', fontWeight: 'bold', padding: '10px 20px'}}>✔ SALVAR</button>
-      </div>
+          </div>
+        </div>
 
+        {/* Save Button */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
+          {saved && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#16a34a', fontWeight: 'bold', fontSize: '0.9rem' }}>
+              <CheckCircle2 size={18} /> Configurações salvas!
+            </div>
+          )}
+          <button 
+            onClick={handleSave}
+            style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '15px 40px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1rem', boxShadow: '0 4px 12px rgba(15,61,46,0.2)' }}>
+            <Save size={20} /> SALVAR ALTERAÇÕES
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 }

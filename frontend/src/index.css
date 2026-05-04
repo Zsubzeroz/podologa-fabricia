@@ -245,3 +245,27 @@ table.sa-table {
   background: var(--sa-blue); color: white; padding: 8px 15px; margin: -15px -15px 15px -15px; font-weight: 600; font-size: 0.9rem;
 }
 .info-box-header.green { background: #0d9488; }
+
+/* PRINT STYLES */
+@media print {
+  .no-print, 
+  .sa-topbar, 
+  .sa-sidebar {
+    display: none !important;
+  }
+  
+  .sa-app-container, .sa-main-body, .sa-content {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sa-page-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}

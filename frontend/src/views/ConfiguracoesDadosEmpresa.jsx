@@ -1,106 +1,143 @@
+import { useState, useEffect } from 'react';
+import { Building2, Save, MapPin, Phone, Mail, Globe, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
+
 export default function ConfiguracoesDadosEmpresa() {
+  const [empresa, setEmpresa] = useState(() => {
+    const saved = window.localStorage.getItem('dados_empresa');
+    return saved ? JSON.parse(saved) : {
+      nome: 'Clínica Fabrícia Rodrigues',
+      cnpj: '00.000.000/0001-00',
+      email: 'contato@fabriciarodrigues.com.br',
+      telefone: '(19) 99722-2694',
+      site: 'www.fabriciarodrigues.com.br',
+      endereco: 'Rua das Flores, 123',
+      bairro: 'Centro',
+      cidade: 'Campinas',
+      estado: 'SP',
+      cep: '13000-000',
+      logo: '/Logo.jpeg'
+    };
+  });
+
+  const [saved, setSaved] = useState(false);
+
+  const handleChange = (e) => {
+    setEmpresa({ ...empresa, [e.target.name]: e.target.value });
+    setSaved(false);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    window.localStorage.setItem('dados_empresa', JSON.stringify(empresa));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEmpresa({ ...empresa, logo: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <div style={{padding: '20px', background: '#f9fafc', minHeight: '100vh'}}>
-      <div style={{color: '#337ab7', fontSize: '18px', fontWeight: 'bold', marginBottom: '15px'}}>
-        DADOS DA EMPRESA
-      </div>
-
-      <div className="card" style={{border: '1px solid #e0e6ed', background: 'white', overflow: 'hidden'}}>
-        
-        {/* Tabs */}
-        <div style={{display: 'flex', borderBottom: '1px solid #e0e6ed'}}>
-          <div style={{padding: '10px 20px', color: '#555', borderTop: '2px solid #d9534f', fontWeight: 'bold', borderRight: '1px solid #e0e6ed'}}>
-             Geral
-          </div>
-          <div style={{padding: '10px 20px', color: '#337ab7', cursor: 'pointer', borderRight: '1px solid #e0e6ed'}}>
-             Endereço
-          </div>
-          <div style={{padding: '10px 20px', color: '#337ab7', cursor: 'pointer'}}>
-             Fiscal
-          </div>
-        </div>
-
-        {/* Content */}
-        <div style={{padding: '20px', display: 'flex', gap: '30px'}}>
-           
-           {/* Logo Upload Box */}
-           <div style={{display: 'flex', flexDirection: 'column', gap: '10px', width: '250px'}}>
-              <div style={{border: '1px solid #ddd', padding: '20px', textAlign: 'center', height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                 <img src="/Logo.jpeg" alt="Logo Clínica" style={{maxWidth: '100%', maxHeight: '100%'}} />
-              </div>
-              <div style={{display: 'flex', gap: '5px'}}>
-                 <button className="btn btn-success" style={{flex: 1, backgroundColor: '#26b99a', fontWeight: 'bold', padding: '8px', fontSize: '12px'}}>+ ADICIONAR</button>
-                 <button className="btn btn-danger" style={{flex: 1, backgroundColor: '#d9534f', fontWeight: 'bold', padding: '8px', fontSize: '12px'}}>🗑 EXCLUIR</button>
-              </div>
-           </div>
-
-           {/* Form Box */}
-           <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '15px'}}>
-              
-              <div style={{display: 'flex', gap: '15px'}}>
-                 <div style={{flex: 1}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Código</label>
-                    <input type="text" className="form-control" defaultValue="94867" disabled style={{background: '#eee'}} />
-                 </div>
-                 <div style={{flex: 3}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Nome da Empresa*</label>
-                    <input type="text" className="form-control" defaultValue="Clínica Fabrícia Rodrigues" />
-                 </div>
-                 <div style={{flex: 2}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Nome do Responsável*</label>
-                    <input type="text" className="form-control" defaultValue="Fabricia Rodrigues" />
-                 </div>
-              </div>
-
-              <div style={{display: 'flex', gap: '15px'}}>
-                 <div style={{flex: 1}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Celular*</label>
-                    <input type="text" className="form-control" defaultValue="(19) 99727-0910" />
-                 </div>
-                 <div style={{flex: 1}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Comercial</label>
-                    <input type="text" className="form-control" />
-                 </div>
-                 <div style={{flex: 2}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Email</label>
-                    <input type="text" className="form-control" defaultValue="fabriciapodologa@gmail.com" />
-                 </div>
-              </div>
-
-              <div style={{display: 'flex', gap: '15px'}}>
-                 <div style={{flex: 1}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>CNPJ</label>
-                    <input type="text" className="form-control" />
-                 </div>
-                 <div style={{flex: 1}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>CPF</label>
-                    <input type="text" className="form-control" defaultValue="330.301.948-76" />
-                 </div>
-                 <div style={{flex: 2}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Site</label>
-                    <input type="text" className="form-control" defaultValue="@fabriciapodologa" />
-                 </div>
-              </div>
-
-              <div style={{display: 'flex', gap: '15px'}}>
-                 <div style={{flex: 1}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Saldo SMS</label>
-                    <input type="text" className="form-control" defaultValue="100" disabled style={{background: '#eee'}} />
-                 </div>
-                 <div style={{flex: 3}}>
-                    <label style={{fontSize: '13px', color: '#666'}}>Espaço Ocupado / Disponível</label>
-                    <input type="text" className="form-control" defaultValue="87,58 KB / 1000 MB" disabled style={{background: '#eee'}} />
-                 </div>
-              </div>
-
-           </div>
-        </div>
-      </div>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      <div style={{marginTop: '20px'}}>
-         <button className="btn btn-success" style={{backgroundColor: '#26b99a', fontWeight: 'bold', padding: '10px 20px'}}>✔ SALVAR</button>
+      {/* Header section */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
+        <Building2 size={28} color="#0f3d2e" />
+        <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
+          Dados da Empresa
+        </h2>
       </div>
 
+      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '40px' }}>
+          
+          {/* Logo Upload Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', padding: '20px', background: '#f9fafb', borderRadius: '12px', border: '2px dashed #e5e7eb' }}>
+            <div style={{ position: 'relative', width: '150px', height: '150px', background: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <img src={empresa.logo} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            </div>
+            <label style={{ backgroundColor: '#fff', color: '#0f3d2e', border: '1px solid #0f3d2e', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ImageIcon size={16} /> ALTERAR LOGO
+              <input type="file" hidden accept="image/*" onChange={handleLogoChange} />
+            </label>
+            <p style={{ fontSize: '0.75rem', color: '#6b7280', textAlign: 'center' }}>Recomendado: JPG ou PNG, 500x500px.</p>
+          </div>
+
+          {/* Form Section */}
+          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>NOME DA EMPRESA</label>
+                <input name="nome" value={empresa.nome} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>CNPJ</label>
+                <input name="cnpj" value={empresa.cnpj} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>EMAIL DE CONTATO</label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                  <input name="email" value={empresa.email} onChange={handleChange} style={{ width: '100%', padding: '10px 10px 10px 35px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>TELEFONE / WHATSAPP</label>
+                <div style={{ position: 'relative' }}>
+                  <Phone size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                  <input name="telefone" value={empresa.telefone} onChange={handleChange} style={{ width: '100%', padding: '10px 10px 10px 35px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>ENDEREÇO COMPLETO</label>
+              <div style={{ position: 'relative' }}>
+                <MapPin size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <input name="endereco" value={empresa.endereco} onChange={handleChange} style={{ width: '100%', padding: '10px 10px 10px 35px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>CIDADE</label>
+                <input name="cidade" value={empresa.cidade} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>ESTADO</label>
+                <input name="estado" value={empresa.estado} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>CEP</label>
+                <input name="cep" value={empresa.cep} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '15px', marginTop: '20px' }}>
+              {saved && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#16a34a', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                  <CheckCircle2 size={18} /> Dados salvos com sucesso!
+                </div>
+              )}
+              <button type="submit" style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '12px 40px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 12px rgba(15,61,46,0.2)' }}>
+                <Save size={18} /> SALVAR DADOS
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
     </div>
   );
 }

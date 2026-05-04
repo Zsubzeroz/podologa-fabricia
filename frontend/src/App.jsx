@@ -22,8 +22,7 @@ import CadastrosComoConheceu from './views/CadastrosComoConheceu';
 import CadastrosFeriado from './views/CadastrosFeriado';
 import CadastrosGrupos from './views/CadastrosGrupos';
 import CadastrosMarcas from './views/CadastrosMarcas';
-import CadastrosOperadoras from './views/CadastrosOperadoras';
-import CadastrosSala from './views/CadastrosSala';
+import CadastrosEquipamentos from './views/CadastrosEquipamentos';
 import ConsultaAgendas from './views/ConsultaAgendas';
 import ConsultaAnalise from './views/ConsultaAnalise';
 import ComissaoProfissional from './views/ComissaoProfissional';
@@ -33,12 +32,12 @@ import ConsultaOrcamentos from './views/ConsultaOrcamentos';
 import ConsultaPrevisaoRetorno from './views/ConsultaPrevisaoRetorno';
 import ConsultaVendas from './views/ConsultaVendas';
 import ConsultaVendasPorCliente from './views/ConsultaVendasPorCliente';
-import PermissoesGrupos from './views/PermissoesGrupos';
 import ConfiguracoesDadosEmpresa from './views/ConfiguracoesDadosEmpresa';
 import ConfiguracoesGeral from './views/ConfiguracoesGeral';
 import AlterarSenha from './views/AlterarSenha';
 import Dashboard from './views/Dashboard';
 import AgendarTab from './views/AgendarTab';
+import NfsE from './views/NfsE';
 
 function App() {
   const [currentView, setCurrentView] = useState('produtos');
@@ -158,8 +157,7 @@ function App() {
         {currentView === 'feriado' && <CadastrosFeriado />}
         {currentView === 'grupos' && <CadastrosGrupos />}
         {currentView === 'marcas' && <CadastrosMarcas />}
-        {currentView === 'operadoras' && <CadastrosOperadoras />}
-        {currentView === 'sala' && <CadastrosSala />}
+        {currentView === 'equipamentos' && <CadastrosEquipamentos />}
         {currentView === 'consulta_agendas' && <ConsultaAgendas />}
         {currentView === 'consulta_analise' && <ConsultaAnalise />}
         {currentView === 'comissao' && <ComissaoProfissional />}
@@ -169,10 +167,10 @@ function App() {
         {currentView === 'previsao_retorno' && <ConsultaPrevisaoRetorno />}
         {currentView === 'vendas' && <ConsultaVendas />}
         {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
-        {currentView === 'permissoes_grupos' && <PermissoesGrupos />}
         {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
         {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
         {currentView === 'alterar_senha' && <AlterarSenha />}
+        {currentView === 'nfs' && <NfsE />}
       </Layout>
     );
   }
@@ -225,8 +223,7 @@ function App() {
       {currentView === 'feriado' && <CadastrosFeriado />}
       {currentView === 'grupos' && <CadastrosGrupos />}
       {currentView === 'marcas' && <CadastrosMarcas />}
-      {currentView === 'operadoras' && <CadastrosOperadoras />}
-      {currentView === 'sala' && <CadastrosSala />}
+      {currentView === 'equipamentos' && <CadastrosEquipamentos />}
       {currentView === 'consulta_agendas' && <ConsultaAgendas />}
       {currentView === 'consulta_analise' && <ConsultaAnalise />}
       {currentView === 'comissao' && <ComissaoProfissional />}
@@ -236,10 +233,10 @@ function App() {
       {currentView === 'previsao_retorno' && <ConsultaPrevisaoRetorno />}
       {currentView === 'vendas' && <ConsultaVendas />}
       {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
-      {currentView === 'permissoes_grupos' && <PermissoesGrupos />}
       {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
       {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
       {currentView === 'alterar_senha' && <AlterarSenha />}
+      {currentView === 'nfs' && <NfsE />}
     </Layout>
   );
 }

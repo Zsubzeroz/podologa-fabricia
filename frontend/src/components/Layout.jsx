@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Calendar, CalendarPlus, ShoppingCart, 
   Users, UserCheck, Package, DollarSign, BarChart2, 
   ShoppingBag, Settings, Database, Search, ChevronRight, HelpCircle,
-  Clock, Shield
+  Clock, Shield, FileText
 } from 'lucide-react';
 import '../index.css';
 
@@ -30,7 +30,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
   return (
     <div className="sa-app-container">
       {/* HEADER TOP SITE */}
-      <header className="sa-topbar">
+      <header className="sa-topbar no-print">
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>AGENDA ONLINE</span>
         </div>
@@ -47,7 +47,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
       
       <div className="sa-main-body">
         {/* SIDEBAR NAVIGATION */}
-        <aside className="sa-sidebar">
+        <aside className="sa-sidebar no-print">
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="agenda" icon={Calendar} label="Minha Agenda" />
           <NavItem id="agendamento" icon={CalendarPlus} label="Agendamento" />
@@ -85,12 +85,10 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
              <li className={`sa-submenu-item ${currentView==='anamnese'?'active':''}`} onClick={()=>setCurrentView('anamnese')}>Anamnese, Fichas e Contratos</li>
              <li className={`sa-submenu-item ${currentView==='campo_personalizado'?'active':''}`} onClick={()=>setCurrentView('campo_personalizado')}>Campo Personalizado</li>
              <li className={`sa-submenu-item ${currentView==='como_conheceu'?'active':''}`} onClick={()=>setCurrentView('como_conheceu')}>Como nos Conheceu</li>
-             <li className="sa-submenu-item">Equipamentos</li>
+             <li className={`sa-submenu-item ${currentView==='equipamentos'?'active':''}`} onClick={()=>setCurrentView('equipamentos')}>Equipamentos</li>
              <li className={`sa-submenu-item ${currentView==='feriado'?'active':''}`} onClick={()=>setCurrentView('feriado')}>Bloqueio de Horários / Férias</li>
              <li className={`sa-submenu-item ${currentView==='grupos'?'active':''}`} onClick={()=>setCurrentView('grupos')}>Grupos de Produtos e Serviços</li>
              <li className={`sa-submenu-item ${currentView==='marcas'?'active':''}`} onClick={()=>setCurrentView('marcas')}>Marcas</li>
-             <li className={`sa-submenu-item ${currentView==='operadoras'?'active':''}`} onClick={()=>setCurrentView('operadoras')}>Operadoras de Celular</li>
-             <li className={`sa-submenu-item ${currentView==='sala'?'active':''}`} onClick={()=>setCurrentView('sala')}>Sala</li>
           </ul>
 
           <NavItem id="consulta" icon={Search} label="Consulta" hasSub={true} />
@@ -106,10 +104,6 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
              <li className={`sa-submenu-item ${currentView==='vendas_cliente'?'active':''}`} onClick={()=>setCurrentView('vendas_cliente')}>Vendas por Cliente</li>
           </ul>
 
-          <NavItem id="permissoes" icon={Shield} label="Permissões" hasSub={true} />
-          <ul className="sa-submenu">
-             <li className={`sa-submenu-item ${currentView==='permissoes_grupos'?'active':''}`} onClick={()=>setCurrentView('permissoes_grupos')}>Grupos de Acessos</li>
-          </ul>
           
           <NavItem id="configuracoes" icon={Settings} label="Configurações" hasSub={true} />
           <ul className="sa-submenu">
@@ -117,7 +111,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
              <li className={`sa-submenu-item ${currentView==='configuracao_geral'?'active':''}`} onClick={()=>setCurrentView('configuracao_geral')}>Configuração</li>
           </ul>
 
-          <NavItem id="nfs" icon={Settings} label="NFS-e" hasSub={true} />
+          <NavItem id="nfs" icon={FileText} label="NFS-e" />
         </aside>
 
         {/* CONTENT */}
