@@ -53,11 +53,6 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
           <NavItem id="agendamento" icon={CalendarPlus} label="Agendamento" />
           <NavItem id="caixa" icon={ShoppingCart} label="Caixa" />
           <NavItem id="clientes" icon={Users} label="Clientes" />
-          <NavItem id="profissional" icon={UserCheck} label="Profissionais" hasSub={true} />
-          <ul className="sa-submenu">
-             <li className={`sa-submenu-item ${currentView==='profissional'?'active':''}`} onClick={()=>setCurrentView('profissional')}>Listagem</li>
-             <li className={`sa-submenu-item ${currentView==='comissao'?'active':''}`} onClick={()=>setCurrentView('comissao')}>Comissão do Profissional</li>
-          </ul>
           <NavItem id="produtos" icon={Package} label="Produtos e Serviços" hasSub={true} />
           <ul className="sa-submenu">
              <li className={`sa-submenu-item ${currentView==='produtos'?'active':''}`} onClick={()=>setCurrentView('produtos')}>Listagem</li>
