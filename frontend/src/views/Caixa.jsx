@@ -320,9 +320,23 @@ export default function Caixa() {
 
       {/* History List: Sales Received */}
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-        <h4 style={{ margin: '0 0 15px 0', color: '#1f2937', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold' }}>
-          <List size={20} /> Histórico de Vendas Realizadas
-        </h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <h4 style={{ margin: 0, color: '#1f2937', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold' }}>
+            <List size={20} /> Histórico de Vendas Realizadas
+          </h4>
+          {vendas.length > 0 && (
+            <button 
+              onClick={() => {
+                if (window.confirm('Tem certeza de que deseja excluir todo o histórico de vendas?')) {
+                  setVendas([]);
+                }
+              }}
+              style={{ background: '#ef4444', border: 'none', color: '#fff', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+            >
+              Limpar Todo o Histórico
+            </button>
+          )}
+        </div>
         {vendas.length === 0 ? (
           <p style={{ color: '#6b7280', margin: 0 }}>Nenhuma venda foi registrada hoje.</p>
         ) : (
@@ -335,6 +349,7 @@ export default function Caixa() {
                   <th style={{ padding: '12px' }}>ITENS VENDIDOS</th>
                   <th style={{ padding: '12px' }}>PAGAMENTO</th>
                   <th style={{ padding: '12px' }}>TOTAL</th>
+                  <th style={{ padding: '12px' }}>AÇÕES</th>
                 </tr>
               </thead>
               <tbody>
@@ -350,6 +365,18 @@ export default function Caixa() {
                     <td style={{ padding: '12px', fontSize: '0.9rem', color: '#4b5563' }}>{venda.formaPagamento}</td>
                     <td style={{ padding: '12px', fontSize: '0.95rem', fontWeight: 'bold', color: '#0f3d2e' }}>
                       R$ {venda.total.toFixed(2).replace('.', ',')}
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm('Tem certeza de que deseja excluir esta venda?')) {
+                            setVendas(vendas.filter(v => v.id !== venda.id));
+                          }
+                        }}
+                        style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        Excluir
+                      </button>
                     </td>
                   </tr>
                 ))}
