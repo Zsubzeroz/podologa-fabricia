@@ -271,6 +271,16 @@ export default function PublicPortal() {
                       return;
                     }
 
+                    if (/\d/.test(clientName)) {
+                      alert('O nome do cliente não deve conter números.');
+                      return;
+                    }
+
+                    if (clientName.trim().length < 3) {
+                      alert('Por favor, insira um nome válido com pelo menos 3 caracteres.');
+                      return;
+                    }
+
                     // Validate phone digits count
                     const phoneDigits = clientPhone.replace(/\D/g, '');
                     if (phoneDigits.length < 10 || phoneDigits.length > 11) {

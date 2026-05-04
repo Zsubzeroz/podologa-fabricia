@@ -31,6 +31,16 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
     e.preventDefault();
     if(!formData.clientName) return alert("Por favor, preencha o cliente.");
 
+    if (/\d/.test(formData.clientName)) {
+      alert('O nome do cliente não deve conter números.');
+      return;
+    }
+
+    if (formData.clientName.trim().length < 3) {
+      alert('Por favor, insira um nome válido com pelo menos 3 caracteres.');
+      return;
+    }
+
     if (formData.phone) {
       const phoneDigits = formData.phone.replace(/\D/g, '');
       if (phoneDigits.length < 10 || phoneDigits.length > 11) {
