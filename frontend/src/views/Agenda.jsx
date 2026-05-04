@@ -8,6 +8,7 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
   const formatDateForDisplay = (dateObj) => {
     return dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   };
+
   const formatDateForInput = (dateObj) => {
     if (!dateObj || !(dateObj instanceof Date)) return '';
     const year = dateObj.getFullYear();
@@ -24,76 +25,179 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
 
   const currentYMD = formatDateForInput(currentDate);
 
+  // For Week View
+  const startOfWeek = new Date(currentDate);
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 6);
+
+  const getWeekAppointments = () => {
+    return appointments.filter(a => {
+      const d = new Date(a.date + 'T00:00:00');
+      return d >= startOfWeek && d <= endOfWeek;
+    });
+  };
+
+  // For Month View
+  const getMonthAppointments = () => {
+    return appointments.filter(a => {
+      if (!a.date) return false;
+      const [year, month] = a.date.split('-').map(Number);
+      return year === currentDate.getFullYear() && month === (currentDate.getMonth() + 1);
+    });
+  };
+
   return (
     <div>
       <div className="calendar-toolbar">
         <div className="toolbar-group">
           <button className="btn btn-default" onClick={() => changeDate(-1)}>&lt;</button>
           <button className="btn btn-default" onClick={() => changeDate(1)}>&gt;</button>
-          <button className="btn btn-default" style={{marginLeft: '0.5rem'}} onClick={() => setCurrentDate(new Date())}>Hoje</button>
-          <button className="btn btn-default" style={{marginLeft: '0.5rem'}}>Ausência</button>
+          <button className="btn btn-default" style={{ marginLeft: '0.5rem' }} onClick={() => setCurrentDate(new Date())}>Hoje</button>
         </div>
         
         <div className="toolbar-group">
-          <button className={`btn ${viewMode==='Mês'?'btn-primary':'btn-default'}`} onClick={() => setViewMode('Mês')}>Mês</button>
-          <button className={`btn ${viewMode==='Semana'?'btn-primary':'btn-default'}`} onClick={() => setViewMode('Semana')}>Semana</button>
-          <button className={`btn ${viewMode==='Dia'?'btn-success':'btn-default'}`} onClick={() => setViewMode('Dia')}>Dia</button>
+          <button className={`btn ${viewMode === 'Mês' ? 'btn-primary' : 'btn-default'}`} onClick={() => setViewMode('Mês')}>Mês</button>
+          <button className={`btn ${viewMode === 'Semana' ? 'btn-primary' : 'btn-default'}`} onClick={() => setViewMode('Semana')}>Semana</button>
+          <button className={`btn ${viewMode === 'Dia' ? 'btn-success' : 'btn-default'}`} onClick={() => setViewMode('Dia')}>Dia</button>
         </div>
       </div>
       
-      <div style={{textAlign: 'center', fontSize: '1.2rem', color: '#555', marginBottom: '1.5rem'}}>
-        {formatDateForDisplay(currentDate)}
+      <div style={{ textAlign: 'center', fontSize: '1.2rem', color: '#555', marginBottom: '1.5rem' }}>
+        {viewMode === 'Dia' && formatDateForDisplay(currentDate)}
+        {viewMode === 'Semana' && `Semana de ${startOfWeek.toLocaleDateString('pt-BR')} até ${endOfWeek.toLocaleDateString('pt-BR')}`}
+        {viewMode === 'Mês' && `Mês de ${currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase()}`}
       </div>
 
-      <div style={{border: '1px solid var(--sa-border)', borderRadius: '4px', overflow: 'hidden'}}>
-        <table className="calendar-table">
-          <thead>
-            <tr>
-              <th style={{width: '60px', borderBottom: '1px solid var(--sa-border)', borderRight: '1px solid var(--sa-border)'}}></th>
-              <th style={{padding: '0.8rem', color: '#333', borderBottom: '1px solid var(--sa-border)'}}>Fabricia Rodrigues Pereira</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hours.map(hour => {
-              const hourSt = `${hour.toString().padStart(2, '0')}:00`;
-              
-              const apptsInHour = appointments.filter(a => {
-                if (a.date !== currentYMD) return false;
-                const h = parseInt(a.startTime.split(':')[0], 10);
-                return h === hour;
-              });
-              
-              return (
-                <tr key={hour}>
-                  <td className="time-header">{hour}</td>
-                  <td className="time-cell" onClick={() => onSlotClick(hourSt)}>
-                    {apptsInHour.map(appt => (
-                      <div key={appt.id} className="appt-block" onClick={(e) => {e.stopPropagation();}} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
-                        <div>
-                           <strong>{appt.startTime} - {appt.endTime}</strong> | {appt.clientName} - {appt.service}
+      {viewMode === 'Dia' && (
+        <div style={{ border: '1px solid var(--sa-border)', borderRadius: '4px', overflow: 'hidden' }}>
+          <table className="calendar-table">
+            <thead>
+              <tr>
+                <th style={{ width: '60px', borderBottom: '1px solid var(--sa-border)', borderRight: '1px solid var(--sa-border)' }}></th>
+                <th style={{ padding: '0.8rem', color: '#333', borderBottom: '1px solid var(--sa-border)' }}>Fabricia Rodrigues Pereira</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hours.map(hour => {
+                const hourSt = `${hour.toString().padStart(2, '0')}:00`;
+                
+                const apptsInHour = appointments.filter(a => {
+                  if (a.date !== currentYMD) return false;
+                  const h = parseInt(a.startTime.split(':')[0], 10);
+                  return h === hour;
+                });
+                
+                return (
+                  <tr key={hour}>
+                    <td className="time-header">{hour}h</td>
+                    <td className="time-cell" onClick={() => onSlotClick && onSlotClick(hourSt)}>
+                      {apptsInHour.map(appt => (
+                        <div key={appt.id} className="appt-block" onClick={(e) => { e.stopPropagation(); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '5px' }}>
+                          <div>
+                            <strong>{appt.startTime} - {appt.endTime}</strong> | {appt.clientName} - {appt.service}
+                          </div>
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            <button 
+                              onClick={() => {
+                                const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
+                                const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
+                                window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                              }}
+                              style={{ background: '#25d366', border: 'none', color: 'white', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
+                            >
+                              WhatsApp
+                            </button>
+                            <button className="btn-cancel-mini" onClick={() => onCancelAppointment(appt.id)}>X</button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          <button 
-                            onClick={() => {
-                              const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
-                              const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
-                              window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-                            }}
-                            style={{ background: '#25d366', border: 'none', color: 'white', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
-                          >
-                            WhatsApp
-                          </button>
-                          <button className="btn-cancel-mini" onClick={() => onCancelAppointment(appt.id)}>X</button>
-                        </div>
-                      </div>
-                    ))}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                      ))}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {viewMode === 'Semana' && (
+        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '15px' }}>
+          <h3 style={{ margin: '0 0 15px 0', color: '#0f3d2e' }}>Agendamentos da Semana</h3>
+          {getWeekAppointments().length === 0 ? (
+            <p style={{ color: '#6b7280', margin: 0 }}>Nenhum atendimento agendado para esta semana.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {getWeekAppointments().map(appt => (
+                <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px' }}>
+                  <div>
+                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}>{appt.date.split('-').reverse().join('/')}</span> - 
+                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}> {appt.startTime}</span> às <span>{appt.endTime}</span> | 
+                    <span style={{ fontWeight: 'bold', color: '#0f3d2e' }}> {appt.clientName}</span> ({appt.service})
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button 
+                      onClick={() => {
+                        const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
+                        const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
+                        window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                      style={{ background: '#25d366', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                    >
+                      WhatsApp
+                    </button>
+                    <button 
+                      onClick={() => onCancelAppointment(appt.id)}
+                      style={{ background: '#ef4444', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {viewMode === 'Mês' && (
+        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '15px' }}>
+          <h3 style={{ margin: '0 0 15px 0', color: '#0f3d2e' }}>Agendamentos do Mês</h3>
+          {getMonthAppointments().length === 0 ? (
+            <p style={{ color: '#6b7280', margin: 0 }}>Nenhum atendimento agendado para este mês.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {getMonthAppointments().map(appt => (
+                <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px' }}>
+                  <div>
+                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}>{appt.date.split('-').reverse().join('/')}</span> - 
+                    <span style={{ fontWeight: 'bold', color: '#1f2937' }}> {appt.startTime}</span> às <span>{appt.endTime}</span> | 
+                    <span style={{ fontWeight: 'bold', color: '#0f3d2e' }}> {appt.clientName}</span> ({appt.service})
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button 
+                      onClick={() => {
+                        const cleanPhone = (appt.clientPhone || '').replace(/\D/g, '');
+                        const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}. Até lá!`;
+                        window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                      style={{ background: '#25d366', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                    >
+                      WhatsApp
+                    </button>
+                    <button 
+                      onClick={() => onCancelAppointment(appt.id)}
+                      style={{ background: '#ef4444', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Pacientes de Hoje List */}
       <div style={{ marginTop: '20px', background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '15px' }}>
