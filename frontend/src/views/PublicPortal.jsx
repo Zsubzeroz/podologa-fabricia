@@ -229,7 +229,16 @@ export default function PublicPortal() {
                     type="tel" 
                     placeholder="(XX) XXXXX-XXXX" 
                     value={clientPhone} 
-                    onChange={(e) => setClientPhone(e.target.value)} 
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      let cleaned = val.replace(/\D/g, '');
+                      if (cleaned.length > 11) cleaned = cleaned.slice(0, 11);
+                      let masked = '';
+                      if (cleaned.length > 0) masked += `(${cleaned.slice(0, 2)}`;
+                      if (cleaned.length > 2) masked += `) ${cleaned.slice(2, 7)}`;
+                      if (cleaned.length > 7) masked += `-${cleaned.slice(7, 11)}`;
+                      setClientPhone(masked);
+                    }} 
                     style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
                   />
                 </div>
@@ -259,6 +268,13 @@ export default function PublicPortal() {
                   onClick={() => {
                     if (!clientName || !clientPhone || !selectedDate || !selectedTime) {
                       alert('Por favor, preencha todos os campos do formulário.');
+                      return;
+                    }
+
+                    // Validate phone digits count
+                    const phoneDigits = clientPhone.replace(/\D/g, '');
+                    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+                      alert('Por favor, insira um número de celular válido com DDD (10 ou 11 dígitos).');
                       return;
                     }
 

@@ -30,6 +30,13 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if(!formData.clientName) return alert("Por favor, preencha o cliente.");
+
+    if (formData.phone) {
+      const phoneDigits = formData.phone.replace(/\D/g, '');
+      if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+        return alert("Por favor, insira um telefone válido com DDD (10 ou 11 dígitos).");
+      }
+    }
     
     let sHour = parseInt(formData.startTime.split(':')[0]) || 9;
     let sMin = parseInt(formData.startTime.split(':')[1]) || 0;
