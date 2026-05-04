@@ -2,11 +2,36 @@ import { useState } from 'react';
 import { Search, ShoppingCart, Filter, Download, FileText, ChevronRight, DollarSign } from 'lucide-react';
 
 export default function ConsultaVendas() {
-  const [vendas] = useState([
-    { id: 1, data: '15/04/2026', cliente: 'Adriano Rangel', valor: 'R$ 150,00', forma: 'Cartão de Crédito', status: 'PAGO' },
-    { id: 2, data: '15/04/2026', cliente: 'Alessandra Santos', valor: 'R$ 80,00', forma: 'Pix', status: 'PAGO' },
-    { id: 3, data: '16/04/2026', cliente: 'Amanda Costa', valor: 'R$ 220,00', forma: 'Dinheiro', status: 'PENDENTE' },
+  const [allVendas] = useState([
+    { id: 1, data: '2026-04-15', cliente: 'Adriano Rangel', valor: 150.00, forma: 'Cartão de Crédito', status: 'PAGO' },
+    { id: 2, data: '2026-04-15', cliente: 'Alessandra Santos', valor: 80.00, forma: 'Pix', status: 'PAGO' },
+    { id: 3, data: '2026-04-16', cliente: 'Amanda Costa', valor: 220.00, forma: 'Dinheiro', status: 'PENDENTE' },
   ]);
+
+  const [filteredVendas, setFilteredVendas] = useState(allVendas);
+  const [filterData, setFilterData] = useState({
+    data: '',
+    forma: 'TODAS'
+  });
+
+  const handleFilter = () => {
+    let result = allVendas;
+    if (filterData.forma !== 'TODAS') {
+      result = result.filter(v => v.forma.toLowerCase().includes(filterData.forma.toLowerCase()));
+    }
+    if (filterData.data) {
+      result = result.filter(v => v.data === filterData.data);
+    }
+    setFilteredVendas(result);
+  };
+
+  const handleClear = () => {
+    setFilterData({ data: '', forma: 'TODAS' });
+    setFilteredVendas(allVendas);
+  };
+
+  const totalRecebido = filteredVendas.filter(v => v.status === 'PAGO').reduce((acc, v) => acc + v.valor, 0);
+  const totalPendente = filteredVendas.filter(v => v.status === 'PENDENTE').reduce((acc, v) => acc + v.valor, 0);
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
@@ -25,15 +50,15 @@ export default function ConsultaVendas() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '25px' }}>
           <div style={{ padding: '15px', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #dcfce7' }}>
             <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#166534', textTransform: 'uppercase' }}>Total Recebido</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#14532d' }}>R$ 230,00</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#14532d' }}>R$ {totalRecebido.toFixed(2)}</div>
           </div>
           <div style={{ padding: '15px', background: '#fef2f2', borderRadius: '10px', border: '1px solid #fee2e2' }}>
             <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#991b1b', textTransform: 'uppercase' }}>Total Pendente</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#7f1d1d' }}>R$ 220,00</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#7f1d1d' }}>R$ {totalPendente.toFixed(2)}</div>
           </div>
           <div style={{ padding: '15px', background: '#eff6ff', borderRadius: '10px', border: '1px solid #dbeafe' }}>
             <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#1e40af', textTransform: 'uppercase' }}>Total de Vendas</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e3a8a' }}>3</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e3a8a' }}>{filteredVendas.length}</div>
           </div>
         </div>
 
@@ -41,23 +66,32 @@ export default function ConsultaVendas() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', marginBottom: '25px', alignItems: 'flex-end' }}>
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Período</label>
-            <input type="date" className="form-control" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
+            <input 
+              type="date" 
+              value={filterData.data}
+              onChange={(e) => setFilterData({...filterData, data: e.target.value})}
+              style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} 
+            />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Forma de Pagto</label>
-            <select style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}>
-              <option>TODAS</option>
-              <option>Pix</option>
-              <option>Cartão</option>
-              <option>Dinheiro</option>
+            <select 
+              value={filterData.forma}
+              onChange={(e) => setFilterData({...filterData, forma: e.target.value})}
+              style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }}
+            >
+              <option value="TODAS">TODAS</option>
+              <option value="Pix">Pix</option>
+              <option value="Cartão">Cartão</option>
+              <option value="Dinheiro">Dinheiro</option>
             </select>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', flex: 1 }}>
+            <button onClick={handleFilter} style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', flex: 1 }}>
               FILTRAR
             </button>
-            <button style={{ backgroundColor: '#f3f4f6', color: '#374151', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-              <Download size={18} />
+            <button onClick={handleClear} style={{ backgroundColor: '#f3f4f6', color: '#374151', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+              LIMPAR
             </button>
           </div>
         </div>
@@ -76,11 +110,11 @@ export default function ConsultaVendas() {
               </tr>
             </thead>
             <tbody>
-              {vendas.map((v) => (
+              {filteredVendas.map((v) => (
                 <tr key={v.id}>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280' }}>{v.data}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '600' }}>{v.cliente}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>{v.valor}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>R$ {v.valor.toFixed(2)}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563', fontSize: '0.85rem' }}>{v.forma}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <span style={{ 
@@ -96,16 +130,18 @@ export default function ConsultaVendas() {
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
-                      <button style={{ border: 'none', background: '#f3f4f6', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#0f3d2e' }}>
+                      <button onClick={() => alert('Visualizando detalhes da venda...')} style={{ border: 'none', background: '#f3f4f6', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#0f3d2e' }}>
                         <FileText size={16} />
-                      </button>
-                      <button style={{ border: 'none', background: '#f3f4f6', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#0f3d2e' }}>
-                        <ChevronRight size={16} />
                       </button>
                     </div>
                   </td>
                 </tr>
               ))}
+              {filteredVendas.length === 0 && (
+                <tr>
+                  <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>Nenhuma venda encontrada.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

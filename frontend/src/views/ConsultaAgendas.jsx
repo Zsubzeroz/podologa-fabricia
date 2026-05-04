@@ -2,10 +2,40 @@ import { useState } from 'react';
 import { Search, Calendar, User, Filter, X, ChevronRight, FileText } from 'lucide-react';
 
 export default function ConsultaAgendas() {
-  const [appointments] = useState([
-    { id: 1, data: '16/04/2026', hora: '14:00', cliente: 'Maria Silva', profissional: 'Fabricia Rodrigues', servico: 'Podologia Preventiva', status: 'CONFIRMADO' },
-    { id: 2, data: '16/04/2026', hora: '15:30', cliente: 'João Pereira', profissional: 'Fabricia Rodrigues', servico: 'Tratamento de Calos', status: 'PENDENTE' },
+  const [allAppointments] = useState([
+    { id: 1, data: '2026-04-16', hora: '14:00', cliente: 'Maria Silva', profissional: 'Fabricia Rodrigues', servico: 'Podologia Preventiva', status: 'CONFIRMADO' },
+    { id: 2, data: '2026-04-16', hora: '15:30', cliente: 'João Pereira', profissional: 'Fabricia Rodrigues', servico: 'Tratamento de Calos', status: 'PENDENTE' },
   ]);
+
+  const [filtered, setFiltered] = useState(allAppointments);
+  const [filterData, setFilterData] = useState({
+    inicio: '',
+    fim: '',
+    cliente: '',
+    status: 'TODOS'
+  });
+
+  const handleSearch = () => {
+    let result = allAppointments;
+    if (filterData.status !== 'TODOS') {
+      result = result.filter(a => a.status === filterData.status);
+    }
+    if (filterData.cliente) {
+      result = result.filter(a => a.cliente.toLowerCase().includes(filterData.cliente.toLowerCase()));
+    }
+    if (filterData.inicio) {
+      result = result.filter(a => a.data >= filterData.inicio);
+    }
+    if (filterData.fim) {
+      result = result.filter(a => a.data <= filterData.fim);
+    }
+    setFiltered(result);
+  };
+
+  const handleClear = () => {
+    setFilterData({ inicio: '', fim: '', cliente: '', status: 'TODOS' });
+    setFiltered(allAppointments);
+  };
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
@@ -25,9 +55,19 @@ export default function ConsultaAgendas() {
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Período</label>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <input type="date" className="form-control" style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
+              <input 
+                type="date" 
+                value={filterData.inicio}
+                onChange={(e) => setFilterData({...filterData, inicio: e.target.value})}
+                style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none', width: '100%' }} 
+              />
               <span style={{ color: '#9ca3af' }}>-</span>
-              <input type="date" className="form-control" style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
+              <input 
+                type="date" 
+                value={filterData.fim}
+                onChange={(e) => setFilterData({...filterData, fim: e.target.value})}
+                style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none', width: '100%' }} 
+              />
             </div>
           </div>
 
@@ -35,25 +75,35 @@ export default function ConsultaAgendas() {
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Cliente</label>
             <div style={{ position: 'relative' }}>
               <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-              <input type="text" placeholder="Nome do cliente..." style={{ width: '100%', padding: '8px 8px 8px 32px', borderRadius: '6px', border: '1px solid #d1d5db' }} />
+              <input 
+                type="text" 
+                placeholder="Nome do cliente..." 
+                value={filterData.cliente}
+                onChange={(e) => setFilterData({...filterData, cliente: e.target.value})}
+                style={{ width: '100%', padding: '8px 8px 8px 32px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} 
+              />
             </div>
           </div>
 
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Status</label>
-            <select style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}>
-              <option>TODOS</option>
-              <option>CONFIRMADO</option>
-              <option>PENDENTE</option>
-              <option>CANCELADO</option>
+            <select 
+              value={filterData.status}
+              onChange={(e) => setFilterData({...filterData, status: e.target.value})}
+              style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }}
+            >
+              <option value="TODOS">TODOS</option>
+              <option value="CONFIRMADO">CONFIRMADO</option>
+              <option value="PENDENTE">PENDENTE</option>
+              <option value="CANCELADO">CANCELADO</option>
             </select>
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', flex: 1 }}>
+            <button onClick={handleSearch} style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', flex: 1 }}>
               PESQUISAR
             </button>
-            <button style={{ backgroundColor: '#f3f4f6', color: '#374151', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={handleClear} style={{ backgroundColor: '#f3f4f6', color: '#374151', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
               LIMPAR
             </button>
           </div>
@@ -73,7 +123,7 @@ export default function ConsultaAgendas() {
               </tr>
             </thead>
             <tbody>
-              {appointments.map((appt) => (
+              {filtered.map((appt) => (
                 <tr key={appt.id}>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6' }}>
                     <div style={{ fontWeight: '700', color: '#111827' }}>{appt.data}</div>
@@ -95,12 +145,17 @@ export default function ConsultaAgendas() {
                     </span>
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
-                    <button style={{ border: 'none', background: 'none', color: '#0f3d2e', cursor: 'pointer' }} title="Ver detalhes">
+                    <button onClick={() => alert('Visualizando detalhes do agendamento...')} style={{ border: 'none', background: 'none', color: '#0f3d2e', cursor: 'pointer' }} title="Ver detalhes">
                       <ChevronRight size={20} />
                     </button>
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>Nenhum agendamento encontrado.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

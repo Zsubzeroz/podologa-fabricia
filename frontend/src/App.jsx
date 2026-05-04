@@ -28,8 +28,9 @@ import ConsultaAnalise from './views/ConsultaAnalise';
 import ComissaoProfissional from './views/ComissaoProfissional';
 import ProdutosEstoque from './views/ProdutosEstoque';
 import ConsultaPacotes from './views/ConsultaPacotes';
+import AuditoriaAgenda from './views/AuditoriaAgenda';
+import AuditoriaAnamnese from './views/AuditoriaAnamnese';
 import ConsultaOrcamentos from './views/ConsultaOrcamentos';
-import ConsultaPrevisaoRetorno from './views/ConsultaPrevisaoRetorno';
 import ConsultaVendas from './views/ConsultaVendas';
 import ConsultaVendasPorCliente from './views/ConsultaVendasPorCliente';
 import ConfiguracoesDadosEmpresa from './views/ConfiguracoesDadosEmpresa';
@@ -43,6 +44,7 @@ function App() {
   const [currentView, setCurrentView] = useState('produtos');
   const [openMenu, setOpenMenu] = useState('cadastros'); 
   const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [preSelectedTime, setPreSelectedTime] = useState('10:00');
   const [auth, setAuth] = useState(() => {
     const saved = window.localStorage.getItem('adminAuth');
     return saved ? JSON.parse(saved) : null;
@@ -109,13 +111,18 @@ function App() {
     </div>
   );
 
+  const handleAddAppointment = (date, time) => {
+    setCurrentDate(date);
+    setPreSelectedTime(time);
+    setCurrentView('agendamento');
+  };
+
   if (isClientPath) return <PublicPortal />;
   if (isAdminPath && !auth) return <Login onLogin={setAuth} />;
   if (isAdminPath && auth) {
     return (
       <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
         {currentView === 'dashboard' && <Dashboard />}
-        {currentView === 'agenda' && (
           <Agenda 
             appointments={appointments} 
             onCancelAppointment={(id) => {
@@ -125,11 +132,12 @@ function App() {
             }}
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
+            onAddAppointment={handleAddAppointment}
           />
-        )}
         {currentView === 'agendamento' && (
           <AgendarTab 
             currentDate={currentDate} 
+            preSelectedTime={preSelectedTime}
             onSave={(newAppt) => {
               const updated = [...appointments, { ...newAppt, id: Date.now() }];
               setAppointments(updated);
@@ -163,8 +171,9 @@ function App() {
         {currentView === 'comissao' && <ComissaoProfissional />}
         {currentView === 'estoque' && <ProdutosEstoque />}
         {currentView === 'pacotes' && <ConsultaPacotes />}
+        {currentView === 'auditoria_agenda' && <AuditoriaAgenda />}
+        {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
         {currentView === 'orcamentos' && <ConsultaOrcamentos />}
-        {currentView === 'previsao_retorno' && <ConsultaPrevisaoRetorno />}
         {currentView === 'vendas' && <ConsultaVendas />}
         {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
         {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
@@ -191,11 +200,13 @@ function App() {
           onCancelAppointment={cancelAppointment}
           currentDate={currentDate}
           setCurrentDate={setCurrentDate}
+          onAddAppointment={handleAddAppointment}
         />
       )}
       {currentView === 'agendamento' && (
         <AgendarTab 
           currentDate={currentDate} 
+          preSelectedTime={preSelectedTime}
           onSave={(newAppt) => {
             const updated = [...appointments, { ...newAppt, id: Date.now() }];
             setAppointments(updated);
@@ -229,8 +240,9 @@ function App() {
       {currentView === 'comissao' && <ComissaoProfissional />}
       {currentView === 'estoque' && <ProdutosEstoque />}
       {currentView === 'pacotes' && <ConsultaPacotes />}
+      {currentView === 'auditoria_agenda' && <AuditoriaAgenda />}
+      {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
       {currentView === 'orcamentos' && <ConsultaOrcamentos />}
-      {currentView === 'previsao_retorno' && <ConsultaPrevisaoRetorno />}
       {currentView === 'vendas' && <ConsultaVendas />}
       {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
       {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}

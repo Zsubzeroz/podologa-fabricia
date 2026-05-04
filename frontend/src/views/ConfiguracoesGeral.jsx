@@ -19,11 +19,17 @@ export default function ConfiguracoesGeral() {
   const [saved, setSaved] = useState(false);
 
   const handleToggle = (key) => {
-    setConfig({ ...config, [key]: !config[key] });
+    setConfig(prev => ({ ...prev, [key]: !prev[key] }));
     setSaved(false);
   };
 
-  const handleSave = () => {
+  const handleChange = (key, value) => {
+    setConfig(prev => ({ ...prev, [key]: value }));
+    setSaved(false);
+  };
+
+  const handleSave = (e) => {
+    if (e) e.preventDefault();
     window.localStorage.setItem('configuracoes_gerais', JSON.stringify(config));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -49,18 +55,20 @@ export default function ConfiguracoesGeral() {
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Interface do Sistema</h3>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontWeight: '600', color: '#374151' }}>Calendário na Vertical</div>
                 <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>Mostrar profissionais no eixo vertical da agenda.</div>
               </div>
               <button 
+                type="button"
                 onClick={() => handleToggle('calendarioVertical')}
                 style={{ 
                   backgroundColor: config.calendarioVertical ? '#0f3d2e' : '#e5e7eb', 
                   color: config.calendarioVertical ? 'white' : '#6b7280',
-                  border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+                  border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s',
+                  minWidth: '70px'
                 }}
               >
                 {config.calendarioVertical ? 'SIM' : 'NÃO'}
@@ -73,11 +81,13 @@ export default function ConfiguracoesGeral() {
                 <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>Impede agendamentos sem definir uma sala.</div>
               </div>
               <button 
+                type="button"
                 onClick={() => handleToggle('obrigarSala')}
                 style={{ 
                   backgroundColor: config.obrigarSala ? '#0f3d2e' : '#e5e7eb', 
                   color: config.obrigarSala ? 'white' : '#6b7280',
-                  border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+                  border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s',
+                  minWidth: '70px'
                 }}
               >
                 {config.obrigarSala ? 'SIM' : 'NÃO'}
@@ -107,22 +117,35 @@ export default function ConfiguracoesGeral() {
                   </div>
                 </div>
                 <button 
+                  type="button"
                   onClick={() => handleToggle('enviarWhatsapp')}
                   style={{ 
                     backgroundColor: config.enviarWhatsapp ? '#16a34a' : '#d1d5db', 
                     color: 'white',
-                    border: 'none', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
+                    border: 'none', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
+                    transition: 'all 0.2s'
                   }}
                 >
                   {config.enviarWhatsapp ? 'ATIVADO' : 'DESATIVADO'}
                 </button>
               </div>
-              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#065f46', marginBottom: '5px' }}>ANTECEDÊNCIA DO ENVIO (HORAS)</label>
-                  <input type="text" value={config.tempoWhatsapp} onChange={(e) => setConfig({...config, tempoWhatsapp: e.target.value})} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #bbf7d0', width: '100px', outline: 'none' }} />
+                  <input 
+                    type="text" 
+                    value={config.tempoWhatsapp} 
+                    onChange={(e) => handleChange('tempoWhatsapp', e.target.value)} 
+                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #bbf7d0', width: '100px', outline: 'none' }} 
+                  />
                 </div>
-                <button onClick={() => alert('Gerando novo QR Code...')} style={{ backgroundColor: '#fff', color: '#16a34a', border: '1px solid #16a34a', padding: '8px 15px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>RECONECTAR WHATSAPP</button>
+                <button 
+                  type="button"
+                  onClick={() => alert('Gerando novo QR Code...')} 
+                  style={{ backgroundColor: '#fff', color: '#16a34a', border: '1px solid #16a34a', padding: '8px 15px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  RECONECTAR WHATSAPP
+                </button>
               </div>
             </div>
 
@@ -131,12 +154,20 @@ export default function ConfiguracoesGeral() {
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '10px' }}>MODELO DE MENSAGEM PARA CLIENTES</label>
               <textarea 
                 value={config.mensagemSms}
-                onChange={(e) => { setConfig({...config, mensagemSms: e.target.value}); setSaved(false); }}
+                onChange={(e) => handleChange('mensagemSms', e.target.value)}
                 style={{ width: '100%', padding: '15px', borderRadius: '8px', border: '1px solid #d1d5db', minHeight: '100px', fontSize: '0.9rem', color: '#374151', lineHeight: '1.5', outline: 'none' }}
               />
               <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
                 {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@HORA'].map(tag => (
-                  <span key={tag} style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', cursor: 'pointer' }}>{tag}</span>
+                  <span 
+                    key={tag} 
+                    onClick={() => handleChange('mensagemSms', config.mensagemSms + ' ' + tag)}
+                    style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', cursor: 'pointer', transition: 'background 0.2s' }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#e5e7eb'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                  >
+                    {tag}
+                  </span>
                 ))}
               </div>
             </div>
@@ -151,8 +182,26 @@ export default function ConfiguracoesGeral() {
             </div>
           )}
           <button 
+            type="button"
             onClick={handleSave}
-            style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '15px 40px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1rem', boxShadow: '0 4px 12px rgba(15,61,46,0.2)' }}>
+            style={{ 
+              backgroundColor: '#0f3d2e', 
+              color: 'white', 
+              border: 'none', 
+              padding: '15px 40px', 
+              borderRadius: '10px', 
+              fontWeight: 'bold', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '10px', 
+              fontSize: '1rem', 
+              boxShadow: '0 4px 12px rgba(15,61,46,0.2)',
+              transition: 'transform 0.1s active'
+            }}
+            onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
+            onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+          >
             <Save size={20} /> SALVAR ALTERAÇÕES
           </button>
         </div>
