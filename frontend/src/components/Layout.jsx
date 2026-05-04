@@ -91,7 +91,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
              <li className={`sa-submenu-item ${currentView==='campo_personalizado'?'active':''}`} onClick={()=>setCurrentView('campo_personalizado')}>Campo Personalizado</li>
              <li className={`sa-submenu-item ${currentView==='como_conheceu'?'active':''}`} onClick={()=>setCurrentView('como_conheceu')}>Como nos Conheceu</li>
              <li className="sa-submenu-item">Equipamentos</li>
-             <li className={`sa-submenu-item ${currentView==='feriado'?'active':''}`} onClick={()=>setCurrentView('feriado')}>Feriado</li>
+             <li className={`sa-submenu-item ${currentView==='feriado'?'active':''}`} onClick={()=>setCurrentView('feriado')}>Bloqueio de Horários / Férias</li>
              <li className={`sa-submenu-item ${currentView==='grupos'?'active':''}`} onClick={()=>setCurrentView('grupos')}>Grupos de Produtos e Serviços</li>
              <li className={`sa-submenu-item ${currentView==='marcas'?'active':''}`} onClick={()=>setCurrentView('marcas')}>Marcas</li>
              <li className={`sa-submenu-item ${currentView==='operadoras'?'active':''}`} onClick={()=>setCurrentView('operadoras')}>Operadoras de Celular</li>
