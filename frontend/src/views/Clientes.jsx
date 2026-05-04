@@ -218,6 +218,7 @@ export default function Clientes() {
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>NOME DO CLIENTE</th>
+                <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>FICHA</th>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>CADASTRO</th>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>CONTATO</th>
                 <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>STATUS</th>
@@ -227,28 +228,28 @@ export default function Clientes() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#6b7280' }}>Nenhum cliente cadastrado.</td>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#6b7280' }}>Nenhum cliente cadastrado.</td>
                 </tr>
               ) : (
                 filtered.map((c) => (
                   <tr key={c.id || c.nome} style={{ borderBottom: '1px solid #f3f4f6' }}>
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ color: '#111827', fontWeight: 'bold', fontSize: '1rem' }}>{c.nome}</span>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button 
-                            onClick={() => handleOpenCreateFicha(c)}
-                            style={{ background: '#0f3d2e', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                          >
-                            <Plus size={12} /> CRIAR FICHA
-                          </button>
-                          <button 
-                            onClick={() => handleOpenFichas(c)}
-                            style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db', padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                          >
-                            <FileText size={12} /> VER FICHAS
-                          </button>
-                        </div>
+                      <span style={{ color: '#111827', fontWeight: 'bold', fontSize: '1rem' }}>{c.nome}</span>
+                    </td>
+                    <td style={{ padding: '14px', verticalAlign: 'middle' }}>
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                        <button 
+                          onClick={() => handleOpenCreateFicha(c)}
+                          style={{ background: '#0f3d2e', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                        >
+                          <Plus size={12} /> CRIAR FICHA
+                        </button>
+                        <button 
+                          onClick={() => handleOpenFichas(c)}
+                          style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db', padding: '6px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                        >
+                          <FileText size={12} /> VER FICHAS
+                        </button>
                       </div>
                     </td>
                     <td style={{ padding: '14px', color: '#4b5563', verticalAlign: 'middle' }}>{c.data}</td>
