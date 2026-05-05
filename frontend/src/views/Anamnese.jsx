@@ -206,6 +206,45 @@ Assinatura do Profissional: _______________________________`
     conteudo: ''
   });
 
+  // Structured Form State for Anamnesis
+  const [structuredData, setStructuredData] = useState({
+    calcado: 'Fechado',
+    calcadoNum: '',
+    meia: 'Algodão',
+    cirurgia: 'NÃO',
+    cirurgiaDesc: '',
+    esportes: 'NÃO',
+    esportesDesc: '',
+    medicamento: 'NÃO',
+    medicamentoDesc: '',
+    gestante: 'NÃO',
+    gestanteSemanas: '',
+    sensibilidade: 'NÃO',
+    sensibilidadeDesc: '',
+    patologias: {
+      fissuras: false,
+      hiperidrose: false,
+      desidrose: false,
+      bromidose: false,
+      hiperqueratose: false,
+      psoriase: false,
+      tineaPedis: false,
+      tineaInterdigital: false,
+      onicomicose: false,
+      onicocriptose: false,
+      onicofose: false,
+      exostose: false,
+      granuloma: false,
+      verruga: false,
+      calo: false,
+      calosidade: false
+    },
+    formatoUngueal: 'Normal',
+    obsPD: '',
+    obsPE: '',
+    procedimento: ''
+  });
+
   useEffect(() => {
     window.localStorage.setItem('anamneses_list', JSON.stringify(fichas));
   }, [fichas]);
@@ -278,6 +317,56 @@ Assinatura do Profissional: _______________________________`
       templateId: templateId,
       conteudo: template ? template.conteudo : ''
     }));
+    
+    // If it's the anamnesis template, the structured form handles the content
+  };
+
+  const handleStructuredChange = (field, value) => {
+    if (field.startsWith('patologia.')) {
+      const p = field.split('.')[1];
+      setStructuredData(prev => ({
+        ...prev,
+        patologias: { ...prev.patologias, [p]: value }
+      }));
+    } else {
+      setStructuredData(prev => ({ ...prev, [field]: value }));
+    }
+  };
+
+  const compileStructuredToText = () => {
+    const p = structuredData.patologias;
+    const formatMark = (val) => val ? 'X' : ' ';
+    
+    const patologiasFormatadas = [
+      `(${formatMark(p.fissuras)}) FISSURAS  (${formatMark(p.hiperidrose)}) HIPERIDROSE  (${formatMark(p.desidrose)}) DESIDROSE`,
+      `(${formatMark(p.bromidose)}) BROMIDOSE  (${formatMark(p.hiperqueratose)}) HIPERQUERATOSE  (${formatMark(p.psoriase)}) PSORÍASE`,
+      `(${formatMark(p.tineaPedis)}) TINEA PEDIS  (${formatMark(p.tineaInterdigital)}) TINEA INTERDIGITAL  (${formatMark(p.onicomicose)}) ONICOMICOSE`,
+      `(${formatMark(p.onicocriptose)}) ONICOCRIPTOSE  (${formatMark(p.onicofose)}) ONICOFOSE  (${formatMark(p.exostose)}) EXOSTOSE`,
+      `(${formatMark(p.granuloma)}) GRANULOMA  (${formatMark(p.verruga)}) VERRUGA  (${formatMark(p.calo)}) CALO  (${formatMark(p.calosidade)}) CALOSIDADE`
+    ].join('\n');
+
+    return `FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA
+
+AVALIAÇÃO FÍSICA E HÁBITOS:
+- Calçado: (${structuredData.calcado === 'Aberto' ? 'X' : ' '}) Aberto  (${structuredData.calcado === 'Fechado' ? 'X' : ' '}) Fechado  (Nº ${structuredData.calcadoNum})
+- Meia: ${structuredData.meia}
+- Cirurgia membros inferiores: (${structuredData.cirurgia === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.cirurgia === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.cirurgiaDesc ? `[${structuredData.cirurgiaDesc}]` : ''}
+- Pratica Esportes: (${structuredData.esportes === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.esportes === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.esportesDesc ? `[${structuredData.esportesDesc}]` : ''}
+- Uso de Medicamentos: (${structuredData.medicamento === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.medicamento === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.medicamentoDesc ? `[${structuredData.medicamentoDesc}]` : ''}
+- Gestante: (${structuredData.gestante === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.gestante === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.gestanteSemanas ? `[${structuredData.gestanteSemanas} semanas]` : ''}
+- Sensibilidade a dor: (${structuredData.sensibilidade === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.sensibilidade === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.sensibilidadeDesc ? `[${structuredData.sensibilidadeDesc}]` : ''}
+
+PATOLOGIAS IDENTIFICADAS:
+${patologiasFormatadas}
+
+FORMATO UNGUEAL: ${structuredData.formatoUngueal}
+
+OBSERVAÇÕES PROFISSIONAIS:
+PD: ${structuredData.obsPD}
+PE: ${structuredData.obsPE}
+PROCEDIMENTO REALIZADO: ${structuredData.procedimento}
+
+DATA: ${new Date().toLocaleDateString('pt-BR')}`;
   };
 
   const handleSavePatientForm = (e) => {
@@ -290,13 +379,18 @@ Assinatura do Profissional: _______________________________`
     const client = clients.find(c => c.id.toString() === fillData.clientId.toString());
     const template = fichas.find(f => f.id.toString() === fillData.templateId.toString());
 
+    // If it's the Anamnesis template (id 1), use the compiled structured text
+    const finalConteudo = fillData.templateId.toString() === '1' 
+      ? compileStructuredToText() 
+      : fillData.conteudo;
+
     const newForm = {
       id: Date.now(),
       clientId: fillData.clientId,
       clientName: client ? client.nome : 'Desconhecido',
       templateId: fillData.templateId,
       templateName: template ? template.nome : 'Desconhecido',
-      conteudo: fillData.conteudo,
+      conteudo: finalConteudo,
       date: new Date().toISOString()
     };
 
@@ -554,12 +648,144 @@ Assinatura do Profissional: _______________________________`
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, overflow: 'hidden' }}>
-              <label style={{ fontSize: '13px', fontWeight: '600' }}>Conteúdo da Ficha (Preencha as informações abaixo)</label>
-              <textarea 
-                value={fillData.conteudo} 
-                onChange={(e) => setFillData({...fillData, conteudo: e.target.value})} 
-                style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', flex: 1, minHeight: '300px', fontFamily: 'monospace' }} 
-              />
+              <label style={{ fontSize: '13px', fontWeight: '600' }}>
+                {fillData.templateId.toString() === '1' ? 'Avaliação Clínica Estruturada' : 'Conteúdo da Ficha'}
+              </label>
+              
+              {fillData.templateId.toString() === '1' ? (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '15px', border: '1px solid #d1d5db', borderRadius: '6px', background: '#f9fafb', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  
+                  {/* Habits Section */}
+                  <div>
+                    <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>HÁBITOS E SAÚDE</h5>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Calçado mais utilizado</label>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <label style={{ fontSize: '12px' }}><input type="radio" name="calcado" checked={structuredData.calcado === 'Aberto'} onChange={() => handleStructuredChange('calcado', 'Aberto')} /> Aberto</label>
+                          <label style={{ fontSize: '12px' }}><input type="radio" name="calcado" checked={structuredData.calcado === 'Fechado'} onChange={() => handleStructuredChange('calcado', 'Fechado')} /> Fechado</label>
+                          <input type="text" placeholder="Nº" value={structuredData.calcadoNum} onChange={(e) => handleStructuredChange('calcadoNum', e.target.value)} style={{ width: '40px', padding: '2px 5px', fontSize: '11px' }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Tipo de Meia</label>
+                        <select value={structuredData.meia} onChange={(e) => handleStructuredChange('meia', e.target.value)} style={{ padding: '4px', fontSize: '12px' }}>
+                          <option>Algodão</option>
+                          <option>Social</option>
+                          <option>Esportiva</option>
+                          <option>Sintética</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Conditions Section */}
+                  <div>
+                    <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>PATOLOGIAS (Selecione se presente)</h5>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                      {Object.keys(structuredData.patologias).map(pat => (
+                        <label key={pat} style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'uppercase' }}>
+                          <input type="checkbox" checked={structuredData.patologias[pat]} onChange={(e) => handleStructuredChange(`patologia.${pat}`, e.target.checked)} />
+                          {pat.replace(/([A-Z])/g, ' $1')}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Health Details Section */}
+                  <div>
+                    <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>DETALHES DE SAÚDE</h5>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Cirurgia membros inferiores?</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <select value={structuredData.cirurgia} onChange={(e) => handleStructuredChange('cirurgia', e.target.value)} style={{ fontSize: '12px' }}>
+                            <option>NÃO</option>
+                            <option>SIM</option>
+                          </select>
+                          <input type="text" placeholder="Especifique..." value={structuredData.cirurgiaDesc} onChange={(e) => handleStructuredChange('cirurgiaDesc', e.target.value)} style={{ flex: 1, padding: '4px' }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Uso de Medicamentos?</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <select value={structuredData.medicamento} onChange={(e) => handleStructuredChange('medicamento', e.target.value)} style={{ fontSize: '12px' }}>
+                            <option>NÃO</option>
+                            <option>SIM</option>
+                          </select>
+                          <input type="text" placeholder="Quais..." value={structuredData.medicamentoDesc} onChange={(e) => handleStructuredChange('medicamentoDesc', e.target.value)} style={{ flex: 1, padding: '4px' }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Pratica Esportes?</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <select value={structuredData.esportes} onChange={(e) => handleStructuredChange('esportes', e.target.value)} style={{ fontSize: '12px' }}>
+                            <option>NÃO</option>
+                            <option>SIM</option>
+                          </select>
+                          <input type="text" placeholder="Quais..." value={structuredData.esportesDesc} onChange={(e) => handleStructuredChange('esportesDesc', e.target.value)} style={{ flex: 1, padding: '4px' }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Sensibilidade a dor?</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <select value={structuredData.sensibilidade} onChange={(e) => handleStructuredChange('sensibilidade', e.target.value)} style={{ fontSize: '12px' }}>
+                            <option>NÃO</option>
+                            <option>SIM</option>
+                          </select>
+                          <input type="text" placeholder="Especifique..." value={structuredData.sensibilidadeDesc} onChange={(e) => handleStructuredChange('sensibilidadeDesc', e.target.value)} style={{ flex: 1, padding: '4px' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Details Section */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Gestante?</label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <select value={structuredData.gestante} onChange={(e) => handleStructuredChange('gestante', e.target.value)} style={{ fontSize: '12px' }}>
+                          <option>NÃO</option>
+                          <option>SIM</option>
+                        </select>
+                        {structuredData.gestante === 'SIM' && <input type="text" placeholder="Semanas" value={structuredData.gestanteSemanas} onChange={(e) => handleStructuredChange('gestanteSemanas', e.target.value)} style={{ width: '80px', padding: '4px' }} />}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Formato Ungueal</label>
+                      <select value={structuredData.formatoUngueal} onChange={(e) => handleStructuredChange('formatoUngueal', e.target.value)} style={{ padding: '4px', fontSize: '12px' }}>
+                        <option>Normal</option>
+                        <option>Funil</option>
+                        <option>Involuta</option>
+                        <option>Telha</option>
+                        <option>Cunha</option>
+                        <option>Gancho</option>
+                        <option>Torquês</option>
+                        <option>Caracol</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Observations Section */}
+                  <div>
+                    <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>OBSERVAÇÕES E PROCEDIMENTO</h5>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <input type="text" placeholder="PD (Pé Direito)" value={structuredData.obsPD} onChange={(e) => handleStructuredChange('obsPD', e.target.value)} style={{ padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                        <input type="text" placeholder="PE (Pé Esquerdo)" value={structuredData.obsPE} onChange={(e) => handleStructuredChange('obsPE', e.target.value)} style={{ padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                      </div>
+                      <textarea placeholder="Descrição do Procedimento Realizado..." value={structuredData.procedimento} onChange={(e) => handleStructuredChange('procedimento', e.target.value)} style={{ padding: '8px', border: '1px solid #ddd', borderRadius: '4px', minHeight: '80px' }} />
+                    </div>
+                  </div>
+
+                </div>
+              ) : (
+                <textarea 
+                  value={fillData.conteudo} 
+                  onChange={(e) => setFillData({...fillData, conteudo: e.target.value})} 
+                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', flex: 1, minHeight: '300px', fontFamily: 'monospace' }} 
+                />
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
