@@ -60,12 +60,6 @@ export default function Login({ onLogin }) {
             Entrar
           </button>
         </form>
-
-        <div className="login-info">
-          <p><strong>Demo - Use para testar:</strong></p>
-          <p>Email: fabriciapodologa@gmail.com</p>
-          <p>Senha: 1519am02</p>
-        </div>
       </div>
     </div>
   );
