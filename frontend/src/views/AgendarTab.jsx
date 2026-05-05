@@ -122,7 +122,7 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
       if (!formData.phone) return alert("Por favor, preencha o telefone do cliente para enviar o WhatsApp.");
       const cleanedPhone = formData.phone.replace(/\D/g, '');
       const formattedDate = formData.date.split('-').reverse().join('/');
-      const message = `Olá ${formData.clientName}! Confirmamos seu agendamento na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
+      const message = `Olá ${formData.clientName}! Seu agendamento foi realizado com sucesso na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
       const waUrl = `https://wa.me/55${cleanedPhone}?text=${message}`;
       window.open(waUrl, '_blank');
     };
@@ -287,7 +287,7 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
               onClick={() => {
                 const cleanedPhone = formData.phone.replace(/\D/g, '');
                 const formattedDate = formData.date.split('-').reverse().join('/');
-                const message = `Olá ${formData.clientName}! Confirmamos seu agendamento na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
+                const message = `Olá ${formData.clientName}! Seu agendamento foi realizado com sucesso na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
                 const waUrl = `https://wa.me/55${cleanedPhone}?text=${message}`;
                 window.open(waUrl, '_blank');
               }}

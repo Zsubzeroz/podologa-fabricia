@@ -59,7 +59,7 @@ export default function PublicPortal() {
 
   const sendWhatsAppNotification = () => {
     const formattedDate = selectedDate.split('-').reverse().join('/');
-    const message = `Olá Fabrícia! Acabei de realizar um agendamento online:%0A%0A*Cliente:* ${clientName}%0A*Serviço:* ${selectedService.name}%0A*Data:* ${formattedDate}%0A*Horário:* ${selectedTime}%0A%0A_Por favor, confirme meu agendamento!_`;
+    const message = `Olá Dra. Fabrícia! Você tem um novo agendamento online:%0A%0A*Cliente:* ${clientName}%0A*Serviço:* ${selectedService.name}%0A*Data:* ${formattedDate}%0A*Horário:* ${selectedTime}%0A%0A_Favor confirmar o agendamento!_`;
     const waUrl = `https://wa.me/5519997270910?text=${message}`;
     window.open(waUrl, '_blank');
   };
