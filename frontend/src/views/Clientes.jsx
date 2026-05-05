@@ -6,6 +6,8 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
   const [clientes, setClientes] = useState(() => ClientManager.getAll());
 
   const [showNewModal, setShowNewModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
 
   const [activeClient, setActiveClient] = useState(null);
@@ -39,10 +41,29 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
       status: formData.status || 'ATIVO'
     };
 
-    const added = ClientManager.add(newClient);
+    if (isEditing) {
+      ClientManager.update(editId, newClient);
+    } else {
+      ClientManager.add(newClient);
+    }
+    
     setClientes(ClientManager.getAll());
     setFormData({ nome: '', data: '', contato: '', status: 'ATIVO' });
+    setIsEditing(false);
+    setEditId(null);
     setShowNewModal(false);
+  };
+
+  const handleEdit = (cliente) => {
+    setFormData({
+      nome: cliente.nome,
+      data: cliente.data,
+      contato: cliente.contato,
+      status: cliente.status || 'ATIVO'
+    });
+    setEditId(cliente.id);
+    setIsEditing(true);
+    setShowNewModal(true);
   };
 
   const handleDelete = (id) => {
@@ -76,7 +97,11 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
         
         <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button 
-            onClick={() => setShowNewModal(true)}
+            onClick={() => {
+              setIsEditing(false);
+              setFormData({ nome: '', data: new Date().toISOString().split('T')[0], contato: '', status: 'ATIVO' });
+              setShowNewModal(true);
+            }}
             style={{ 
               backgroundColor: '#0f3d2e', 
               color: '#fff', 
@@ -169,8 +194,16 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                         <button 
+                          onClick={() => handleEdit(c)}
+                          style={{ padding: '8px', background: '#eff6ff', color: '#2563eb', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                          title="Editar Cliente"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button 
                           onClick={() => handleDelete(c.id)}
                           style={{ padding: '8px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                          title="Excluir Cliente"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -192,7 +225,9 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
             style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '450px', width: '100%', display: 'flex', flexDirection: 'column', gap: '15px' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '12px' }}>
-              <h3 style={{ margin: 0, color: '#111827', fontWeight: 'bold' }}>Novo Cliente</h3>
+              <h3 style={{ margin: 0, color: '#111827', fontWeight: 'bold' }}>
+                {isEditing ? 'Editar Cliente' : 'Novo Cliente'}
+              </h3>
               <button type="button" onClick={() => setShowNewModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>✕</button>
             </div>
             
@@ -255,7 +290,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                 type="submit" 
                 style={{ flex: 1, padding: '12px', background: '#0f3d2e', color: 'white', borderRadius: '6px', border: 'none', fontWeight: 'bold' }}
               >
-                Salvar Cliente
+                {isEditing ? 'Salvar Alterações' : 'Salvar Cliente'}
               </button>
             </div>
           </form>

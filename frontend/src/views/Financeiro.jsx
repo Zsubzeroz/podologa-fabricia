@@ -60,7 +60,7 @@ export default function Financeiro() {
 
   const handleDelete = (id) => {
     if (window.confirm('Tem certeza que deseja excluir este lançamento?')) {
-      setFinanceiro(financeiro.filter(f => f.id !== id));
+      setFinanceiro(financeiro.filter(f => String(f.id) !== String(id)));
     }
   };
 

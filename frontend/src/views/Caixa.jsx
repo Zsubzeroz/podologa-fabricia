@@ -67,7 +67,7 @@ export default function Caixa() {
   };
 
   const handleRemoveItem = (itemId) => {
-    const filtered = currentSale.itens.filter(item => item.id !== itemId);
+    const filtered = currentSale.itens.filter(item => String(item.id) !== String(itemId));
     const newTotal = filtered.reduce((sum, item) => sum + item.subtotal, 0);
     setCurrentSale({
       ...currentSale,
@@ -370,7 +370,7 @@ export default function Caixa() {
                       <button 
                         onClick={() => {
                           if (window.confirm('Tem certeza de que deseja excluir esta venda?')) {
-                            setVendas(vendas.filter(v => v.id !== venda.id));
+                            setVendas(vendas.filter(v => String(v.id) !== String(venda.id)));
                           }
                         }}
                         style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}

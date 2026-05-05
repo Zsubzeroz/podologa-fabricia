@@ -50,11 +50,11 @@ export default function Produtos() {
     if (!name.trim()) return;
 
     if (isEditing) {
-      const updated = services.map(s => s.id === editId ? { ...s, name, duration, price } : s);
+      const updated = services.map(s => String(s.id) === String(editId) ? { ...s, name, duration, price } : s);
       saveToLocalStorage(updated);
     } else {
       const newService = {
-        id: Date.now(),
+        id: Date.now().toString(),
         name,
         duration,
         price,
@@ -66,8 +66,9 @@ export default function Produtos() {
   };
 
   const handleDelete = (id) => {
+    if (!id) return;
     if (window.confirm('Deseja realmente excluir este serviço?')) {
-      const filtered = services.filter(s => s.id !== id);
+      const filtered = services.filter(s => String(s.id) !== String(id));
       saveToLocalStorage(filtered);
     }
   };
