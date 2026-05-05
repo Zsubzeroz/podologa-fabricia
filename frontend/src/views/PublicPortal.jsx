@@ -13,6 +13,7 @@ export default function PublicPortal() {
 
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
 
@@ -56,6 +57,14 @@ export default function PublicPortal() {
       }
     ];
   });
+
+  const sendEmailNotification = () => {
+    const formattedDate = selectedDate.split('-').reverse().join('/');
+    const subject = `Novo Agendamento Online - ${clientName}`;
+    const body = `Olá Dra. Fabrícia,%0D%0A%0D%0AVocê tem um novo agendamento online:%0D%0A%0D%0ACliente: ${clientName}%0D%0AEmail: ${clientEmail}%0D%0AServiço: ${selectedService.name}%0D%0AData: ${formattedDate}%0D%0AHorário: ${selectedTime}%0D%0A%0D%0AFavor confirmar no sistema!`;
+    const mailtoUrl = `mailto:fabriciapodologa@gmail.com?subject=${subject}&body=${body}`;
+    window.open(mailtoUrl, '_blank');
+  };
 
   const sendWhatsAppNotification = () => {
     const formattedDate = selectedDate.split('-').reverse().join('/');
@@ -335,6 +344,17 @@ export default function PublicPortal() {
                 </div>
 
                 <div className="form-group">
+                  <label>Seu E-mail (Opcional)</label>
+                  <input 
+                    type="email" 
+                    placeholder="seu@email.com" 
+                    value={clientEmail} 
+                    onChange={(e) => setClientEmail(e.target.value)} 
+                    style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
+                </div>
+
+                <div className="form-group">
                   <label>Data Preferida</label>
                   <input 
                     type="date" 
@@ -578,6 +598,15 @@ export default function PublicPortal() {
                     const message = `Olá Dra. Fabrícia! Você tem um novo agendamento online:%0A%0A*Cliente:* ${clientName}%0A*Serviço:* ${selectedService.name}%0A*Data:* ${formattedDate}%0A*Horário:* ${selectedTime}%0A%0A_Favor confirmar o agendamento!_`;
                     const waUrl = `https://wa.me/5519997270910?text=${message}`;
                     window.open(waUrl, '_blank');
+                    
+                    // IF EMAIL IS PROVIDED, ALSO SUGGEST EMAIL
+                    if (clientEmail) {
+                      setTimeout(() => {
+                        if (window.confirm('Deseja também enviar a confirmação por E-mail para a clínica?')) {
+                          sendEmailNotification();
+                        }
+                      }, 1000);
+                    }
                     
                     setIsConfirmed(true);
                   }}

@@ -18,6 +18,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
     nome: '',
     data: '',
     contato: '',
+    email: '',
     status: 'ATIVO'
   });
 
@@ -38,6 +39,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
       nome: formData.nome,
       data: formData.data || today,
       contato: formData.contato,
+      email: formData.email,
       status: formData.status || 'ATIVO'
     };
 
@@ -48,7 +50,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
     }
     
     setClientes(ClientManager.getAll());
-    setFormData({ nome: '', data: '', contato: '', status: 'ATIVO' });
+    setFormData({ nome: '', data: '', contato: '', email: '', status: 'ATIVO' });
     setIsEditing(false);
     setEditId(null);
     setShowNewModal(false);
@@ -59,6 +61,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
       nome: cliente.nome,
       data: cliente.data,
       contato: cliente.contato,
+      email: cliente.email || '',
       status: cliente.status || 'ATIVO'
     });
     setEditId(cliente.id);
@@ -247,6 +250,17 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                 value={formData.contato}
                 onChange={(e) => setFormData({...formData, contato: e.target.value})}
                 placeholder="(00) 00000-0000"
+                style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '13px', fontWeight: '600' }}>E-mail</label>
+              <input 
+                type="email" 
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                placeholder="cliente@email.com"
                 style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px' }}
               />
             </div>
