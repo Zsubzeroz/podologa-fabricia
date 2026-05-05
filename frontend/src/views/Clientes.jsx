@@ -67,16 +67,10 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
   };
 
   const handleDelete = (id) => {
-    console.log('BOTÃO EXCLUIR CLICADO. ID:', id);
-    if (window.confirm('Tem certeza de que deseja excluir este item?')) {
-      console.log('Confirmação ACEITA pelo usuário.');
-      const updated = ClientManager.remove(id);
-      console.log('Manager removeu o item. Novo total:', updated.length);
-      setClientes(updated);
-      console.log('Estado setClientes chamado.');
-    } else {
-      console.log('Confirmação NEGADA pelo usuário.');
-    }
+    console.log('TENTANDO EXCLUIR SEM CONFIRMAÇÃO. ID:', id);
+    const updated = ClientManager.remove(id);
+    console.log('Item removido. Novo total:', updated.length);
+    setClientes(updated);
   };
 
   const filtered = clientes.filter(c => 
@@ -196,18 +190,18 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                         <button 
-                          onClick={() => handleEdit(c)}
-                          style={{ padding: '8px', background: '#eff6ff', color: '#2563eb', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-                          title="Editar Cliente"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button 
                           onClick={() => handleDelete(c.id)}
                           style={{ padding: '8px', background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
                           title="Excluir Cliente"
                         >
                           <Trash2 size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleEdit(c)}
+                          style={{ padding: '8px', background: '#eff6ff', color: '#2563eb', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                          title="Editar Cliente"
+                        >
+                          <Edit size={16} />
                         </button>
                       </div>
                     </td>
