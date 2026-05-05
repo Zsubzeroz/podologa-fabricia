@@ -148,7 +148,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
             setViewMode('Dia');
           }}
           style={{ 
-            background: isToday ? '#f0fdf4' : '#fff', 
+            background: blocked ? '#fef2f2' : (isToday ? '#f0fdf4' : '#fff'), 
             height: '120px', 
             border: '1px solid #e5e7eb', 
             padding: '8px', 
@@ -164,7 +164,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
             <span style={{ 
               fontWeight: 'bold', 
               fontSize: '0.9rem', 
-              color: isToday ? '#16a34a' : '#374151',
+              color: blocked ? '#991b1b' : (isToday ? '#16a34a' : '#374151'),
               background: isToday ? '#fff' : 'transparent',
               width: '24px',
               height: '24px',
@@ -176,7 +176,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
             }}>
               {d}
             </span>
-            {blocked && <span style={{ fontSize: '0.6rem', background: '#fee2e2', color: '#ef4444', padding: '2px 4px', borderRadius: '4px', fontWeight: 'bold' }}>BLOQUEADO</span>}
+            {blocked && <span style={{ fontSize: '0.6rem', background: '#fee2e2', color: '#991b1b', padding: '2px 4px', borderRadius: '4px', fontWeight: 'bold' }}>BLOQUEADO</span>}
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -307,8 +307,8 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
               <tbody>
                 {hours.length === 0 ? (
                   <tr>
-                    <td colSpan="2" style={{ padding: '60px', textAlign: 'center', color: '#9ca3af', fontWeight: '600' }}>
-                      A clínica está fechada neste dia.
+                    <td colSpan="2" style={{ padding: '60px', textAlign: 'center', color: '#9ca3af', fontWeight: '600', background: '#fef2f2' }}>
+                      <div style={{ color: '#991b1b', fontWeight: '800' }}>A clínica está fechada neste dia.</div>
                     </td>
                   </tr>
                 ) : hours.map(hour => {
@@ -317,8 +317,8 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                   const block = isTimeBlocked(hourSt);
                   
                   return (
-                    <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                      <td style={{ padding: '20px', color: '#111827', fontSize: '1.1rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: '#fcfcfc', textAlign: 'center' }}>
+                    <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6', background: block && !block.startTime ? '#fff1f2' : '#fff' }}>
+                      <td style={{ padding: '20px', color: '#111827', fontSize: '1.1rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: block && !block.startTime ? '#ffe4e6' : '#fcfcfc', textAlign: 'center' }}>
                         {hour}h
                       </td>
                       <td 
