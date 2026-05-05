@@ -272,6 +272,37 @@ export default function ConfiguracoesGeral() {
           </div>
         </div>
 
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
+            <Save size={20} color="#0f3d2e" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>Backup de Segurança</h3>
+          </div>
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <button 
+              type="button"
+              onClick={() => {
+                const data = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                  const key = localStorage.key(i);
+                  data[key] = localStorage.getItem(key);
+                }
+                const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_podologia_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+                a.click();
+              }}
+              style={{ backgroundColor: '#10b981', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+            >
+              EXPORTAR TUDO (BACKUP)
+            </button>
+            <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+              Use este botão para salvar uma cópia de todos os seus dados (clientes, fichas, agenda) em um arquivo no seu computador ou tablet.
+            </p>
+          </div>
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', marginTop: '10px' }}>
           {saved && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: '800', fontSize: '1rem' }}>

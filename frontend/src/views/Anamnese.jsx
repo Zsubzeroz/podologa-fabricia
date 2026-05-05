@@ -1,6 +1,80 @@
-import { useState, useEffect } from 'react';
-import { ClipboardList, Plus, Search, Trash2, Edit, Printer, X, User, FileText, History } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ClipboardList, Plus, Search, Trash2, Edit, Printer, X, User, FileText, History, RotateCcw, Check } from 'lucide-react';
 import { SecurityManager } from '../utils/EntityManager';
+
+// Componente de Assinatura Digital
+const SignaturePad = ({ onSave, onClear }) => {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+  }, []);
+
+  const startDrawing = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    e.preventDefault();
+  };
+
+  const endDrawing = () => {
+    setIsDrawing(false);
+    const canvas = canvasRef.current;
+    onSave(canvas.toDataURL());
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    onClear();
+  };
+
+  return (
+    <div style={{ border: '2px dashed #ccc', borderRadius: '8px', background: '#fff', position: 'relative' }}>
+      <canvas
+        ref={canvasRef}
+        width={600}
+        height={150}
+        onMouseDown={startDrawing}
+        onMouseMove={draw}
+        onMouseUp={endDrawing}
+        onTouchStart={startDrawing}
+        onTouchMove={draw}
+        onTouchEnd={endDrawing}
+        style={{ cursor: 'crosshair', width: '100%', display: 'block' }}
+      />
+      <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px' }}>
+        <button type="button" onClick={clear} style={{ background: '#f3f4f6', border: '1px solid #ddd', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+          <RotateCcw size={14} /> Limpar
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function Anamnese() {
   // Tabs: 'modelos' or 'pacientes'
@@ -243,7 +317,16 @@ Assinatura do Profissional: _______________________________`
     formatoUngueal: 'Normal',
     obsPD: '',
     obsPE: '',
-    procedimento: ''
+    procedimento: '',
+    // Novos campos baseados na imagem
+    testes: {
+      perfusao: 'Normal', perfusaoPD: '', perfusaoPE: '',
+      digitoPressao: 'Normal', digitoPressaoPD: '', digitoPressaoPE: '',
+      monofilamento: 'Normal', monofilamentoPD: '', monofilamentoPE: '',
+      pulso: 'Presente', pulsoPD: '', pulsoPE: '',
+      tibial: 'Presente', tibialPD: '', tibialPE: ''
+    },
+    assinatura: null
   });
 
   useEffect(() => {
@@ -339,6 +422,12 @@ Assinatura do Profissional: _______________________________`
         ...prev,
         patologias: { ...prev.patologias, [p]: value }
       }));
+    } else if (field.startsWith('testes.')) {
+      const t = field.split('.')[1];
+      setStructuredData(prev => ({
+        ...prev,
+        testes: { ...prev.testes, [t]: value }
+      }));
     } else {
       setStructuredData(prev => ({ ...prev, [field]: value }));
     }
@@ -346,6 +435,7 @@ Assinatura do Profissional: _______________________________`
 
   const compileStructuredToText = () => {
     const p = structuredData.patologias;
+    const t = structuredData.testes;
     const formatMark = (val) => val ? 'X' : ' ';
     
     const patologiasFormatadas = [
@@ -355,6 +445,15 @@ Assinatura do Profissional: _______________________________`
       `(${formatMark(p.onicocriptose)}) ONICOCRIPTOSE  (${formatMark(p.onicofose)}) ONICOFOSE  (${formatMark(p.exostose)}) EXOSTOSE`,
       `(${formatMark(p.granuloma)}) GRANULOMA  (${formatMark(p.verruga)}) VERRUGA  (${formatMark(p.calo)}) CALO  (${formatMark(p.calosidade)}) CALOSIDADE`
     ].join('\n');
+
+    const testesFormatados = `
+TESTES CLÍNICOS:
+- Perfusão: ${t.perfusao} [PD: ${t.perfusaoPD} | PE: ${t.perfusaoPE}]
+- Digito Pressão: ${t.digitoPressao} [PD: ${t.digitoPressaoPD} | PE: ${t.digitoPressaoPE}]
+- Teste Monofilamento: ${t.monofilamento} [PD: ${t.monofilamentoPD} | PE: ${t.monofilamentoPE}]
+- Pulso: ${t.pulso} [PD: ${t.pulsoPD} | PE: ${t.pulsoPE}]
+- Tibial: ${t.tibial} [PD: ${t.tibialPD} | PE: ${t.tibialPE}]
+`;
 
     return `FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA
 
@@ -369,6 +468,8 @@ AVALIAÇÃO FÍSICA E HÁBITOS:
 
 PATOLOGIAS IDENTIFICADAS:
 ${patologiasFormatadas}
+
+${testesFormatados}
 
 FORMATO UNGUEAL: ${structuredData.formatoUngueal}
 
@@ -391,7 +492,8 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
     const template = fichas.find(f => f.id.toString() === fillData.templateId.toString());
 
     // If it's the Anamnesis template (id 1), use the compiled structured text
-    const finalConteudo = fillData.templateId.toString() === '1' 
+    const isAnamnesis = fillData.templateId.toString() === '1';
+    const finalConteudo = isAnamnesis 
       ? compileStructuredToText() 
       : fillData.conteudo;
 
@@ -402,6 +504,7 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
       templateId: fillData.templateId,
       templateName: template ? template.nome : 'Desconhecido',
       conteudo: finalConteudo,
+      signature: isAnamnesis ? structuredData.assinatura : null,
       date: new Date().toISOString()
     };
 
@@ -778,6 +881,38 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                     </div>
                   </div>
 
+                  {/* Clinical Tests Section */}
+                  <div>
+                    <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>TESTES CLÍNICOS</h5>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {[
+                        { label: 'Perfusão', key: 'perfusao' },
+                        { label: 'Dígito Pressão', key: 'digitoPressao' },
+                        { label: 'Teste Monofilamento', key: 'monofilamento' },
+                        { label: 'Pulso', key: 'pulso' },
+                        { label: 'Tibial', key: 'tibial' }
+                      ].map(test => (
+                        <div key={test.key} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', alignItems: 'center' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 'bold' }}>{test.label}</label>
+                          <input 
+                            type="text" 
+                            placeholder="P.D." 
+                            value={structuredData.testes[`${test.key}PD`]} 
+                            onChange={(e) => handleStructuredChange(`testes.${test.key}PD`, e.target.value)} 
+                            style={{ padding: '4px', fontSize: '12px', border: '1px solid #ddd', borderRadius: '4px' }} 
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="P.E." 
+                            value={structuredData.testes[`${test.key}PE`]} 
+                            onChange={(e) => handleStructuredChange(`testes.${test.key}PE`, e.target.value)} 
+                            style={{ padding: '4px', fontSize: '12px', border: '1px solid #ddd', borderRadius: '4px' }} 
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Observations Section */}
                   <div>
                     <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>OBSERVAÇÕES E PROCEDIMENTO</h5>
@@ -788,6 +923,20 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                       </div>
                       <textarea placeholder="Descrição do Procedimento Realizado..." value={structuredData.procedimento} onChange={(e) => handleStructuredChange('procedimento', e.target.value)} style={{ padding: '8px', border: '1px solid #ddd', borderRadius: '4px', minHeight: '80px' }} />
                     </div>
+                  </div>
+
+                  {/* Signature Section */}
+                  <div>
+                    <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>ASSINATURA DO PACIENTE (Tablet)</h5>
+                    <SignaturePad 
+                      onSave={(data) => handleStructuredChange('assinatura', data)} 
+                      onClear={() => handleStructuredChange('assinatura', null)} 
+                    />
+                    {structuredData.assinatura && (
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Check size={14} /> Assinatura capturada com sucesso!
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -838,6 +987,24 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
               <div style={{ lineHeight: '1.6' }}>
                 {printItem.conteudo || 'Este documento não possui conteúdo.'}
               </div>
+
+              {printItem.signature && (
+                <div style={{ marginTop: '40px', borderTop: '1px solid #000', paddingTop: '10px', maxWidth: '300px' }}>
+                  <img src={printItem.signature} alt="Assinatura" style={{ width: '100%', maxHeight: '100px', objectFit: 'contain' }} />
+                  <p style={{ margin: 0, fontSize: '12px', textAlign: 'center', fontWeight: 'bold' }}>ASSINATURA DO PACIENTE</p>
+                </div>
+              )}
+
+              {printItem.isPatientForm && !printItem.signature && (
+                <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between' }}>
+                  <div style={{ borderTop: '1px solid #000', width: '200px', textAlign: 'center', fontSize: '11px', paddingTop: '5px' }}>
+                    ASSINATURA DO PACIENTE
+                  </div>
+                  <div style={{ borderTop: '1px solid #000', width: '200px', textAlign: 'center', fontSize: '11px', paddingTop: '5px' }}>
+                    ASSINATURA DO PROFISSIONAL
+                  </div>
+                </div>
+              )}
 
               {printItem.nome === 'FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA' && (
                 <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
