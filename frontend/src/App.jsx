@@ -125,6 +125,12 @@ function App() {
     window.localStorage.setItem('appointments', JSON.stringify(updated));
   };
 
+  const updateAppointment = (id, data) => {
+    const updated = appointments.map(appt => appt.id === id ? { ...appt, ...data } : appt);
+    setAppointments(updated);
+    window.localStorage.setItem('appointments', JSON.stringify(updated));
+  };
+
   if (isClientPath) return <PublicPortal />;
   if (isAdminPath && !auth) return <Login onLogin={setAuth} />;
   
@@ -136,6 +142,7 @@ function App() {
           <Agenda 
             appointments={appointments} 
             onCancelAppointment={cancelAppointment}
+            onUpdateAppointment={updateAppointment}
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
             onAddAppointment={handleAddAppointment}

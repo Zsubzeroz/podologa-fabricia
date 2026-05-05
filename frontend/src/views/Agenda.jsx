@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal } from 'lucide-react';
 import { AppointmentManager } from '../utils/EntityManager';
 
-export default function Agenda({ appointments, onCancelAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
+export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia');
 
   const getWorkHoursForDay = (dateObj) => {
@@ -70,15 +70,23 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
   const isTimeBlocked = (hourSt) => {
     const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
     return blockedDays.find(b => {
-      // Check if current date is within the range [b.date, b.endDate]
       const startDate = b.date;
       const endDate = b.endDate || b.date;
-      
       if (currentYMD < startDate || currentYMD > endDate) return false;
-      
       if (!b.startTime && !b.endTime) return true; 
       return hourSt >= b.startTime && hourSt < b.endTime;
     });
+  };
+
+  const getStatusStyles = (status) => {
+    switch (status) {
+      case 'Confirmado':
+        return { background: '#eff6ff', border: '1px solid #3b82f6', color: '#1e40af' };
+      case 'Atendido':
+        return { background: '#f3f4f6', border: '1px solid #9ca3af', color: '#374151', opacity: 0.8 };
+      default: // Agendado
+        return { background: '#ecfdf5', border: '1px solid #10b981', color: '#065f46' };
+    }
   };
 
   return (
@@ -112,100 +120,120 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
       </div>
 
       <div style={{ border: '1px solid #e5e7eb', borderRadius: '12px', background: '#fff', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-              <th style={{ width: '100px', padding: '15px', textAlign: 'center', color: '#6b7280', fontSize: '0.75rem', fontWeight: '800' }}>HORÁRIO</th>
-              <th style={{ padding: '15px', textAlign: 'left', color: '#6b7280', fontSize: '0.75rem', fontWeight: '800' }}>PACIENTES / DISPONIBILIDADE</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hours.length === 0 ? (
-              <tr>
-                <td colSpan="2" style={{ padding: '60px', textAlign: 'center', color: '#9ca3af', fontWeight: '600' }}>
-                  A clínica está fechada neste dia.
-                </td>
+        <div className="sa-table-container">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                <th style={{ width: '100px', padding: '15px', textAlign: 'center', color: '#6b7280', fontSize: '0.75rem', fontWeight: '800' }}>HORÁRIO</th>
+                <th style={{ padding: '15px', textAlign: 'left', color: '#6b7280', fontSize: '0.75rem', fontWeight: '800' }}>PACIENTES / DISPONIBILIDADE</th>
               </tr>
-            ) : hours.map(hour => {
-              const hourSt = `${hour.toString().padStart(2, '0')}:00`;
-              const apptsInHour = appointments.filter(a => a.date === currentYMD && parseInt(a.startTime.split(':')[0], 10) === hour);
-              const block = isTimeBlocked(hourSt);
-              
-              return (
-                <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '20px', color: '#111827', fontSize: '1.1rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: '#fcfcfc', textAlign: 'center' }}>
-                    {hour}h
-                  </td>
-                  <td 
-                    style={{ padding: '8px 15px', position: 'relative', cursor: apptsInHour.length === 0 && !block ? 'pointer' : 'default' }}
-                    onClick={() => { if (apptsInHour.length === 0 && !block) onAddAppointment(currentDate, hourSt); }}
-                  >
-                    {apptsInHour.length > 0 ? (
-                      apptsInHour.map(appt => (
-                        <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', background: '#ecfdf5', border: '1px solid #10b981', padding: '12px 18px', borderRadius: '10px', color: '#065f46', marginBottom: apptsInHour.length > 1 ? '8px' : 0 }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '800', fontSize: '1rem' }}>{appt.clientName}</div>
-                            <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
-                          </div>
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onGenerateReceipt(appt.clientName, appt.service);
-                              }}
-                              style={{ background: '#fff', border: '1px solid #10b981', color: '#065f46', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
-                            >
-                              <FileText size={14} /> RECIBO
-                            </button>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}.`;
-                                window.open(`https://wa.me/55${(appt.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
-                              }}
-                              style={{ background: '#25d366', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
-                            >
-                              <Smartphone size={14} /> WHATSAPP
-                            </button>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); onCancelAppointment(appt.id); }} 
-                              style={{ background: '#fee2e2', border: 'none', color: '#ef4444', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
-                            >
-                              CANCELAR
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    ) : block ? (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fef2f2', border: '1px dashed #fca5a5', color: '#991b1b', padding: '12px 18px', borderRadius: '10px' }}>
-                        <span style={{ fontWeight: '600' }}>⛔ BLOQUEADO: {block.description}</span>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleUnblockHour(block.id); }}
-                          style={{ background: '#991b1b', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}
-                        >
-                          LIBERAR
-                        </button>
-                      </div>
-                    ) : (
-                      <div 
-                        className="agenda-slot-empty"
-                        style={{ height: '50px', display: 'flex', alignItems: 'center', color: '#9ca3af', fontSize: '0.9rem', fontStyle: 'italic', transition: 'all 0.2s' }}
-                      >
-                        <Plus size={16} style={{ marginRight: '8px', opacity: 0.5 }} /> Clique para agendar um paciente às {hourSt}...
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleBlockHour(hourSt); }}
-                          style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #d1d5db', color: '#9ca3af', padding: '4px 10px', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}
-                        >
-                          BLOQUEAR
-                        </button>
-                      </div>
-                    )}
+            </thead>
+            <tbody>
+              {hours.length === 0 ? (
+                <tr>
+                  <td colSpan="2" style={{ padding: '60px', textAlign: 'center', color: '#9ca3af', fontWeight: '600' }}>
+                    A clínica está fechada neste dia.
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ) : hours.map(hour => {
+                const hourSt = `${hour.toString().padStart(2, '0')}:00`;
+                const apptsInHour = appointments.filter(a => a.date === currentYMD && parseInt(a.startTime.split(':')[0], 10) === hour);
+                const block = isTimeBlocked(hourSt);
+                
+                return (
+                  <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '20px', color: '#111827', fontSize: '1.1rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: '#fcfcfc', textAlign: 'center' }}>
+                      {hour}h
+                    </td>
+                    <td 
+                      style={{ padding: '8px 15px', position: 'relative', cursor: apptsInHour.length === 0 && !block ? 'pointer' : 'default' }}
+                      onClick={() => { if (apptsInHour.length === 0 && !block) onAddAppointment(currentDate, hourSt); }}
+                    >
+                      {apptsInHour.length > 0 ? (
+                        apptsInHour.map(appt => {
+                          const statusStyle = getStatusStyles(appt.status);
+                          return (
+                            <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', ...statusStyle, padding: '12px 18px', borderRadius: '10px', marginBottom: apptsInHour.length > 1 ? '8px' : 0, transition: 'all 0.3s' }}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: '800', fontSize: '1rem' }}>{appt.clientName}</div>
+                                <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
+                                <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase' }}>● {appt.status || 'Agendado'}</div>
+                              </div>
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <select 
+                                  value={appt.status || 'Agendado'}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    onUpdateAppointment(appt.id, { status: e.target.value });
+                                  }}
+                                  style={{ background: '#fff', border: `1px solid ${statusStyle.color}`, color: statusStyle.color, padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', outline: 'none' }}
+                                >
+                                  <option value="Agendado">Agendado</option>
+                                  <option value="Confirmado">Confirmado</option>
+                                  <option value="Atendido">Atendido</option>
+                                </select>
+
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onGenerateReceipt(appt.clientName, appt.service);
+                                  }}
+                                  style={{ background: '#fff', border: '1px solid #d1d5db', color: '#4b5563', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                >
+                                  <FileText size={14} /> RECIBO
+                                </button>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}.`;
+                                    window.open(`https://wa.me/55${(appt.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                                  }}
+                                  style={{ background: '#25d366', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                >
+                                  <Smartphone size={14} /> WHATSAPP
+                                </button>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); onCancelAppointment(appt.id); }} 
+                                  style={{ background: '#fee2e2', border: 'none', color: '#ef4444', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                >
+                                  CANCELAR
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : block ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fef2f2', border: '1px dashed #fca5a5', color: '#991b1b', padding: '12px 18px', borderRadius: '10px' }}>
+                          <span style={{ fontWeight: '600' }}>⛔ BLOQUEADO: {block.description}</span>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleUnblockHour(block.id); }}
+                            style={{ background: '#991b1b', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}
+                          >
+                            LIBERAR
+                          </button>
+                        </div>
+                      ) : (
+                        <div 
+                          className="agenda-slot-empty"
+                          style={{ height: '50px', display: 'flex', alignItems: 'center', color: '#9ca3af', fontSize: '0.9rem', fontStyle: 'italic', transition: 'all 0.2s' }}
+                        >
+                          <Plus size={16} style={{ marginRight: '8px', opacity: 0.5 }} /> Clique para agendar um paciente às {hourSt}...
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleBlockHour(hourSt); }}
+                            style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #d1d5db', color: '#9ca3af', padding: '4px 10px', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}
+                          >
+                            BLOQUEAR
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <style>{`
