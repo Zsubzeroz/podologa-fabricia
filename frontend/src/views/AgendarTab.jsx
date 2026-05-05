@@ -130,11 +130,9 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     onSave({ ...formData, endTime });
     alert('Agendamento realizado com sucesso!');
     
-    // Auto-ask if wants to send WhatsApp
+    // AUTO-TRIGGER WHATSAPP FOR CLIENT
     if (formData.phone) {
-      if (window.confirm('Deseja enviar a confirmação por WhatsApp para o cliente?')) {
-        sendWhatsAppConfirmation();
-      }
+      sendWhatsAppConfirmation();
     }
   };
 

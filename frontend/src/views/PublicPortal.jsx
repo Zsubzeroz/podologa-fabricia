@@ -572,6 +572,13 @@ export default function PublicPortal() {
                     const updated = [...currentAppts, newAppointment];
                     window.localStorage.setItem('appointments', JSON.stringify(updated));
                     window.dispatchEvent(new Event('storage'));
+                    
+                    // AUTO-TRIGGER WHATSAPP
+                    const formattedDate = selectedDate.split('-').reverse().join('/');
+                    const message = `Olá Dra. Fabrícia! Você tem um novo agendamento online:%0A%0A*Cliente:* ${clientName}%0A*Serviço:* ${selectedService.name}%0A*Data:* ${formattedDate}%0A*Horário:* ${selectedTime}%0A%0A_Favor confirmar o agendamento!_`;
+                    const waUrl = `https://wa.me/5519997270910?text=${message}`;
+                    window.open(waUrl, '_blank');
+                    
                     setIsConfirmed(true);
                   }}
                   style={{ background: '#c6a75e', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: '100%', marginTop: '10px' }}
