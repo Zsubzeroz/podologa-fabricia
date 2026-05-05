@@ -24,14 +24,14 @@ class EntityManager {
   }
 
   remove(id) {
-    const items = this.getAll().filter(item => item.id !== id);
+    const items = this.getAll().filter(item => String(item.id) !== String(id));
     this.save(items);
     return items;
   }
 
   update(id, updatedData) {
     const items = this.getAll().map(item => 
-      item.id === id ? { ...item, ...updatedData } : item
+      String(item.id) === String(id) ? { ...item, ...updatedData } : item
     );
     this.save(items);
     return items;
