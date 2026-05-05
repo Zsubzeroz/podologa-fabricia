@@ -47,6 +47,7 @@ export const SaleManager = new EntityManager('vendas_list');
 export const OrcamentoManager = new EntityManager('orcamentos_list');
 export const PacoteManager = new EntityManager('pacotes_list');
 export const ProfessionalManager = new EntityManager('professionals_list');
+export const AuditManager = new EntityManager('audit_logs');
 
 export class SecurityManager {
   static getCredentials() {
@@ -66,6 +67,17 @@ export class SecurityManager {
   static verify(email, password) {
     const creds = this.getCredentials();
     return creds.email === email && creds.password === password;
+  }
+
+  static log(acao, cliente, detalhe) {
+    const user = this.getCredentials().email.split('@')[0];
+    AuditManager.add({
+      data: new Date().toLocaleString(),
+      usuario: user.charAt(0).toUpperCase() + user.slice(1),
+      acao,
+      cliente,
+      detalhe
+    });
   }
 }
 

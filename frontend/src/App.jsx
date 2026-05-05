@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import Layout from './components/Layout';
+import { SecurityManager } from './utils/EntityManager';
 
 // Core Views
 import Login from './views/Login';
@@ -135,10 +136,14 @@ function App() {
 
   const cancelAppointment = (id) => {
     if (window.confirm('Deseja realmente cancelar este agendamento?')) {
+      const appt = appointments.find(a => a.id === id);
       const updated = appointments.filter(a => a.id !== id);
       setAppointments(updated);
       window.localStorage.setItem('appointments', JSON.stringify(updated));
       window.dispatchEvent(new Event('storage'));
+      if (appt) {
+        SecurityManager.log('Agendamento Cancelado', appt.clientName, `Agendado para ${appt.date} às ${appt.startTime}`);
+      }
     }
   };
 
@@ -175,6 +180,12 @@ function App() {
     setAppointments(updated);
     window.localStorage.setItem('appointments', JSON.stringify(updated));
     window.dispatchEvent(new Event('storage'));
+
+    if (data.status) {
+      SecurityManager.log('Status de Agenda Alterado', oldAppt.clientName, `Alterado para ${data.status}`);
+    } else {
+      SecurityManager.log('Agendamento Editado', oldAppt.clientName, `Data/Hora: ${newAppt.date} ${newAppt.startTime}`);
+    }
   };
 
   if (isClientPath) return <PublicPortal />;
@@ -205,6 +216,7 @@ function App() {
                 const updated = [...appointments, { ...newAppt, id: Date.now() }];
                 setAppointments(updated);
                 window.localStorage.setItem('appointments', JSON.stringify(updated));
+                SecurityManager.log('Agendamento Criado', newAppt.clientName, `Agendado para ${newAppt.date} às ${newAppt.startTime}`);
                 resetPreSelections();
                 setCurrentView('agenda');
               }} 

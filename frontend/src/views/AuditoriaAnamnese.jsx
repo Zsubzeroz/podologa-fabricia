@@ -1,17 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, ShieldCheck, Filter, Download, ChevronRight, FileText, Calendar, User } from 'lucide-react';
+import { AuditManager } from '../utils/EntityManager';
 
 export default function AuditoriaAnamnese() {
-  const [logs] = useState([
-    { id: 1, data: '2026-04-20 14:30', usuario: 'Fabricia Rodrigues', acao: 'Alteração de Ficha', cliente: 'Maria Silva', detalhe: 'Pergunta "Diabetes" alterada para "SIM"' },
-    { id: 2, data: '2026-04-20 15:45', usuario: 'Fabricia Rodrigues', acao: 'Assinatura de Contrato', cliente: 'João Pereira', detalhe: 'Contrato de Podoprofilaxia assinado via sistema' },
-    { id: 3, data: '2026-04-21 09:12', usuario: 'Fabricia Rodrigues', acao: 'Nova Anamnese', cliente: 'Beatriz Lima', detalhe: 'Ficha inicial preenchida e salva' },
-  ]);
+  const [logs, setLogs] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const data = AuditManager.getAll().filter(log => log.acao.includes('Anamnese') || log.acao.includes('Ficha') || log.acao.includes('Contrato'));
+    setLogs(data);
+    setFiltered(data);
+  }, []);
+
+  const handleFilter = () => {
+    const result = logs.filter(log => 
+      log.usuario.toLowerCase().includes(search.toLowerCase()) || 
+      log.cliente.toLowerCase().includes(search.toLowerCase()) ||
+      log.acao.toLowerCase().includes(search.toLowerCase())
+    );
+    setFiltered(result);
+  };
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      {/* Header section */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
         <ShieldCheck size={28} color="#0f3d2e" />
         <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
@@ -27,21 +40,19 @@ export default function AuditoriaAnamnese() {
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Pesquisar</label>
             <div style={{ position: 'relative' }}>
               <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-              <input type="text" placeholder="Usuário, cliente ou ação..." style={{ width: '100%', padding: '8px 8px 8px 32px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+              <input 
+                type="text" 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Usuário, cliente ou ação..." 
+                style={{ width: '100%', padding: '8px 8px 8px 32px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} 
+              />
             </div>
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Data</label>
-            <input type="date" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
-          </div>
-
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', flex: 1 }}>
-              FILTRAR
-            </button>
-            <button style={{ backgroundColor: '#f3f4f6', color: '#374151', border: 'none', padding: '10px 15px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-              <Download size={18} />
+            <button onClick={handleFilter} style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', flex: 1 }}>
+              FILTRAR LOGS
             </button>
           </div>
         </div>
@@ -59,7 +70,7 @@ export default function AuditoriaAnamnese() {
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
+              {filtered.map((log) => (
                 <tr key={log.id}>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280', fontSize: '0.85rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -83,6 +94,11 @@ export default function AuditoriaAnamnese() {
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280', fontSize: '0.85rem' }}>{log.detalhe}</td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>Nenhum registro de auditoria encontrado.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

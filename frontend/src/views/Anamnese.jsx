@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ClipboardList, Plus, Search, Trash2, Edit, Printer, X, User, FileText, History } from 'lucide-react';
+import { SecurityManager } from '../utils/EntityManager';
 
 export default function Anamnese() {
   // Tabs: 'modelos' or 'pacientes'
@@ -281,22 +282,32 @@ Assinatura do Profissional: _______________________________`
     if (isEditing) {
       const updated = fichas.map(f => f.id === editId ? { ...formData, id: editId } : f);
       setFichas(updated);
+      SecurityManager.log('Modelo Alterado', 'SISTEMA', `Modelo: ${formData.nome}`);
     } else {
       const newF = { id: Date.now(), ...formData };
       setFichas([...fichas, newF]);
+      SecurityManager.log('Novo Modelo Criado', 'SISTEMA', `Modelo: ${formData.nome}`);
     }
     setShowModal(false);
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Tem certeza de que deseja excluir este modelo?')) {
+      const ficha = fichas.find(f => f.id === id);
       setFichas(fichas.filter(f => f.id !== id));
+      if (ficha) {
+        SecurityManager.log('Modelo Excluído', 'SISTEMA', `Modelo: ${ficha.nome}`);
+      }
     }
   };
 
   const handleDeletePatientForm = (id) => {
     if (window.confirm('Tem certeza de que deseja excluir esta ficha de paciente?')) {
+      const form = patientForms.find(f => f.id === id);
       setPatientForms(patientForms.filter(f => f.id !== id));
+      if (form) {
+        SecurityManager.log('Ficha Excluída', form.clientName, `Ficha: ${form.templateName}`);
+      }
     }
   };
 
@@ -395,6 +406,7 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
     };
 
     setPatientForms([newForm, ...patientForms]);
+    SecurityManager.log('Nova Ficha de Paciente', newForm.clientName, `Documento: ${newForm.templateName}`);
     setShowFillModal(false);
   };
 
