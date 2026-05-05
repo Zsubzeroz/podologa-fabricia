@@ -402,7 +402,7 @@ export default function PublicPortal() {
                       });
 
                       if (availableSlots.length === 0) {
-                        return <p style={{ color: '#ef4444', marginTop: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Nenhum horário disponível para este dia.</p>;
+                        return <p style={{ color: '#ef4444', marginTop: '5px', fontSize: '0.9rem', fontWeight: 'bold' }}>Nenhum horário encontrado para este dia. Tente outra data.</p>;
                       }
 
                       return (
