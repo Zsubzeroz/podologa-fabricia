@@ -1,44 +1,56 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Layout from './components/Layout';
+
+// Core Views
 import Login from './views/Login';
 import PublicPortal from './views/PublicPortal';
-import Agenda from './views/Agenda';
-import Caixa from './views/Caixa';
-import Produtos from './views/Produtos';
-import Clientes from './views/Clientes';
-import Anamnese from './views/Anamnese';
-import Profissional from './views/Profissional';
-import Financeiro from './views/Financeiro';
-import FinanceiroMeusCaixas from './views/FinanceiroMeusCaixas';
-import FinanceiroCategoria from './views/FinanceiroCategoria';
-import FinanceiroConta from './views/FinanceiroConta';
-import FinanceiroFormasPagamento from './views/FinanceiroFormasPagamento';
-import AnaliseFluxoAnual from './views/AnaliseFluxoAnual';
-import AnaliseFluxoMensal from './views/AnaliseFluxoMensal';
-import ComprasCompra from './views/ComprasCompra';
-import ComprasFornecedor from './views/ComprasFornecedor';
-import CadastrosCampoPersonalizado from './views/CadastrosCampoPersonalizado';
-import CadastrosComoConheceu from './views/CadastrosComoConheceu';
-import CadastrosFeriado from './views/CadastrosFeriado';
-import CadastrosGrupos from './views/CadastrosGrupos';
-import CadastrosMarcas from './views/CadastrosMarcas';
-import CadastrosEquipamentos from './views/CadastrosEquipamentos';
-import ConsultaAgendas from './views/ConsultaAgendas';
-import ConsultaAnalise from './views/ConsultaAnalise';
-import ComissaoProfissional from './views/ComissaoProfissional';
-import ProdutosEstoque from './views/ProdutosEstoque';
-import ConsultaPacotes from './views/ConsultaPacotes';
-import AuditoriaAgenda from './views/AuditoriaAgenda';
-import AuditoriaAnamnese from './views/AuditoriaAnamnese';
-import ConsultaOrcamentos from './views/ConsultaOrcamentos';
-import ConsultaVendas from './views/ConsultaVendas';
-import ConsultaVendasPorCliente from './views/ConsultaVendasPorCliente';
-import ConfiguracoesDadosEmpresa from './views/ConfiguracoesDadosEmpresa';
-import ConfiguracoesGeral from './views/ConfiguracoesGeral';
-import AlterarSenha from './views/AlterarSenha';
 import Dashboard from './views/Dashboard';
-import AgendarTab from './views/AgendarTab';
-import NfsE from './views/NfsE';
+import Agenda from './views/Agenda';
+
+// Lazy Loaded Views
+const Caixa = lazy(() => import('./views/Caixa'));
+const Produtos = lazy(() => import('./views/Produtos'));
+const Clientes = lazy(() => import('./views/Clientes'));
+const Anamnese = lazy(() => import('./views/Anamnese'));
+const Profissional = lazy(() => import('./views/Profissional'));
+const Financeiro = lazy(() => import('./views/Financeiro'));
+const FinanceiroMeusCaixas = lazy(() => import('./views/FinanceiroMeusCaixas'));
+const FinanceiroCategoria = lazy(() => import('./views/FinanceiroCategoria'));
+const FinanceiroConta = lazy(() => import('./views/FinanceiroConta'));
+const FinanceiroFormasPagamento = lazy(() => import('./views/FinanceiroFormasPagamento'));
+const AnaliseFluxoAnual = lazy(() => import('./views/AnaliseFluxoAnual'));
+const AnaliseFluxoMensal = lazy(() => import('./views/AnaliseFluxoMensal'));
+const ComprasCompra = lazy(() => import('./views/ComprasCompra'));
+const ComprasFornecedor = lazy(() => import('./views/ComprasFornecedor'));
+const CadastrosCampoPersonalizado = lazy(() => import('./views/CadastrosCampoPersonalizado'));
+const CadastrosComoConheceu = lazy(() => import('./views/CadastrosComoConheceu'));
+const CadastrosFeriado = lazy(() => import('./views/CadastrosFeriado'));
+const CadastrosGrupos = lazy(() => import('./views/CadastrosGrupos'));
+const CadastrosMarcas = lazy(() => import('./views/CadastrosMarcas'));
+const CadastrosEquipamentos = lazy(() => import('./views/CadastrosEquipamentos'));
+const ConsultaAgendas = lazy(() => import('./views/ConsultaAgendas'));
+const ConsultaAnalise = lazy(() => import('./views/ConsultaAnalise'));
+const ComissaoProfissional = lazy(() => import('./views/ComissaoProfissional'));
+const ProdutosEstoque = lazy(() => import('./views/ProdutosEstoque'));
+const ConsultaPacotes = lazy(() => import('./views/ConsultaPacotes'));
+const AuditoriaAgenda = lazy(() => import('./views/AuditoriaAgenda'));
+const AuditoriaAnamnese = lazy(() => import('./views/AuditoriaAnamnese'));
+const ConsultaOrcamentos = lazy(() => import('./views/ConsultaOrcamentos'));
+const ConsultaVendas = lazy(() => import('./views/ConsultaVendas'));
+const ConsultaVendasPorCliente = lazy(() => import('./views/ConsultaVendasPorCliente'));
+const ConfiguracoesDadosEmpresa = lazy(() => import('./views/ConfiguracoesDadosEmpresa'));
+const ConfiguracoesGeral = lazy(() => import('./views/ConfiguracoesGeral'));
+const AlterarSenha = lazy(() => import('./views/AlterarSenha'));
+const AgendarTab = lazy(() => import('./views/AgendarTab'));
+const NfsE = lazy(() => import('./views/NfsE'));
+
+// Loading component
+const LoadingSpinner = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', padding: '50px' }}>
+    <div style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #0f3d2e', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+  </div>
+);
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -47,11 +59,6 @@ function App() {
   const [preSelectedTime, setPreSelectedTime] = useState('10:00');
   const [preSelectedClient, setPreSelectedClient] = useState(null);
   const [preSelectedService, setPreSelectedService] = useState(null);
-
-  const resetPreSelections = () => {
-    setPreSelectedClient(null);
-    setPreSelectedService(null);
-  };
 
   const [auth, setAuth] = useState(() => {
     const saved = window.localStorage.getItem('adminAuth');
@@ -63,11 +70,12 @@ function App() {
     return saved ? JSON.parse(saved) : [
       {
         id: 1,
-        clientName: 'Poliana',
-        service: 'Avaliação',
-        date: '2026-04-16',
-        startTime: '16:00',
-        endTime: '17:00'
+        clientName: 'Maria Silva',
+        service: 'Podologia Preventiva',
+        date: '2026-05-10',
+        startTime: '14:00',
+        endTime: '15:00',
+        status: 'Agendado'
       }
     ];
   });
@@ -119,10 +127,19 @@ function App() {
     setCurrentView('nfs');
   };
 
+  const resetPreSelections = () => {
+    setPreSelectedClient(null);
+    setPreSelectedService(null);
+    setPreSelectedTime('10:00');
+  };
+
   const cancelAppointment = (id) => {
-    const updated = appointments.filter(appt => appt.id !== id);
-    setAppointments(updated);
-    window.localStorage.setItem('appointments', JSON.stringify(updated));
+    if (window.confirm('Deseja realmente cancelar este agendamento?')) {
+      const updated = appointments.filter(a => a.id !== id);
+      setAppointments(updated);
+      window.localStorage.setItem('appointments', JSON.stringify(updated));
+      window.dispatchEvent(new Event('storage'));
+    }
   };
 
   const updateAppointment = (id, data) => {
@@ -131,24 +148,21 @@ function App() {
     
     const oldAppt = appointments[apptIndex];
     const newAppt = { ...oldAppt, ...data };
-    
-    // Auto Financial Entry when Attended
-    if (newAppt.status === 'Atendido' && oldAppt.status !== 'Atendido') {
+
+    // Automatic financial entry for 'Atendido' status
+    if (data.status === 'Atendido' && oldAppt.status !== 'Atendido') {
       const services = JSON.parse(window.localStorage.getItem('services') || '[]');
-      const serviceObj = services.find(s => s.name === newAppt.service);
-      let priceVal = 0;
-      if (serviceObj && serviceObj.price) {
-        priceVal = parseFloat(serviceObj.price.replace(/[R$\s,.]/g, '')) / 100 || 0;
-      }
+      const serviceObj = services.find(s => s.name === oldAppt.service);
+      const priceVal = serviceObj ? parseFloat(serviceObj.price) : 0;
       
       const financeiro = JSON.parse(window.localStorage.getItem('financeiro_entries') || '[]');
       const newFinanceEntry = {
         id: Date.now(),
-        data: newAppt.date,
-        descricao: `Atendimento - ${newAppt.clientName} (${newAppt.service})`,
-        tipo: 'Receber',
+        date: new Date().toISOString().split('T')[0],
+        description: `Atendimento: ${oldAppt.clientName} (${oldAppt.service})`,
+        tipo: 'Receita',
         categoria: 'Atendimento',
-        forma: 'Dinheiro', // Default
+        forma: 'Dinheiro', 
         valor: priceVal
       };
       
@@ -160,8 +174,6 @@ function App() {
     updated[apptIndex] = newAppt;
     setAppointments(updated);
     window.localStorage.setItem('appointments', JSON.stringify(updated));
-    
-    // Notify storage change
     window.dispatchEvent(new Event('storage'));
   };
 
@@ -171,91 +183,90 @@ function App() {
   if (isAdminPath && auth) {
     return (
       <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
-        {currentView === 'dashboard' && <Dashboard />}
-        {currentView === 'agenda' && (
-          <Agenda 
-            appointments={appointments} 
-            onCancelAppointment={cancelAppointment}
-            onUpdateAppointment={updateAppointment}
-            currentDate={currentDate}
-            setCurrentDate={setCurrentDate}
-            onAddAppointment={handleAddAppointment}
-            onGenerateReceipt={handleGenerateReceipt}
-          />
-        )}
-        {currentView === 'agendamento' && (
-          <AgendarTab 
-            currentDate={currentDate} 
-            preSelectedTime={preSelectedTime}
-            preSelectedClient={preSelectedClient}
-            onSave={(newAppt) => {
-              const updated = [...appointments, { ...newAppt, id: Date.now() }];
-              setAppointments(updated);
-              window.localStorage.setItem('appointments', JSON.stringify(updated));
-              resetPreSelections();
-              setCurrentView('agenda');
-            }} 
-          />
-        )}
-        {currentView === 'caixa' && <Caixa />}
-        {currentView === 'produtos' && <Produtos />}
-        {currentView === 'clientes' && (
-          <Clientes 
-            onSchedule={(clientName) => handleAddAppointment(new Date(), '10:00', clientName)}
-            onGenerateReceipt={(clientName) => handleGenerateReceipt(clientName, '')}
-          />
-        )}
-        {currentView === 'anamnese' && <Anamnese />}
-        {currentView === 'profissional' && <Profissional />}
-        {currentView === 'lancamentos' && <Financeiro />}
-        {currentView === 'meus_caixas' && <FinanceiroMeusCaixas />}
-        {currentView === 'categoria' && <FinanceiroCategoria />}
-        {currentView === 'conta' && <FinanceiroConta />}
-        {currentView === 'formas_pagamento' && <FinanceiroFormasPagamento />}
-        {currentView === 'fluxo_anual' && <AnaliseFluxoAnual />}
-        {currentView === 'fluxo_mensal' && <AnaliseFluxoMensal />}
-        {currentView === 'compra' && <ComprasCompra />}
-        {currentView === 'fornecedor' && <ComprasFornecedor />}
-        {currentView === 'campo_personalizado' && <CadastrosCampoPersonalizado />}
-        {currentView === 'como_conheceu' && <CadastrosComoConheceu />}
-        {currentView === 'feriado' && <CadastrosFeriado />}
-        {currentView === 'grupos' && <CadastrosGrupos />}
-        {currentView === 'marcas' && <CadastrosMarcas />}
-        {currentView === 'equipamentos' && <CadastrosEquipamentos />}
-        {currentView === 'consulta_agendas' && <ConsultaAgendas />}
-        {currentView === 'consulta_analise' && <ConsultaAnalise />}
-        {currentView === 'comissao' && <ComissaoProfissional />}
-        {currentView === 'estoque' && <ProdutosEstoque />}
-        {currentView === 'pacotes' && <ConsultaPacotes />}
-        {currentView === 'auditoria_agenda' && <AuditoriaAgenda />}
-        {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
-        {currentView === 'orcamentos' && <ConsultaOrcamentos />}
-        {currentView === 'vendas' && <ConsultaVendas />}
-        {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
-        {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
-        {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
-        {currentView === 'alterar_senha' && <AlterarSenha />}
-        {currentView === 'nfs' && (
-          <NfsE 
-            preSelectedClient={preSelectedClient} 
-            preSelectedService={preSelectedService} 
-            onResetSelections={resetPreSelections} 
-          />
-        )}
+        <Suspense fallback={<LoadingSpinner />}>
+          {currentView === 'dashboard' && <Dashboard />}
+          {currentView === 'agenda' && (
+            <Agenda 
+              appointments={appointments} 
+              onCancelAppointment={cancelAppointment}
+              onUpdateAppointment={updateAppointment}
+              currentDate={currentDate}
+              setCurrentDate={setCurrentDate}
+              onAddAppointment={handleAddAppointment}
+              onGenerateReceipt={handleGenerateReceipt}
+            />
+          )}
+          {currentView === 'agendamento' && (
+            <AgendarTab 
+              currentDate={currentDate} 
+              preSelectedTime={preSelectedTime}
+              preSelectedClient={preSelectedClient}
+              onSave={(newAppt) => {
+                const updated = [...appointments, { ...newAppt, id: Date.now() }];
+                setAppointments(updated);
+                window.localStorage.setItem('appointments', JSON.stringify(updated));
+                resetPreSelections();
+                setCurrentView('agenda');
+              }} 
+            />
+          )}
+          {currentView === 'caixa' && <Caixa />}
+          {currentView === 'produtos' && <Produtos />}
+          {currentView === 'clientes' && (
+            <Clientes 
+              onSchedule={(clientName) => handleAddAppointment(new Date(), '10:00', clientName)}
+              onGenerateReceipt={(clientName) => handleGenerateReceipt(clientName, '')}
+            />
+          )}
+          {currentView === 'anamnese' && <Anamnese />}
+          {currentView === 'profissional' && <Profissional />}
+          {currentView === 'lancamentos' && <Financeiro />}
+          {currentView === 'meus_caixas' && <FinanceiroMeusCaixas />}
+          {currentView === 'categoria' && <FinanceiroCategoria />}
+          {currentView === 'conta' && <FinanceiroConta />}
+          {currentView === 'formas_pagamento' && <FinanceiroFormasPagamento />}
+          {currentView === 'fluxo_anual' && <AnaliseFluxoAnual />}
+          {currentView === 'fluxo_mensal' && <AnaliseFluxoMensal />}
+          {currentView === 'compra' && <ComprasCompra />}
+          {currentView === 'fornecedor' && <ComprasFornecedor />}
+          {currentView === 'campo_personalizado' && <CadastrosCampoPersonalizado />}
+          {currentView === 'como_conheceu' && <CadastrosComoConheceu />}
+          {currentView === 'feriado' && <CadastrosFeriado />}
+          {currentView === 'grupos' && <CadastrosGrupos />}
+          {currentView === 'marcas' && <CadastrosMarcas />}
+          {currentView === 'equipamentos' && <CadastrosEquipamentos />}
+          {currentView === 'consulta_agendas' && <ConsultaAgendas />}
+          {currentView === 'consulta_analise' && <ConsultaAnalise />}
+          {currentView === 'comissao' && <ComissaoProfissional />}
+          {currentView === 'estoque' && <ProdutosEstoque />}
+          {currentView === 'pacotes' && <ConsultaPacotes />}
+          {currentView === 'auditoria_agenda' && <AuditoriaAgenda />}
+          {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
+          {currentView === 'orcamentos' && <ConsultaOrcamentos />}
+          {currentView === 'vendas' && <ConsultaVendas />}
+          {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
+          {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
+          {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
+          {currentView === 'alterar_senha' && <AlterarSenha />}
+          {currentView === 'nfs' && (
+            <NfsE 
+              preSelectedClient={preSelectedClient} 
+              preSelectedService={preSelectedService} 
+              onResetSelections={resetPreSelections} 
+            />
+          )}
+        </Suspense>
       </Layout>
     );
   }
 
-  // Fallback for non-admin paths
   return (
-    <div className="home-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f7fb', padding: '2rem' }}>
-      <div style={{ maxWidth: '500px', width: '100%', background: 'white', borderRadius: '18px', boxShadow: '0 24px 48px rgba(0,0,0,0.08)', padding: '3rem', textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '1rem' }}>Clínica Fabrícia Rodrigues</h1>
-        <p style={{ marginBottom: '2rem', color: '#555' }}>Escolha o acesso abaixo:</p>
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          <a href="/cliente" style={{ padding: '1rem 1.5rem', borderRadius: '12px', background: '#22c55e', color: 'white', textDecoration: 'none', fontWeight: '700' }}>Portal do Cliente</a>
-          <a href="/admin" style={{ padding: '1rem 1.5rem', borderRadius: '12px', background: '#2563eb', color: 'white', textDecoration: 'none', fontWeight: '700' }}>Área da Clínica</a>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#f9fafb' }}>
+      <img src="/logo.png" alt="Logo" style={{ width: '120px', height: '120px', marginBottom: '20px', borderRadius: '50%' }} />
+      <h2 style={{ color: '#0f3d2e', fontWeight: '800' }}>Clínica Fabrícia Rodrigues</h2>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '20px' }}>
+        <button onClick={() => window.location.href = '/admin'} style={{ padding: '12px 24px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Painel Administrativo</button>
+        <button onClick={() => window.location.href = '/cliente'} style={{ padding: '12px 24px', background: '#fff', color: '#0f3d2e', border: '1px solid #0f3d2e', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Portal do Cliente</button>
       </div>
     </div>
   );
