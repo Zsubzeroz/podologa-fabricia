@@ -46,6 +46,28 @@ export const ServiceManager = new EntityManager('services');
 export const SaleManager = new EntityManager('vendas_list');
 export const OrcamentoManager = new EntityManager('orcamentos_list');
 export const PacoteManager = new EntityManager('pacotes_list');
+export const ProfessionalManager = new EntityManager('professionals_list');
+
+export class SecurityManager {
+  static getCredentials() {
+    const saved = window.localStorage.getItem('admin_credentials');
+    if (saved) return JSON.parse(saved);
+    // Default fallback
+    return {
+      email: 'fabriciapodologa@gmail.com',
+      password: '1519am02'
+    };
+  }
+
+  static setCredentials(email, password) {
+    window.localStorage.setItem('admin_credentials', JSON.stringify({ email, password }));
+  }
+
+  static verify(email, password) {
+    const creds = this.getCredentials();
+    return creds.email === email && creds.password === password;
+  }
+}
 
 export class CompanySettings {
   static get() {

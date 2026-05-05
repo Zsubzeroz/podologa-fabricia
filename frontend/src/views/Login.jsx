@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LogIn } from 'lucide-react';
 import '../styles/login.css';
+import { SecurityManager } from '../utils/EntityManager';
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -11,11 +12,7 @@ export default function Login({ onLogin }) {
     e.preventDefault();
     setError('');
 
-    // Credenciais padrão
-    const adminEmail = 'fabriciapodologa@gmail.com';
-    const adminPassword = '1519am02';
-
-    if (email === adminEmail && password === adminPassword) {
+    if (SecurityManager.verify(email, password)) {
       onLogin({ role: 'admin', email });
     } else {
       setError('Email ou senha incorretos');
