@@ -67,11 +67,15 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
   };
 
   const handleDelete = (id) => {
-    console.log('Solicitação de exclusão para ID:', id);
+    console.log('BOTÃO EXCLUIR CLICADO. ID:', id);
     if (window.confirm('Tem certeza de que deseja excluir este item?')) {
+      console.log('Confirmação ACEITA pelo usuário.');
       const updated = ClientManager.remove(id);
-      console.log('Itens restantes após exclusão:', updated.length);
+      console.log('Manager removeu o item. Novo total:', updated.length);
       setClientes(updated);
+      console.log('Estado setClientes chamado.');
+    } else {
+      console.log('Confirmação NEGADA pelo usuário.');
     }
   };
 

@@ -66,11 +66,13 @@ export default function Produtos() {
   };
 
   const handleDelete = (id) => {
-    console.log('Excluindo serviço ID:', id);
+    console.log('CLIQUE EXCLUIR SERVIÇO. ID:', id);
     if (window.confirm('Deseja realmente excluir este serviço?')) {
+      console.log('Confirmação confirmada.');
       const filtered = services.filter(s => String(s.id) !== String(id));
-      console.log('Serviços restantes:', filtered.length);
+      console.log('Total após filtro:', filtered.length);
       saveToLocalStorage(filtered);
+      console.log('saveToLocalStorage chamado.');
     }
   };
 
