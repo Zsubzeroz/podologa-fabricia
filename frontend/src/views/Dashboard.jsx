@@ -15,7 +15,7 @@ export default function Dashboard({ setCurrentView }) {
       appointments: AppointmentManager.getAll().length,
       services: ServiceManager.getAll().length,
       clients: ClientManager.getAll().length,
-      sales: SaleManager.getAll().filter(s => s.status === 'PAGO').reduce((acc, s) => acc + Number(s.valor), 0)
+      sales: SaleManager.getAll().filter(s => (s.status || 'PAGO') === 'PAGO').reduce((acc, s) => acc + Number(s.total || s.valor || 0), 0)
     });
   }, []);
 
