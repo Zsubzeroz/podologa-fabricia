@@ -8,6 +8,8 @@ export default function PublicPortal() {
   const [selectedService, setSelectedService] = useState(null);
   const [selectedProfessional, setSelectedProfessional] = useState('FABRICIA RODRIGUES');
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [foundAppointments, setFoundAppointments] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
@@ -158,18 +160,72 @@ export default function PublicPortal() {
             <h2>Consultar meus Agendamentos</h2>
             
             <div className="form-group">
-              <label>Informe seu Celular</label>
+              <label>Informe seu Celular (com DDD)</label>
               <input
                 type="tel"
-                placeholder="Informe seu celular..."
+                placeholder="(XX) XXXXX-XXXX"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  let val = e.target.value;
+                  let cleaned = val.replace(/\D/g, '');
+                  if (cleaned.length > 11) cleaned = cleaned.slice(0, 11);
+                  let masked = '';
+                  if (cleaned.length > 0) masked += `(${cleaned.slice(0, 2)}`;
+                  if (cleaned.length > 2) masked += `) ${cleaned.slice(2, 7)}`;
+                  if (cleaned.length > 7) masked += `-${cleaned.slice(7, 11)}`;
+                  setPhone(masked);
+                }}
               />
             </div>
 
-            <button className="btn-consult">
+            <button 
+              className="btn-consult"
+              onClick={() => {
+                if (!phone) {
+                  alert('Por favor, informe seu celular.');
+                  return;
+                }
+                const allApps = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+                const cleanedPhone = phone.replace(/\D/g, '');
+                const userApps = allApps.filter(app => {
+                  const appPhone = app.cliente_contato ? app.cliente_contato.replace(/\D/g, '') : '';
+                  return appPhone === cleanedPhone && app.status !== 'Cancelado';
+                });
+                
+                // Sort by date/time (most recent first for future ones)
+                userApps.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+                setFoundAppointments(userApps);
+                setHasSearched(true);
+              }}
+            >
               🔍 CONSULTAR
             </button>
+
+            {hasSearched && (
+              <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+                {foundAppointments.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#6b7280', background: '#f9fafb', borderRadius: '8px' }}>
+                    <p style={{ margin: 0, fontWeight: 'bold' }}>Não há agendamento para este número.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <p style={{ fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', marginBottom: '5px' }}>Encontramos {foundAppointments.length} agendamento(s):</p>
+                    {foundAppointments.map((app, idx) => (
+                      <div key={idx} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px' }}>
+                        <div style={{ fontWeight: 'bold', color: '#166534' }}>{app.servico}</div>
+                        <div style={{ fontSize: '0.85rem', color: '#14532d' }}>
+                          📅 {app.data.split('-').reverse().join('/')} às {app.hora}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#15803d', marginTop: '4px' }}>
+                          Status: {app.status || 'Confirmado'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
