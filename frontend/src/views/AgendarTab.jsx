@@ -110,8 +110,8 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     });
 
     if (hasConflict) {
-      alert('Atenção: Este horário já possui outro agendamento. Por favor, escolha outro horário ou outra data.');
-      return;
+      const confirmOverbook = window.confirm('Atenção: Este horário já possui outro agendamento. Deseja agendar por cima mesmo assim?');
+      if (!confirmOverbook) return;
     }
 
     onSave({ ...formData, endTime });

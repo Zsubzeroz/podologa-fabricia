@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle } from 'lucide-react';
-import { AppointmentManager } from '../utils/EntityManager';
+import { AppointmentManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia');
@@ -87,6 +87,21 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
       default: // Agendado / Pendente
         return { background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b' };
     }
+  };
+
+  const handleWhatsAppReminder = (appt) => {
+    const config = GeneralSettings.get();
+    const company = CompanySettings.get();
+    let msg = config.mensagemLembrete;
+    
+    msg = msg.replace(/@CLIENTE/g, appt.clientName);
+    msg = msg.replace(/@NOMEEMPRESA/g, company.nome);
+    msg = msg.replace(/@NOMESERVICO/g, appt.service);
+    msg = msg.replace(/@DIA/g, appt.date.split('-').reverse().join('/'));
+    msg = msg.replace(/@HORA/g, appt.startTime);
+    
+    const phone = (appt.phone || appt.clientPhone || '').replace(/\D/g, '');
+    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (
@@ -198,8 +213,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const msg = `Olá ${appt.clientName}, passando para confirmar seu atendimento de ${appt.service} no dia ${appt.date} às ${appt.startTime}.`;
-                                    window.open(`https://wa.me/55${(appt.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                                    handleWhatsAppReminder(appt);
                                   }}
                                   style={{ background: '#25d366', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
                                 >

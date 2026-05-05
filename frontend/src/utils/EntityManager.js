@@ -71,7 +71,7 @@ export class GeneralSettings {
       obrigarSala: false,
       enviarLembrete: true,
       tempoLembrete: '24',
-      mensagemLembrete: 'Olá @CLIENTE, passando para confirmar seu atendimento de @NOMESERVICO amanhã, dia @DIA às @HORA. Se precisar desmarcar, nos avise com antecedência. Atenciosamente, @NOMEEMPRESA.'
+      mensagemLembrete: 'Olá @CLIENTE, passando para confirmar seu atendimento de @NOMESERVICO no dia @DIA às @HORA. Por favor, responda "SIM" para confirmar ou nos avise se precisar desmarcar. Atenciosamente, @NOMEEMPRESA.'
     };
   }
 
