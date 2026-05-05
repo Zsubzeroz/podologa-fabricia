@@ -12,8 +12,8 @@ export default function Login({ onLogin }) {
     setError('');
 
     // Credenciais padrão
-    const adminEmail = 'fabricia@clinica.com';
-    const adminPassword = 'admin123';
+    const adminEmail = 'fabriciapodologa@gmail.com';
+    const adminPassword = '1519am02';
 
     if (email === adminEmail && password === adminPassword) {
       onLogin({ role: 'admin', email });
@@ -63,8 +63,8 @@ export default function Login({ onLogin }) {
 
         <div className="login-info">
           <p><strong>Demo - Use para testar:</strong></p>
-          <p>Email: fabricia@clinica.com</p>
-          <p>Senha: admin123</p>
+          <p>Email: fabriciapodologa@gmail.com</p>
+          <p>Senha: 1519am02</p>
         </div>
       </div>
     </div>
