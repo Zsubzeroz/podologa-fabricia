@@ -349,6 +349,8 @@ export default function PublicPortal() {
                   <input 
                     type="date" 
                     value={selectedDate} 
+                    min={new Date().toISOString().split('T')[0]}
+                    max={new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]}
                     onChange={(e) => {
                       setSelectedDate(e.target.value);
                       setSelectedTime(''); // Reset time when date changes
@@ -581,10 +583,21 @@ export default function PublicPortal() {
 
                     const updated = [...currentAppts, newAppointment];
                     window.localStorage.setItem('appointments', JSON.stringify(updated));
-                    window.dispatchEvent(new Event('storage'));
                     
-                    const updated = [...currentAppts, newAppointment];
-                    window.localStorage.setItem('appointments', JSON.stringify(updated));
+                    // SYNC CLIENT TO DATABASE
+                    const currentClients = JSON.parse(window.localStorage.getItem('clientes') || '[]');
+                    const clientExists = currentClients.some(c => c.contato.replace(/\D/g, '') === clientPhone.replace(/\D/g, ''));
+                    if (!clientExists) {
+                      const newClient = {
+                        id: Date.now(),
+                        nome: clientName,
+                        contato: clientPhone,
+                        email: clientEmail,
+                        data: new Date().toLocaleDateString('pt-BR')
+                      };
+                      window.localStorage.setItem('clientes', JSON.stringify([...currentClients, newClient]));
+                    }
+
                     window.dispatchEvent(new Event('storage'));
                     
                     // DISPARO 100% AUTOMÁTICO VIA EMAILJS

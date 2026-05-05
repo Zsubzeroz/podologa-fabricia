@@ -253,6 +253,8 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
               name="date" 
               className="form-control" 
               value={formData.date} 
+              min={new Date().toISOString().split('T')[0]}
+              max={new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]}
               onChange={handleChange} 
               style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
             />
