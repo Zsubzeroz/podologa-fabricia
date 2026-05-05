@@ -321,7 +321,11 @@ export default function PublicPortal() {
                         const endTotal = startTotal + durationMinutes;
 
                         // 1. Check blocked times
-                        const matchingBlock = blockedDays.find(b => b.date === selectedDate);
+                        const matchingBlock = blockedDays.find(b => {
+                          const start = b.date;
+                          const end = b.endDate || b.date;
+                          return selectedDate >= start && selectedDate <= end;
+                        });
                         if (matchingBlock) {
                           if (!matchingBlock.startTime && !matchingBlock.endTime) return false;
                           const bStart = getMinutes(matchingBlock.startTime);
@@ -434,7 +438,11 @@ export default function PublicPortal() {
 
                     // 2. Validate against blocked dates and times
                     const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
-                    const matchingBlock = blockedDays.find(b => b.date === selectedDate);
+                    const matchingBlock = blockedDays.find(b => {
+                      const start = b.date;
+                      const end = b.endDate || b.date;
+                      return selectedDate >= start && selectedDate <= end;
+                    });
                     if (matchingBlock) {
                       if (!matchingBlock.startTime && !matchingBlock.endTime) {
                         alert(`Nesta data a clínica estará fechada por motivo de: ${matchingBlock.description}`);

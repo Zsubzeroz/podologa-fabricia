@@ -85,7 +85,11 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
 
     // Validate against blocked days/times
     const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
-    const matchingBlock = blockedDays.find(b => b.date === formData.date);
+    const matchingBlock = blockedDays.find(b => {
+      const start = b.date;
+      const end = b.endDate || b.date;
+      return formData.date >= start && formData.date <= end;
+    });
     if (matchingBlock) {
       if (!matchingBlock.startTime && !matchingBlock.endTime) {
         alert(`O profissional está ausente neste dia por motivo de: ${matchingBlock.description}`);
