@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, Package, Users, DollarSign, Plus, ClipboardList, ShoppingBag, ArrowRight } from 'lucide-react';
 import { ClientManager, ServiceManager, AppointmentManager, SaleManager } from '../utils/EntityManager';
 
-export default function Dashboard() {
+export default function Dashboard({ setCurrentView }) {
   const [stats, setStats] = useState({
     appointments: 0,
     services: 0,
@@ -74,6 +74,7 @@ export default function Dashboard() {
             {quickActions.map((action, i) => (
               <button 
                 key={i}
+                onClick={() => setCurrentView(action.view)}
                 style={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
@@ -102,20 +103,23 @@ export default function Dashboard() {
               Precisando de ajuda com o sistema? Fale diretamente com o seu desenvolvedor pelo WhatsApp: <strong>(19) 99722-2694</strong>.
             </p>
           </div>
-          <button style={{ 
-            width: '100%', 
-            padding: '15px', 
-            borderRadius: '10px', 
-            border: 'none', 
-            background: '#0f3d2e', 
-            color: 'white', 
-            fontWeight: 'bold', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            gap: '10px',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => setCurrentView('consulta_analise')}
+            style={{ 
+              width: '100%', 
+              padding: '15px', 
+              borderRadius: '10px', 
+              border: 'none', 
+              background: '#0f3d2e', 
+              color: 'white', 
+              fontWeight: 'bold', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '10px',
+              cursor: 'pointer'
+            }}
+          >
             Ver Relatórios Completos <ArrowRight size={18} />
           </button>
         </div>

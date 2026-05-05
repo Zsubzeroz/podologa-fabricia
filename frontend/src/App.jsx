@@ -184,7 +184,7 @@ function App() {
     return (
       <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
         <Suspense fallback={<LoadingSpinner />}>
-          {currentView === 'dashboard' && <Dashboard />}
+          {currentView === 'dashboard' && <Dashboard setCurrentView={setCurrentView} />}
           {currentView === 'agenda' && (
             <Agenda 
               appointments={appointments} 
