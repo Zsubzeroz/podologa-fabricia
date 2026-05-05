@@ -601,6 +601,19 @@ Assinatura do Profissional: _______________________________`
                 {printItem.conteudo || 'Este documento não possui conteúdo.'}
               </div>
 
+              {printItem.nome === 'FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA' && (
+                <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                  <div style={{ border: '1px solid #e5e7eb', padding: '15px', borderRadius: '8px' }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', textAlign: 'center', fontWeight: 'bold' }}>MAPA DE AVALIAÇÃO (DORSAL E PLANTAR)</h4>
+                    <img src="/assets/foot_views.png" alt="Vistas Podológicas" style={{ width: '100%', maxHeight: '400px', objectFit: 'contain' }} />
+                  </div>
+                  <div style={{ border: '1px solid #e5e7eb', padding: '15px', borderRadius: '8px' }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', textAlign: 'center', fontWeight: 'bold' }}>REFERÊNCIA DE FORMATOS UNGUEAIS</h4>
+                    <img src="/assets/nail_shapes.png" alt="Formatos Ungueais" style={{ width: '100%', maxHeight: '400px', objectFit: 'contain' }} />
+                  </div>
+                </div>
+              )}
+
               <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between', gap: '40px' }}>
                 <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
                   <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
@@ -644,9 +657,22 @@ Assinatura do Profissional: _______________________________`
               </div>
             )}
 
-            <div style={{ minHeight: '500px' }}>
+            <div style={{ minHeight: '300px' }}>
               {printItem.conteudo}
             </div>
+
+            {printItem.nome === 'FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA' && (
+              <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <h4 style={{ fontSize: '14px', marginBottom: '10px', color: '#0f3d2e' }}>MAPA DE AVALIAÇÃO (DORSAL E PLANTAR)</h4>
+                  <img src="/assets/foot_views.png" alt="Mapa" style={{ width: '100%', maxWidth: '600px' }} />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <h4 style={{ fontSize: '14px', marginBottom: '10px', color: '#0f3d2e' }}>REFERÊNCIA DE FORMATOS UNGUEAIS</h4>
+                  <img src="/assets/nail_shapes.png" alt="Unhas" style={{ width: '100%', maxWidth: '600px' }} />
+                </div>
+              </div>
+            )}
 
             <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between', gap: '80px' }}>
               <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
