@@ -118,8 +118,24 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
       if (!confirmOverbook) return;
     }
 
+    const sendWhatsAppConfirmation = () => {
+      if (!formData.phone) return alert("Por favor, preencha o telefone do cliente para enviar o WhatsApp.");
+      const cleanedPhone = formData.phone.replace(/\D/g, '');
+      const formattedDate = formData.date.split('-').reverse().join('/');
+      const message = `Olá ${formData.clientName}! Confirmamos seu agendamento na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
+      const waUrl = `https://wa.me/55${cleanedPhone}?text=${message}`;
+      window.open(waUrl, '_blank');
+    };
+
     onSave({ ...formData, endTime });
     alert('Agendamento realizado com sucesso!');
+    
+    // Auto-ask if wants to send WhatsApp
+    if (formData.phone) {
+      if (window.confirm('Deseja enviar a confirmação por WhatsApp para o cliente?')) {
+        sendWhatsAppConfirmation();
+      }
+    }
   };
 
   return (
@@ -264,7 +280,33 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
           ></textarea>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.5rem', marginTop: '0.5rem', borderTop: '1px solid #f3f4f6', paddingTop: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', borderTop: '1px solid #f3f4f6', paddingTop: '1.5rem' }}>
+          {formData.phone && (
+            <button 
+              type="button"
+              onClick={() => {
+                const cleanedPhone = formData.phone.replace(/\D/g, '');
+                const formattedDate = formData.date.split('-').reverse().join('/');
+                const message = `Olá ${formData.clientName}! Confirmamos seu agendamento na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
+                const waUrl = `https://wa.me/55${cleanedPhone}?text=${message}`;
+                window.open(waUrl, '_blank');
+              }}
+              style={{ 
+                backgroundColor: '#25d366', 
+                color: '#fff', 
+                padding: '12px 20px', 
+                borderRadius: '6px', 
+                border: 'none', 
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <MessageCircle size={20} /> ENVIAR WHATSAPP
+            </button>
+          )}
           <button 
             type="submit" 
             className="btn-confirm" 

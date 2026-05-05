@@ -57,6 +57,13 @@ export default function PublicPortal() {
     ];
   });
 
+  const sendWhatsAppNotification = () => {
+    const formattedDate = selectedDate.split('-').reverse().join('/');
+    const message = `Olá Fabrícia! Acabei de realizar um agendamento online:%0A%0A*Cliente:* ${clientName}%0A*Serviço:* ${selectedService.name}%0A*Data:* ${formattedDate}%0A*Horário:* ${selectedTime}%0A%0A_Por favor, confirme meu agendamento!_`;
+    const waUrl = `https://wa.me/5519997270910?text=${message}`;
+    window.open(waUrl, '_blank');
+  };
+
   return (
     <div className="public-portal">
       {/* Header */}
@@ -263,11 +270,33 @@ export default function PublicPortal() {
                 </div>
 
                 <button 
+                  onClick={sendWhatsAppNotification}
+                  style={{ 
+                    backgroundColor: '#25d366', 
+                    color: 'white', 
+                    width: '100%', 
+                    padding: '14px', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer', 
+                    fontWeight: 'bold', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '10px',
+                    marginBottom: '10px',
+                    boxShadow: '0 4px 10px rgba(37, 211, 102, 0.2)' 
+                  }}
+                >
+                  <MessageCircle size={20} /> ENVIAR CONFIRMAÇÃO NO WHATSAPP
+                </button>
+
+                <button 
                   className="btn-confirm" 
                   onClick={() => setShowScheduleModal(false)}
                   style={{ background: '#0f3d2e', color: 'white', width: '100%', padding: '12px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
                 >
-                  OK, ENTENDIDO
+                  OK, CONCLUIR
                 </button>
               </div>
             ) : (
