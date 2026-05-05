@@ -5,8 +5,10 @@ import {
   Clock, Shield, FileText
 } from 'lucide-react';
 import '../index.css';
+import { CompanySettings } from '../utils/EntityManager';
 
 export default function Layout({ children, currentView, setCurrentView, openMenu, setOpenMenu }) {
+  const companyData = CompanySettings.get();
   
   const NavItem = ({ id, icon: Icon, label, hasSub }) => (
     <div 
@@ -32,7 +34,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
       {/* HEADER TOP SITE */}
       <header className="sa-topbar no-print">
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>AGENDA ONLINE</span>
+          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>{companyData.nome.toUpperCase()}</span>
         </div>
         <div className="sa-topbar-right">
           <div className="badge-support">
@@ -40,7 +42,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
           </div>
           <HelpCircle size={18} style={{ cursor: 'pointer' }} title="Precisa de ajuda? Ligue para o engenheiro Luan Estifer" onClick={() => alert('Precisa de ajuda? Ligue para o engenheiro Luan Estifer')} />
           <div style={{cursor: 'pointer'}} onClick={()=>setCurrentView('alterar_senha')}>
-            Fabricia Rodrigues Pereira | Clínica Fabricia Rodrigues <span style={{fontSize:'0.7rem'}}>▼</span>
+            Fabricia Rodrigues Pereira | {companyData.nome} <span style={{fontSize:'0.7rem'}}>▼</span>
           </div>
         </div>
       </header>
@@ -110,7 +112,7 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
              <li className={`sa-submenu-item ${currentView==='configuracao_geral'?'active':''}`} onClick={()=>setCurrentView('configuracao_geral')}>Configuração</li>
           </ul>
 
-          <NavItem id="nfs" icon={FileText} label="NFS-e" />
+          <NavItem id="nfs" icon={FileText} label="Recibos" />
         </aside>
 
         {/* CONTENT */}
