@@ -70,7 +70,12 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
   const isTimeBlocked = (hourSt) => {
     const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
     return blockedDays.find(b => {
-      if (b.date !== currentYMD) return false;
+      // Check if current date is within the range [b.date, b.endDate]
+      const startDate = b.date;
+      const endDate = b.endDate || b.date;
+      
+      if (currentYMD < startDate || currentYMD > endDate) return false;
+      
       if (!b.startTime && !b.endTime) return true; 
       return hourSt >= b.startTime && hourSt < b.endTime;
     });

@@ -5,14 +5,15 @@ export default function CadastrosFeriado() {
   const [blockedDays, setBlockedDays] = useState(() => {
     const saved = window.localStorage.getItem('blockedDays');
     return saved ? JSON.parse(saved) : [
-      { id: 1, date: '2026-04-10', description: 'Aniversário da cidade', type: 'Feriado', startTime: '', endTime: '' },
-      { id: 2, date: '2026-04-21', description: 'Tiradentes', type: 'Feriado', startTime: '', endTime: '' },
+      { id: 1, date: '2026-04-10', endDate: '2026-04-10', description: 'Aniversário da cidade', type: 'Feriado', startTime: '', endTime: '' },
+      { id: 2, date: '2026-04-21', endDate: '2026-04-21', description: 'Tiradentes', type: 'Feriado', startTime: '', endTime: '' },
     ];
   });
 
   const [formData, setFormData] = useState({
     id: null,
     date: '',
+    endDate: '',
     description: '',
     type: 'Feriado',
     startTime: '',
@@ -28,51 +29,71 @@ export default function CadastrosFeriado() {
     return saved ? JSON.parse(saved) : { start: '08:00', end: '19:00' };
   });
 
+  // Effect to keep localStorage in sync
   useEffect(() => {
     window.localStorage.setItem('blockedDays', JSON.stringify(blockedDays));
+    // Dispatch storage event to notify other components (like Agenda)
+    window.dispatchEvent(new Event('storage'));
   }, [blockedDays]);
 
   useEffect(() => {
     window.localStorage.setItem('workingHours', JSON.stringify(workingHours));
+    window.dispatchEvent(new Event('storage'));
   }, [workingHours]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const updated = { ...prev, [name]: value };
+      // If date is set and endDate is empty, default endDate to the same date
+      if (name === 'date' && !prev.endDate) {
+        updated.endDate = value;
+      }
+      return updated;
+    });
   };
 
   const handleSave = (e) => {
     e.preventDefault();
     if (!formData.date || !formData.description) {
-      alert('Por favor, preencha a data e a descrição.');
+      alert('Por favor, preencha a data de início e a descrição.');
       return;
     }
 
+    const finalData = {
+      ...formData,
+      endDate: formData.endDate || formData.date // Ensure endDate exists
+    };
+
     if (isEditing) {
-      const updated = blockedDays.map(b => b.id === formData.id ? { ...formData } : b);
+      const updated = blockedDays.map(b => b.id === formData.id ? { ...finalData } : b);
       setBlockedDays(updated);
       setIsEditing(false);
     } else {
       const newBlock = {
+        ...finalData,
         id: Date.now(),
-        ...formData
       };
-      setBlockedDays([...blockedDays, newBlock]);
+      setBlockedDays(prev => [...prev, newBlock]);
     }
 
-    setFormData({ id: null, date: '', description: '', type: 'Feriado', startTime: '', endTime: '' });
+    setFormData({ id: null, date: '', endDate: '', description: '', type: 'Feriado', startTime: '', endTime: '' });
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
   };
 
   const handleEdit = (block) => {
-    setFormData(block);
+    setFormData({
+      ...block,
+      endDate: block.endDate || block.date // Backwards compatibility
+    });
     setIsEditing(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Tem certeza de que deseja excluir este bloqueio?')) {
-      setBlockedDays(blockedDays.filter(b => b.id !== id));
+    if (window.confirm('Tem certeza de que deseja excluir este bloqueio permanentemente?')) {
+      setBlockedDays(prev => prev.filter(b => b.id !== id));
     }
   };
 
@@ -84,7 +105,6 @@ export default function CadastrosFeriado() {
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      {/* Header section */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
         <Calendar size={28} color="#0f3d2e" />
         <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
@@ -110,7 +130,7 @@ export default function CadastrosFeriado() {
               <input type="time" value={workingHours.end} onChange={(e) => setWorkingHours({ ...workingHours, end: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
             </div>
             <div style={{ flex: 2, fontSize: '0.85rem', color: '#6b7280' }}>
-              * Estes horários delimitam a visualização padrão da sua agenda e o portal de agendamento online para clientes.
+              * Estes horários delimitam a visualização padrão da sua agenda.
             </div>
           </div>
         </div>
@@ -126,10 +146,14 @@ export default function CadastrosFeriado() {
 
           <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', alignItems: 'flex-end' }}>
             <div>
-              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>DATA</label>
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>INÍCIO DO BLOQUEIO</label>
               <input type="date" name="date" value={formData.date} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
             </div>
-            <div style={{ flex: 2 }}>
+            <div>
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>FIM DO BLOQUEIO</label>
+              <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
               <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>DESCRIÇÃO</label>
               <input type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Ex: Férias, Folga, Feriado..." required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
             </div>
@@ -143,11 +167,11 @@ export default function CadastrosFeriado() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>INÍCIO (OPCIONAL)</label>
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>HORA INÍCIO (OPCIONAL)</label>
               <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
             </div>
             <div>
-              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>FIM (OPCIONAL)</label>
+              <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>HORA FIM (OPCIONAL)</label>
               <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
             </div>
             <div>
@@ -157,13 +181,13 @@ export default function CadastrosFeriado() {
             </div>
           </form>
           {isEditing && (
-            <button onClick={() => { setIsEditing(false); setFormData({ id: null, date: '', description: '', type: 'Feriado', startTime: '', endTime: '' }); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: 'bold', fontSize: '0.8rem', marginTop: '10px', cursor: 'pointer' }}>CANCELAR EDIÇÃO</button>
+            <button onClick={() => { setIsEditing(false); setFormData({ id: null, date: '', endDate: '', description: '', type: 'Feriado', startTime: '', endTime: '' }); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: 'bold', fontSize: '0.8rem', marginTop: '10px', cursor: 'pointer' }}>CANCELAR EDIÇÃO</button>
           )}
         </div>
 
         {/* List Section */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ position: 'relative', width: '300px' }}>
               <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
               <input type="text" placeholder="Buscar bloqueio..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: '100%', padding: '8px 8px 8px 32px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
@@ -171,11 +195,11 @@ export default function CadastrosFeriado() {
             <div style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 'bold' }}>Total: {filtered.length}</div>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto' }} className="sa-table-container">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-                  <th style={{ textAlign: 'left', padding: '15px', color: '#374151', fontSize: '0.85rem', fontWeight: '700' }}>DATA</th>
+                  <th style={{ textAlign: 'left', padding: '15px', color: '#374151', fontSize: '0.85rem', fontWeight: '700' }}>PERÍODO</th>
                   <th style={{ textAlign: 'left', padding: '15px', color: '#374151', fontSize: '0.85rem', fontWeight: '700' }}>DESCRIÇÃO</th>
                   <th style={{ textAlign: 'left', padding: '15px', color: '#374151', fontSize: '0.85rem', fontWeight: '700' }}>TIPO</th>
                   <th style={{ textAlign: 'left', padding: '15px', color: '#374151', fontSize: '0.85rem', fontWeight: '700' }}>HORÁRIO</th>
@@ -185,7 +209,10 @@ export default function CadastrosFeriado() {
               <tbody>
                 {filtered.map((b) => (
                   <tr key={b.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                    <td style={{ padding: '15px', fontWeight: 'bold', color: '#111827' }}>{b.date.split('-').reverse().join('/')}</td>
+                    <td style={{ padding: '15px', fontWeight: 'bold', color: '#111827' }}>
+                      {b.date.split('-').reverse().join('/')} 
+                      {b.endDate && b.endDate !== b.date ? ` até ${b.endDate.split('-').reverse().join('/')}` : ''}
+                    </td>
                     <td style={{ padding: '15px', color: '#4b5563' }}>{b.description}</td>
                     <td style={{ padding: '15px' }}>
                       <span style={{ backgroundColor: '#ecfdf5', color: '#059669', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '700' }}>{b.type.toUpperCase()}</span>
@@ -195,10 +222,17 @@ export default function CadastrosFeriado() {
                     </td>
                     <td style={{ padding: '15px', textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                        <button onClick={() => handleEdit(b)} style={{ border: '1px solid #d1d5db', background: 'white', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#0f3d2e' }} title="Editar">
+                        <button onClick={() => handleEdit(b)} style={{ border: '1px solid #d1d5db', background: 'white', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#0f3d2e' }} title="Editar">
                           <Edit2 size={16} />
                         </button>
-                        <button onClick={() => handleDelete(b.id)} style={{ border: '1px solid #fee2e2', background: 'white', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#ef4444' }} title="Excluir">
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleDelete(b.id);
+                          }} 
+                          style={{ border: '1px solid #fee2e2', background: 'white', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#ef4444' }} 
+                          title="Excluir"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
