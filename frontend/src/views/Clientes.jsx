@@ -165,14 +165,9 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                       {c.data}
                     </td>
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
-                      <a 
-                        href={`https://wa.me/55${c.contato.replace(/\D/g, '')}`} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#059669', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' }}
-                      >
-                        <span style={{ background: '#ecfdf5', padding: '4px 8px', borderRadius: '6px' }}>{c.contato}</span>
-                      </a>
+                      <span style={{ background: '#f3f4f6', padding: '4px 8px', borderRadius: '6px', color: '#374151', fontWeight: '600', fontSize: '0.95rem' }}>
+                        {c.contato}
+                      </span>
                     </td>
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>

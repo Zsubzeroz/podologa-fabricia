@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Calendar, User, Phone, Clock, FileText, CheckCircle } from 'lucide-react';
+import { Calendar, User, Phone, Clock, FileText, CheckCircle, Mail } from 'lucide-react';
 import { AppointmentManager, ServiceManager } from '../utils/EntityManager';
+import emailjs from '@emailjs/browser';
+import { EMAIL_CONFIG } from '../utils/emailConfig';
 
 export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSelectedClient }) {
   const formatDateForInput = (d) => {
@@ -17,14 +19,11 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
   const [formData, setFormData] = useState({
     clientName: preSelectedClient || '',
     phone: '',
-    birthdate: '',
-    service: services[0]?.name || 'Avaliação',
-    date: currentDate ? formatDateForInput(currentDate) : formatDateForInput(new Date()),
     startTime: preSelectedTime || '10:00',
     duration: '01:00',
     repeat: 'Nunca',
     status: 'Agendado',
-    notifySms: 'SIM',
+    notifyEmail: 'SIM',
     notes: '',
     source: 'manual',
     status: 'Agendado'
@@ -118,22 +117,34 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
       if (!confirmOverbook) return;
     }
 
-    const sendWhatsAppConfirmation = () => {
-      if (!formData.phone) return alert("Por favor, preencha o telefone do cliente para enviar o WhatsApp.");
-      const cleanedPhone = formData.phone.replace(/\D/g, '');
-      const formattedDate = formData.date.split('-').reverse().join('/');
-      const message = `Olá ${formData.clientName}! Seu agendamento foi realizado com sucesso na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
-      const waUrl = `https://wa.me/55${cleanedPhone}?text=${message}`;
-      window.open(waUrl, '_blank');
+    const sendAutomaticEmail = async () => {
+      try {
+        const templateParams = {
+          to_name: formData.clientName,
+          client_email: formData.clientEmail || 'Não informado',
+          service_name: formData.service,
+          appointment_date: formData.date.split('-').reverse().join('/'),
+          appointment_time: formData.startTime,
+          message: 'Seu agendamento na Clínica Fabrícia foi confirmado!'
+        };
+
+        await emailjs.send(
+          EMAIL_CONFIG.SERVICE_ID,
+          EMAIL_CONFIG.TEMPLATE_ID,
+          templateParams,
+          EMAIL_CONFIG.PUBLIC_KEY
+        );
+        console.log('E-mail automático enviado ao cliente!');
+      } catch (error) {
+        console.error('Erro ao enviar e-mail:', error);
+      }
     };
 
     onSave({ ...formData, endTime });
     alert('Agendamento realizado com sucesso!');
     
-    // AUTO-TRIGGER WHATSAPP FOR CLIENT
-    if (formData.phone) {
-      sendWhatsAppConfirmation();
-    }
+    // DISPARO 100% AUTOMÁTICO
+    sendAutomaticEmail();
   };
 
   return (
@@ -279,32 +290,6 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', borderTop: '1px solid #f3f4f6', paddingTop: '1.5rem' }}>
-          {formData.phone && (
-            <button 
-              type="button"
-              onClick={() => {
-                const cleanedPhone = formData.phone.replace(/\D/g, '');
-                const formattedDate = formData.date.split('-').reverse().join('/');
-                const message = `Olá ${formData.clientName}! Seu agendamento foi realizado com sucesso na Clínica Fabrícia:%0A%0A*Serviço:* ${formData.service}%0A*Data:* ${formattedDate}%0A*Horário:* ${formData.startTime}%0A%0A📍 *Endereço:* R. Papa João Paulo II, 256 - Artur Nogueira - SP%0A%0A_Aguardamos você!_`;
-                const waUrl = `https://wa.me/55${cleanedPhone}?text=${message}`;
-                window.open(waUrl, '_blank');
-              }}
-              style={{ 
-                backgroundColor: '#25d366', 
-                color: '#fff', 
-                padding: '12px 20px', 
-                borderRadius: '6px', 
-                border: 'none', 
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              <MessageCircle size={20} /> ENVIAR WHATSAPP
-            </button>
-          )}
           <button 
             type="submit" 
             className="btn-confirm" 

@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { X, MessageCircle, Phone, Camera, Calendar } from 'lucide-react';
+import { X, Mail, Phone, Camera, Calendar } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+import { EMAIL_CONFIG } from '../utils/emailConfig';
 
 export default function PublicPortal() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -58,19 +60,29 @@ export default function PublicPortal() {
     ];
   });
 
-  const sendEmailNotification = () => {
-    const formattedDate = selectedDate.split('-').reverse().join('/');
-    const subject = `Novo Agendamento Online - ${clientName}`;
-    const body = `Olá Dra. Fabrícia,%0D%0A%0D%0AVocê tem um novo agendamento online:%0D%0A%0D%0ACliente: ${clientName}%0D%0AEmail: ${clientEmail}%0D%0AServiço: ${selectedService.name}%0D%0AData: ${formattedDate}%0D%0AHorário: ${selectedTime}%0D%0A%0D%0AFavor confirmar no sistema!`;
-    const mailtoUrl = `mailto:fabriciapodologa@gmail.com?subject=${subject}&body=${body}`;
-    window.open(mailtoUrl, '_blank');
-  };
+  const sendAutomaticEmail = async (appointmentData) => {
+    try {
+      const templateParams = {
+        to_name: 'Dra. Fabrícia',
+        from_name: appointmentData.clientName,
+        client_email: appointmentData.clientEmail || 'Não informado',
+        client_phone: appointmentData.clientPhone,
+        service_name: appointmentData.service,
+        appointment_date: appointmentData.date.split('-').reverse().join('/'),
+        appointment_time: appointmentData.startTime,
+        message: 'Novo agendamento realizado pelo site!'
+      };
 
-  const sendWhatsAppNotification = () => {
-    const formattedDate = selectedDate.split('-').reverse().join('/');
-    const message = `Olá Dra. Fabrícia! Você tem um novo agendamento online:%0A%0A*Cliente:* ${clientName}%0A*Serviço:* ${selectedService.name}%0A*Data:* ${formattedDate}%0A*Horário:* ${selectedTime}%0A%0A_Favor confirmar o agendamento!_`;
-    const waUrl = `https://wa.me/5519997270910?text=${message}`;
-    window.open(waUrl, '_blank');
+      await emailjs.send(
+        EMAIL_CONFIG.SERVICE_ID,
+        EMAIL_CONFIG.TEMPLATE_ID,
+        templateParams,
+        EMAIL_CONFIG.PUBLIC_KEY
+      );
+      console.log('E-mail automático enviado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao enviar e-mail automático:', error);
+    }
   };
 
   return (
@@ -88,9 +100,9 @@ export default function PublicPortal() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               {/* Ícones de Contato inferior esquerda */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {/* WhatsApp */}
-                <a href="https://wa.me/5519997270910" target="_blank" rel="noreferrer" className="social-icon whatsapp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#25d366', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
-                  <MessageCircle size={22} />
+                {/* E-mail (Substituiu WhatsApp) */}
+                <a href="mailto:fabriciapodologa@gmail.com" className="social-icon email" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ea4335', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
+                  <Mail size={22} />
                 </a>
                 {/* Instagram */}
                 <a href="https://www.instagram.com/fabriciapodologa/" target="_blank" rel="noreferrer" className="social-icon instagram" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e1306c', width: '42px', height: '42px', borderRadius: '50%', color: 'white', boxShadow: '0 3px 8px rgba(0,0,0,0.1)' }}>
@@ -274,31 +286,9 @@ export default function PublicPortal() {
                     Prezados clientes. Solicitamos pontualidade. Lembramos que a tolerância máxima de atraso é de 10 minutos, visando o bom andamento da agenda e o respeito aos demais clientes. Agradecemos a compreensão.
                   </p>
                   <p style={{ color: '#0f3d2e', margin: '10px 0 0 0', lineHeight: 1.5, fontSize: '0.95rem', fontWeight: 'bold', borderTop: '1px solid #ddd', paddingTop: '8px' }}>
-                    ✆ Um lembrete será enviado 1 dia antes no seu WhatsApp!
+                    ✉ Um lembrete automático foi enviado para seu e-mail!
                   </p>
                 </div>
-
-                <button 
-                  onClick={sendWhatsAppNotification}
-                  style={{ 
-                    backgroundColor: '#25d366', 
-                    color: 'white', 
-                    width: '100%', 
-                    padding: '14px', 
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    cursor: 'pointer', 
-                    fontWeight: 'bold', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    gap: '10px',
-                    marginBottom: '10px',
-                    boxShadow: '0 4px 10px rgba(37, 211, 102, 0.2)' 
-                  }}
-                >
-                  <MessageCircle size={20} /> ENVIAR CONFIRMAÇÃO NO WHATSAPP
-                </button>
 
                 <button 
                   className="btn-confirm" 
@@ -593,20 +583,12 @@ export default function PublicPortal() {
                     window.localStorage.setItem('appointments', JSON.stringify(updated));
                     window.dispatchEvent(new Event('storage'));
                     
-                    // AUTO-TRIGGER WHATSAPP
-                    const formattedDate = selectedDate.split('-').reverse().join('/');
-                    const message = `Olá Dra. Fabrícia! Você tem um novo agendamento online:%0A%0A*Cliente:* ${clientName}%0A*Serviço:* ${selectedService.name}%0A*Data:* ${formattedDate}%0A*Horário:* ${selectedTime}%0A%0A_Favor confirmar o agendamento!_`;
-                    const waUrl = `https://wa.me/5519997270910?text=${message}`;
-                    window.open(waUrl, '_blank');
+                    const updated = [...currentAppts, newAppointment];
+                    window.localStorage.setItem('appointments', JSON.stringify(updated));
+                    window.dispatchEvent(new Event('storage'));
                     
-                    // IF EMAIL IS PROVIDED, ALSO SUGGEST EMAIL
-                    if (clientEmail) {
-                      setTimeout(() => {
-                        if (window.confirm('Deseja também enviar a confirmação por E-mail para a clínica?')) {
-                          sendEmailNotification();
-                        }
-                      }, 1000);
-                    }
+                    // DISPARO 100% AUTOMÁTICO VIA EMAILJS
+                    sendAutomaticEmail(newAppointment);
                     
                     setIsConfirmed(true);
                   }}
