@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Mail, Phone, Camera, Calendar } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import { EMAIL_CONFIG } from '../utils/emailConfig';
+import { GeneralSettings, CompanySettings } from '../utils/EntityManager';
 
 export default function PublicPortal() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -62,15 +63,23 @@ export default function PublicPortal() {
 
   const sendAutomaticEmail = async (appointmentData) => {
     try {
+      const config = GeneralSettings.get();
+      const company = CompanySettings.get();
+      let body = config.mensagemEmail || 'Olá @CLIENTE, seu agendamento foi confirmado!';
+      
+      body = body.replace(/@CLIENTE/g, appointmentData.clientName);
+      body = body.replace(/@NOMEEMPRESA/g, company.nome);
+      body = body.replace(/@NOMESERVICO/g, appointmentData.service);
+      body = body.replace(/@DIA/g, appointmentData.date.split('-').reverse().join('/'));
+      body = body.replace(/@HORA/g, appointmentData.startTime);
+
       const templateParams = {
-        to_name: 'Dra. Fabrícia',
-        from_name: appointmentData.clientName,
+        to_name: appointmentData.clientName,
         client_email: appointmentData.clientEmail || 'Não informado',
-        client_phone: appointmentData.clientPhone,
         service_name: appointmentData.service,
         appointment_date: appointmentData.date.split('-').reverse().join('/'),
         appointment_time: appointmentData.startTime,
-        message: 'Novo agendamento realizado pelo site!'
+        message: body
       };
 
       await emailjs.send(

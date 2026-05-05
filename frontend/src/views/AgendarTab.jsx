@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, User, Phone, Clock, FileText, CheckCircle, Mail } from 'lucide-react';
-import { AppointmentManager, ServiceManager } from '../utils/EntityManager';
+import { AppointmentManager, ServiceManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
 import emailjs from '@emailjs/browser';
 import { EMAIL_CONFIG } from '../utils/emailConfig';
 
@@ -119,13 +119,23 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
 
     const sendAutomaticEmail = async () => {
       try {
+        const config = GeneralSettings.get();
+        const company = CompanySettings.get();
+        let body = config.mensagemEmail || 'Olá @CLIENTE, seu agendamento foi confirmado!';
+        
+        body = body.replace(/@CLIENTE/g, formData.clientName);
+        body = body.replace(/@NOMEEMPRESA/g, company.nome);
+        body = body.replace(/@NOMESERVICO/g, formData.service);
+        body = body.replace(/@DIA/g, formData.date.split('-').reverse().join('/'));
+        body = body.replace(/@HORA/g, formData.startTime);
+
         const templateParams = {
           to_name: formData.clientName,
           client_email: formData.clientEmail || 'Não informado',
           service_name: formData.service,
           appointment_date: formData.date.split('-').reverse().join('/'),
           appointment_time: formData.startTime,
-          message: 'Seu agendamento na Clínica Fabrícia foi confirmado!'
+          message: body
         };
 
         await emailjs.send(

@@ -211,6 +211,67 @@ export default function ConfiguracoesGeral() {
           </div>
         </div>
 
+        {/* Lembretes de E-mail Automático */}
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
+            <Mail size={20} color="#0f3d2e" />
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>E-mail Automático (Confirmação)</h3>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#374151', marginBottom: '12px', textTransform: 'uppercase' }}>
+                  Mensagem do E-mail
+                </label>
+                <textarea 
+                  id="mensagem-email"
+                  value={config.mensagemEmail || ''}
+                  onChange={(e) => handleChange('mensagemEmail', e.target.value)}
+                  style={{ width: '100%', padding: '15px', borderRadius: '10px', border: '1px solid #d1d5db', minHeight: '140px', fontSize: '1rem', color: '#1f2937', lineHeight: '1.6', outline: 'none' }}
+                  placeholder="Escreva aqui o texto do e-mail de confirmação..."
+                />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                  {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@HORA'].map(tag => (
+                    <button 
+                      key={tag} 
+                      type="button"
+                      onClick={() => {
+                        const textarea = document.getElementById('mensagem-email');
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const text = config.mensagemEmail || '';
+                        const newText = text.substring(0, start) + tag + text.substring(end);
+                        handleChange('mensagemEmail', newText);
+                      }}
+                      style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer', border: '1px solid #e5e7eb' }}
+                    >
+                      + {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#374151', marginBottom: '12px', textTransform: 'uppercase' }}>
+                  Preview do E-mail
+                </label>
+                <div style={{ background: '#f9fafb', borderRadius: '12px', padding: '20px', border: '1px solid #e5e7eb', minHeight: '140px' }}>
+                  <div style={{ fontWeight: 'bold', color: '#0f3d2e', marginBottom: '10px' }}>Assunto: Confirmação de Agendamento</div>
+                  <div style={{ whiteSpace: 'pre-wrap', color: '#374151', fontSize: '0.95rem' }}>
+                    {(config.mensagemEmail || '')
+                      .replace(/@CLIENTE/g, 'Maria Silva')
+                      .replace(/@NOMEEMPRESA/g, 'Fabrícia Rodrigues')
+                      .replace(/@NOMESERVICO/g, 'Podoprofilaxia')
+                      .replace(/@DIA/g, '15/05')
+                      .replace(/@HORA/g, '14:30')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', marginTop: '10px' }}>
           {saved && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: '800', fontSize: '1rem' }}>
