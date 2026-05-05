@@ -122,7 +122,6 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
           <ul className="sa-submenu">
              <li className={`sa-submenu-item ${currentView==='consulta_agendas'?'active':''}`} onClick={()=>setCurrentView('consulta_agendas')}>Agendas</li>
              <li className={`sa-submenu-item ${currentView==='consulta_analise'?'active':''}`} onClick={()=>setCurrentView('consulta_analise')}>Análise</li>
-             <li className={`sa-submenu-item ${currentView==='auditoria_agenda'?'active':''}`} onClick={()=>setCurrentView('auditoria_agenda')}>Auditoria de Agenda</li>
              <li className={`sa-submenu-item ${currentView==='auditoria_anamnese'?'active':''}`} onClick={()=>setCurrentView('auditoria_anamnese')}>Auditoria de Anamnese, Fichas e Contrato</li>
              <li className={`sa-submenu-item ${currentView==='orcamentos'?'active':''}`} onClick={()=>setCurrentView('orcamentos')}>Orçamentos</li>
              <li className={`sa-submenu-item ${currentView==='pacotes'?'active':''}`} onClick={()=>setCurrentView('pacotes')}>Pacotes por Cliente</li>

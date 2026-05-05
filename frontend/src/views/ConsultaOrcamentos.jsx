@@ -164,10 +164,10 @@ export default function ConsultaOrcamentos() {
             <tbody>
               {filtered.map((o) => (
                 <tr key={o.id}>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280' }}>{o.data}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '600' }}>{o.cliente}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{o.servico}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>R$ {Number(o.valor).toFixed(2)}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280' }}>{o.date || o.data}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '600' }}>{o.clientName || o.cliente}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{o.service || o.servico}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>R$ {Number(o.total || o.valor || 0).toFixed(2)}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <span style={{ 
                       backgroundColor: o.status === 'APROVADO' ? '#ecfdf5' : o.status === 'PENDENTE' ? '#fff7ed' : '#fef2f2', 
@@ -217,8 +217,8 @@ export default function ConsultaOrcamentos() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Cliente</label>
               <select 
-                value={formData.cliente} 
-                onChange={(e) => setFormData({...formData, cliente: e.target.value})}
+                value={formData.clientName || formData.cliente} 
+                onChange={(e) => setFormData({...formData, clientName: e.target.value, cliente: e.target.value})}
                 required
                 style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
               >

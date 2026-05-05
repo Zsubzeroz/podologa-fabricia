@@ -139,7 +139,7 @@ export default function ConsultaPacotes() {
             <tbody>
               {filtered.map((p) => (
                 <tr key={p.id}>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '600' }}>{p.cliente}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '600' }}>{p.clientName || p.cliente}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{p.pacote}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.85rem', fontWeight: '700' }}>{p.usadas} / {p.total}</div>
@@ -197,8 +197,8 @@ export default function ConsultaPacotes() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Cliente</label>
               <select 
-                value={formData.cliente} 
-                onChange={(e) => setFormData({...formData, cliente: e.target.value})}
+                value={formData.clientName || formData.cliente} 
+                onChange={(e) => setFormData({...formData, clientName: e.target.value, cliente: e.target.value})}
                 required
                 style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
               >

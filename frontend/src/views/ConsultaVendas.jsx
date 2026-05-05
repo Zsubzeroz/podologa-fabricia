@@ -87,8 +87,8 @@ export default function ConsultaVendas() {
     setShowModal(false);
   };
 
-  const totalRecebido = filteredVendas.filter(v => v.status === 'PAGO').reduce((acc, v) => acc + Number(v.valor), 0);
-  const totalPendente = filteredVendas.filter(v => v.status === 'PENDENTE').reduce((acc, v) => acc + Number(v.valor), 0);
+  const totalRecebido = filteredVendas.filter(v => (v.status || 'PAGO') === 'PAGO').reduce((acc, v) => acc + Number(v.total || v.valor || 0), 0);
+  const totalPendente = filteredVendas.filter(v => v.status === 'PENDENTE').reduce((acc, v) => acc + Number(v.total || v.valor || 0), 0);
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
@@ -110,7 +110,6 @@ export default function ConsultaVendas() {
 
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
         
-        {/* Quick Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '25px' }}>
           <div style={{ padding: '15px', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #dcfce7' }}>
             <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#166534', textTransform: 'uppercase' }}>Total Recebido</div>
@@ -126,7 +125,6 @@ export default function ConsultaVendas() {
           </div>
         </div>
 
-        {/* Filters */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', marginBottom: '25px', alignItems: 'flex-end' }}>
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Período</label>
@@ -160,7 +158,6 @@ export default function ConsultaVendas() {
           </div>
         </div>
 
-        {/* Table */}
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
@@ -176,20 +173,24 @@ export default function ConsultaVendas() {
             <tbody>
               {filteredVendas.map((v) => (
                 <tr key={v.id}>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280' }}>{v.data}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <Calendar size={14} /> {v.data}
+                    </div>
+                  </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '600' }}>{v.cliente}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>R$ {Number(v.valor).toFixed(2)}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563', fontSize: '0.85rem' }}>{v.forma}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>R$ {(Number(v.total) || 0).toFixed(2)}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563', fontSize: '0.85rem' }}>{v.formaPagamento}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <span style={{ 
-                      backgroundColor: v.status === 'PAGO' ? '#ecfdf5' : '#fff1f2', 
-                      color: v.status === 'PAGO' ? '#059669' : '#e11d48', 
+                      backgroundColor: (v.status || 'PAGO') === 'PAGO' ? '#ecfdf5' : '#fff1f2', 
+                      color: (v.status || 'PAGO') === 'PAGO' ? '#059669' : '#e11d48', 
                       padding: '4px 10px', 
                       borderRadius: '9999px', 
                       fontSize: '0.75rem', 
                       fontWeight: '700' 
                     }}>
-                      {v.status}
+                      {v.status || 'PAGO'}
                     </span>
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
@@ -204,6 +205,7 @@ export default function ConsultaVendas() {
                   </td>
                 </tr>
               ))}
+ ))}
               {filteredVendas.length === 0 && (
                 <tr>
                   <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>Nenhuma venda encontrada.</td>

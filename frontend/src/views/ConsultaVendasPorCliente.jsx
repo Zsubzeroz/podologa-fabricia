@@ -23,7 +23,7 @@ export default function ConsultaVendasPorCliente() {
     setFiltered(result);
   };
 
-  const totalAcumulado = filtered.reduce((acc, v) => acc + Number(v.valor), 0);
+  const totalAcumulado = filtered.reduce((acc, v) => acc + Number(v.total || v.valor || 0), 0);
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
@@ -92,18 +92,18 @@ export default function ConsultaVendasPorCliente() {
                       <Calendar size={14} /> {v.data}
                     </div>
                   </td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '700' }}>R$ {Number(v.valor).toFixed(2)}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{v.forma}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '700' }}>R$ {(v.total || v.valor || 0).toFixed(2)}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{v.formaPagamento || v.forma}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <span style={{ 
-                      backgroundColor: v.status === 'PAGO' ? '#ecfdf5' : '#fff1f2', 
-                      color: v.status === 'PAGO' ? '#059669' : '#e11d48', 
+                      backgroundColor: (v.status || 'PAGO') === 'PAGO' ? '#ecfdf5' : '#fff1f2', 
+                      color: (v.status || 'PAGO') === 'PAGO' ? '#059669' : '#e11d48', 
                       padding: '4px 10px', 
                       borderRadius: '9999px', 
                       fontSize: '0.75rem', 
                       fontWeight: '700' 
                     }}>
-                      {v.status}
+                      {v.status || 'PAGO'}
                     </span>
                   </td>
                 </tr>

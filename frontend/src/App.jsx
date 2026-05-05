@@ -34,7 +34,6 @@ const ConsultaAnalise = lazy(() => import('./views/ConsultaAnalise'));
 const ComissaoProfissional = lazy(() => import('./views/ComissaoProfissional'));
 const ProdutosEstoque = lazy(() => import('./views/ProdutosEstoque'));
 const ConsultaPacotes = lazy(() => import('./views/ConsultaPacotes'));
-const AuditoriaAgenda = lazy(() => import('./views/AuditoriaAgenda'));
 const AuditoriaAnamnese = lazy(() => import('./views/AuditoriaAnamnese'));
 const ConsultaOrcamentos = lazy(() => import('./views/ConsultaOrcamentos'));
 const ConsultaVendas = lazy(() => import('./views/ConsultaVendas'));
@@ -141,9 +140,6 @@ function App() {
       setAppointments(updated);
       window.localStorage.setItem('appointments', JSON.stringify(updated));
       window.dispatchEvent(new Event('storage'));
-      if (appt) {
-        SecurityManager.log('Agendamento Cancelado', appt.clientName, `Agendado para ${appt.date} às ${appt.startTime}`);
-      }
     }
   };
 
@@ -180,12 +176,6 @@ function App() {
     setAppointments(updated);
     window.localStorage.setItem('appointments', JSON.stringify(updated));
     window.dispatchEvent(new Event('storage'));
-
-    if (data.status) {
-      SecurityManager.log('Status de Agenda Alterado', oldAppt.clientName, `Alterado para ${data.status}`);
-    } else {
-      SecurityManager.log('Agendamento Editado', oldAppt.clientName, `Data/Hora: ${newAppt.date} ${newAppt.startTime}`);
-    }
   };
 
   if (isClientPath) return <PublicPortal />;
@@ -216,7 +206,6 @@ function App() {
                 const updated = [...appointments, { ...newAppt, id: Date.now() }];
                 setAppointments(updated);
                 window.localStorage.setItem('appointments', JSON.stringify(updated));
-                SecurityManager.log('Agendamento Criado', newAppt.clientName, `Agendado para ${newAppt.date} às ${newAppt.startTime}`);
                 resetPreSelections();
                 setCurrentView('agenda');
               }} 
@@ -252,7 +241,6 @@ function App() {
           {currentView === 'comissao' && <ComissaoProfissional />}
           {currentView === 'estoque' && <ProdutosEstoque />}
           {currentView === 'pacotes' && <ConsultaPacotes />}
-          {currentView === 'auditoria_agenda' && <AuditoriaAgenda />}
           {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
           {currentView === 'orcamentos' && <ConsultaOrcamentos />}
           {currentView === 'vendas' && <ConsultaVendas />}

@@ -19,12 +19,12 @@ export default function ConsultaAgendas() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({
-    data: new Date().toISOString().split('T')[0],
-    hora: '08:00',
-    cliente: '',
+    date: new Date().toISOString().split('T')[0],
+    startTime: '08:00',
+    clientName: '',
     profissional: 'Fabricia Rodrigues',
-    servico: '',
-    status: 'PENDENTE'
+    service: '',
+    status: 'Agendado'
   });
 
   useEffect(() => {
@@ -39,13 +39,13 @@ export default function ConsultaAgendas() {
       result = result.filter(a => a.status === filterData.status);
     }
     if (filterData.cliente) {
-      result = result.filter(a => a.cliente.toLowerCase().includes(filterData.cliente.toLowerCase()));
+      result = result.filter(a => a.clientName.toLowerCase().includes(filterData.cliente.toLowerCase()));
     }
     if (filterData.inicio) {
-      result = result.filter(a => a.data >= filterData.inicio);
+      result = result.filter(a => a.date >= filterData.inicio);
     }
     if (filterData.fim) {
-      result = result.filter(a => a.data <= filterData.fim);
+      result = result.filter(a => a.date <= filterData.fim);
     }
     setFiltered(result);
   };
@@ -65,12 +65,12 @@ export default function ConsultaAgendas() {
 
   const handleOpenAdd = () => {
     setFormData({
-      data: new Date().toISOString().split('T')[0],
-      hora: '08:00',
-      cliente: '',
+      date: new Date().toISOString().split('T')[0],
+      startTime: '08:00',
+      clientName: '',
       profissional: 'Fabricia Rodrigues',
-      servico: '',
-      status: 'PENDENTE'
+      service: '',
+      status: 'Agendado'
     });
     setIsEditing(false);
     setShowModal(true);
@@ -161,9 +161,9 @@ export default function ConsultaAgendas() {
               style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }}
             >
               <option value="TODOS">TODOS</option>
-              <option value="CONFIRMADO">CONFIRMADO</option>
-              <option value="PENDENTE">PENDENTE</option>
-              <option value="CANCELADO">CANCELADO</option>
+              <option value="Confirmado">Confirmado</option>
+              <option value="Agendado">Agendado</option>
+              <option value="Atendido">Atendido</option>
             </select>
           </div>
 
@@ -194,16 +194,16 @@ export default function ConsultaAgendas() {
               {filtered.map((appt) => (
                 <tr key={appt.id}>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6' }}>
-                    <div style={{ fontWeight: '700', color: '#111827' }}>{appt.data}</div>
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{appt.hora}</div>
+                    <div style={{ fontWeight: '700', color: '#111827' }}>{appt.date}</div>
+                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{appt.startTime}</div>
                   </td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#374151', fontWeight: '600' }}>{appt.cliente}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{appt.servico}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{appt.profissional}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#374151', fontWeight: '600' }}>{appt.clientName}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{appt.service}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#4b5563' }}>{appt.profissional || 'Fabricia Rodrigues'}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <span style={{ 
-                      backgroundColor: appt.status === 'CONFIRMADO' ? '#ecfdf5' : '#fff7ed', 
-                      color: appt.status === 'CONFIRMADO' ? '#059669' : '#d97706', 
+                      backgroundColor: appt.status === 'Confirmado' ? '#ecfdf5' : '#fff7ed', 
+                      color: appt.status === 'Confirmado' ? '#059669' : '#d97706', 
                       padding: '4px 10px', 
                       borderRadius: '9999px', 
                       fontSize: '0.75rem', 
@@ -249,8 +249,8 @@ export default function ConsultaAgendas() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Cliente</label>
               <select 
-                value={formData.cliente} 
-                onChange={(e) => setFormData({...formData, cliente: e.target.value})}
+                value={formData.clientName} 
+                onChange={(e) => setFormData({...formData, clientName: e.target.value})}
                 required
                 style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
               >
@@ -262,8 +262,8 @@ export default function ConsultaAgendas() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Serviço</label>
               <select 
-                value={formData.servico} 
-                onChange={(e) => setFormData({...formData, servico: e.target.value})}
+                value={formData.service} 
+                onChange={(e) => setFormData({...formData, service: e.target.value})}
                 required
                 style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
               >
@@ -277,8 +277,8 @@ export default function ConsultaAgendas() {
                 <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Data</label>
                 <input 
                   type="date" 
-                  value={formData.data} 
-                  onChange={(e) => setFormData({...formData, data: e.target.value})}
+                  value={formData.date} 
+                  onChange={(e) => setFormData({...formData, date: e.target.value})}
                   required
                   style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
                 />
@@ -287,8 +287,8 @@ export default function ConsultaAgendas() {
                 <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Hora</label>
                 <input 
                   type="time" 
-                  value={formData.hora} 
-                  onChange={(e) => setFormData({...formData, hora: e.target.value})}
+                  value={formData.startTime} 
+                  onChange={(e) => setFormData({...formData, startTime: e.target.value})}
                   required
                   style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
                 />
@@ -302,9 +302,9 @@ export default function ConsultaAgendas() {
                 onChange={(e) => setFormData({...formData, status: e.target.value})}
                 style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
               >
-                <option value="PENDENTE">PENDENTE</option>
-                <option value="CONFIRMADO">CONFIRMADO</option>
-                <option value="CANCELADO">CANCELADO</option>
+                <option value="Agendado">Agendado</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="Atendido">Atendido</option>
               </select>
             </div>
 
