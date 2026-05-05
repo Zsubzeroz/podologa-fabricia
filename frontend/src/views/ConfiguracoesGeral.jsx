@@ -47,7 +47,7 @@ export default function ConfiguracoesGeral() {
   const getPreview = () => {
     let msg = config.mensagemLembrete;
     msg = msg.replace(/@CLIENTE/g, 'Maria Silva');
-    msg = msg.replace(/@NOMEEMPRESA/g, 'Clínica Fabrícia Rodrigues');
+    msg = msg.replace(/@NOMEEMPRESA/g, 'Fabrícia Rodrigues Saúde Bem-Estar');
     msg = msg.replace(/@NOMESERVICO/g, 'Podoprofilaxia');
     msg = msg.replace(/@DIA/g, '15/05');
     msg = msg.replace(/@HORA/g, '14:30');

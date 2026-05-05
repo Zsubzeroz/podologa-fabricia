@@ -263,7 +263,7 @@ function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#f9fafb' }}>
       <img src="/logo.png" alt="Logo" style={{ width: '120px', height: '120px', marginBottom: '20px', borderRadius: '50%' }} />
-      <h2 style={{ color: '#0f3d2e', fontWeight: '800' }}>Clínica Fabrícia Rodrigues</h2>
+      <h2 style={{ color: '#0f3d2e', fontWeight: '800' }}>Fabrícia Rodrigues Saúde Bem-Estar</h2>
       <div style={{ display: 'flex', gap: '1rem', marginTop: '20px' }}>
         <button onClick={() => window.location.href = '/admin'} style={{ padding: '12px 24px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Painel Administrativo</button>
         <button onClick={() => window.location.href = '/cliente'} style={{ padding: '12px 24px', background: '#fff', color: '#0f3d2e', border: '1px solid #0f3d2e', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Portal do Cliente</button>

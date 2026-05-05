@@ -27,7 +27,7 @@ export default function Login({ onLogin }) {
       <div className="login-card">
         <div className="login-header">
           <img src="/logo.png" alt="Logo" style={{ width: '80px', height: '80px', marginBottom: '15px', borderRadius: '50%', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
-          <h1>Clínica Fabrícia Rodrigues</h1>
+          <h1>Fabrícia Rodrigues Saúde Bem-Estar</h1>
           <p>Painel de Administração</p>
         </div>
 

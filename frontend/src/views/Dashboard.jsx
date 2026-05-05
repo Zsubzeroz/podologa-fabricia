@@ -83,7 +83,7 @@ export default function Dashboard() {
           Dúvidas sobre o sistema? Você pode entrar em contato diretamente com o suporte técnico no número: <strong>(19) 99722-2694</strong>.
         </p>
         <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
-          Sistema atualizado para a Clínica Fabrícia Rodrigues.
+          Sistema atualizado para a Fabrícia Rodrigues Saúde Bem-Estar.
         </p>
       </div>
     </div>
