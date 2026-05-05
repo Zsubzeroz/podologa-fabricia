@@ -1,15 +1,22 @@
+import { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Calendar, CalendarPlus, ShoppingCart, 
   Users, UserCheck, Package, DollarSign, BarChart2, 
   ShoppingBag, Settings, Database, Search, ChevronRight, HelpCircle,
-  Clock, Shield, FileText
+  Clock, Shield, FileText, Menu, X
 } from 'lucide-react';
 import '../index.css';
 import { CompanySettings } from '../utils/EntityManager';
 
 export default function Layout({ children, currentView, setCurrentView, openMenu, setOpenMenu }) {
   const companyData = CompanySettings.get();
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when view changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [currentView]);
+
   const NavItem = ({ id, icon: Icon, label, hasSub }) => (
     <div 
       className={`sa-menu-item ${currentView === id ? 'active' : ''} ${openMenu === id ? 'open' : ''}`}
@@ -33,23 +40,41 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
     <div className="sa-app-container">
       {/* HEADER TOP SITE */}
       <header className="sa-topbar no-print">
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>{companyData.nome.toUpperCase()}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button 
+            className="mobile-only"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '5px', display: 'none' }}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          
+          <style>{`
+            @media (max-width: 768px) {
+              .mobile-only { display: block !important; }
+              .desktop-only { display: none !important; }
+            }
+          `}</style>
+
+          <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+            {companyData.nome.toUpperCase()}
+          </span>
         </div>
+
         <div className="sa-topbar-right">
-          <div className="badge-support">
+          <div className="badge-support desktop-only">
              SUPORTE: (19) 99722-2694
           </div>
-          <HelpCircle size={18} style={{ cursor: 'pointer' }} title="Precisa de ajuda? Ligue para o engenheiro Luan Estifer" onClick={() => alert('Precisa de ajuda? Ligue para o engenheiro Luan Estifer')} />
-          <div style={{cursor: 'pointer'}} onClick={()=>setCurrentView('alterar_senha')}>
-            Fabricia Rodrigues Pereira | {companyData.nome} <span style={{fontSize:'0.7rem'}}>▼</span>
+          <HelpCircle size={18} className="desktop-only" style={{ cursor: 'pointer' }} title="Ajuda" onClick={() => alert('Precisa de ajuda? Ligue para Luan Estifer')} />
+          <div style={{cursor: 'pointer', fontSize: '0.8rem'}} onClick={()=>setCurrentView('alterar_senha')}>
+            <span className="desktop-only">Fabricia Rodrigues | </span> {companyData.nome.split(' ')[0]} <span style={{fontSize:'0.6rem'}}>▼</span>
           </div>
         </div>
       </header>
       
       <div className="sa-main-body">
         {/* SIDEBAR NAVIGATION */}
-        <aside className="sa-sidebar no-print">
+        <aside className={`sa-sidebar no-print ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="agenda" icon={Calendar} label="Minha Agenda" />
           <NavItem id="agendamento" icon={CalendarPlus} label="Agendamento" />
@@ -114,6 +139,14 @@ export default function Layout({ children, currentView, setCurrentView, openMenu
 
           <NavItem id="nfs" icon={FileText} label="Recibos" />
         </aside>
+
+        {/* Overlay for mobile menu */}
+        {mobileMenuOpen && (
+          <div 
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ position: 'fixed', top: 55, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1999 }}
+          />
+        )}
 
         {/* CONTENT */}
         <main className="sa-content">

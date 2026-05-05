@@ -246,6 +246,63 @@ table.sa-table {
 }
 .info-box-header.green { background: #0d9488; }
 
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+
+  .sa-topbar {
+    padding: 0 10px;
+  }
+
+  .sa-topbar-right {
+    gap: 8px;
+    font-size: 0.75rem;
+  }
+
+  .badge-support {
+    display: none;
+  }
+
+  .sa-sidebar {
+    position: fixed;
+    top: 55px;
+    left: -230px;
+    bottom: 0;
+    width: 230px;
+    z-index: 2000;
+    transition: left 0.3s ease;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  }
+
+  .sa-sidebar.mobile-open {
+    left: 0;
+  }
+
+  .sa-content {
+    padding: 10px;
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .sa-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sa-table {
+    min-width: 600px;
+  }
+
+  .sa-brand span {
+    font-size: 1rem;
+  }
+}
+
 /* PRINT STYLES */
 @media print {
   .no-print, 

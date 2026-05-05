@@ -138,11 +138,11 @@ export default function Agenda({ appointments, onCancelAppointment, currentDate,
                     {apptsInHour.length > 0 ? (
                       apptsInHour.map(appt => (
                         <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', background: '#ecfdf5', border: '1px solid #10b981', padding: '12px 18px', borderRadius: '10px', color: '#065f46', marginBottom: apptsInHour.length > 1 ? '8px' : 0 }}>
-                          <div>
+                          <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: '800', fontSize: '1rem' }}>{appt.clientName}</div>
                             <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
                           </div>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();

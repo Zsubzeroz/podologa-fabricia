@@ -1,112 +1,102 @@
 import { useState, useEffect } from 'react';
-import { FileText, Search, Plus, Filter, Download, X, CheckCircle2, Printer, Calendar, Trash2 } from 'lucide-react';
+import { FileText, Plus, Search, Trash2, Printer, X, Save, CheckCircle2, User, CreditCard, Calendar } from 'lucide-react';
 import { ReceiptManager, CompanySettings } from '../utils/EntityManager';
 
 export default function NfsE({ preSelectedClient, preSelectedService, onResetSelections }) {
-  const [allNotas, setAllNotas] = useState(() => ReceiptManager.getAll());
-  const [filteredNotas, setFilteredNotas] = useState(allNotas);
+  const [notas, setNotas] = useState(() => ReceiptManager.getAll());
+  const companyData = CompanySettings.get();
+
+  const [showModal, setShowModal] = useState(false);
+  const [nota, setNota] = useState({
+    numero: '',
+    data: new Date().toISOString().split('T')[0],
+    cliente: '',
+    servico: '',
+    valor: 'R$ 0,00',
+    status: 'Emitida'
+  });
+
   const [filterData, setFilterData] = useState({
     search: '',
     inicio: '',
-    fim: '',
-    status: 'TODOS'
+    fim: ''
   });
 
-  const [showModal, setShowModal] = useState(false);
-  const [showPrintModal, setShowPrintModal] = useState(false);
-  const [selectedNota, setSelectedNota] = useState(null);
-  const [success, setSuccess] = useState(false);
-  const [newNota, setNewNota] = useState({
-    cliente: '',
-    servico: '',
-    valor: ''
-  });
-
-  const companyData = CompanySettings.get();
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (preSelectedClient) {
-      setNewNota(prev => ({ ...prev, cliente: preSelectedClient, servico: preSelectedService || '' }));
+    if (preSelectedClient || preSelectedService) {
+      setNota(prev => ({
+        ...prev,
+        cliente: preSelectedClient || prev.cliente,
+        servico: preSelectedService || prev.servico
+      }));
       setShowModal(true);
-      if (onResetSelections) onResetSelections();
+      // We don't reset selections here to allow the user to see the pre-filled data in the modal
     }
   }, [preSelectedClient, preSelectedService]);
 
-  useEffect(() => {
-    handleFilter();
-  }, [allNotas, filterData]);
-
-  const handleFilter = () => {
-    let result = [...allNotas];
-    if (filterData.search) {
-      result = result.filter(n => n.cliente.toLowerCase().includes(filterData.search.toLowerCase()) || n.numero.includes(filterData.search));
-    }
-    if (filterData.status !== 'TODOS') {
-      result = result.filter(n => n.status === filterData.status);
-    }
-    if (filterData.inicio) result = result.filter(n => n.data >= filterData.inicio);
-    if (filterData.fim) result = result.filter(n => n.data <= filterData.fim);
-    setFilteredNotas(result);
-  };
-
-  const handleClear = () => {
-    setFilterData({ search: '', inicio: '', fim: '', status: 'TODOS' });
-  };
-
-  const handleEmitir = (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-    const nota = {
-      numero: `2026/${(allNotas.length + 1).toString().padStart(3, '0')}`,
-      cliente: newNota.cliente,
-      data: new Date().toISOString().split('T')[0],
-      valor: `R$ ${newNota.valor}`,
-      status: 'EMITIDO',
-      servico: newNota.servico
+    const newNota = { 
+      ...nota, 
+      id: Date.now(),
+      numero: (notas.length + 1).toString().padStart(4, '0')
     };
-    
-    setSuccess(true);
+    const updated = ReceiptManager.add(newNota);
+    setNotas(updated);
+    setSaved(true);
     setTimeout(() => {
-      const added = ReceiptManager.add(nota);
-      setAllNotas(ReceiptManager.getAll());
-      setSuccess(false);
+      setSaved(false);
       setShowModal(false);
-      setNewNota({ cliente: '', servico: '', valor: '' });
+      if (onResetSelections) onResetSelections();
     }, 1500);
   };
 
-  const handleOpenPrint = (nota) => {
-    setSelectedNota(nota);
-    setShowPrintModal(true);
-  };
-
-  const handleRemove = (id) => {
-    if (window.confirm('Tem certeza de que deseja remover este recibo?')) {
+  const handleDelete = (id) => {
+    if (window.confirm('Excluir este recibo permanentemente?')) {
       const updated = ReceiptManager.remove(id);
-      setAllNotas(updated);
+      setNotas(updated);
     }
   };
 
-  const PrintPreview = ({ nota }) => (
-    <div id="printable-nfs" style={{ padding: '40px', background: 'white', color: '#000', fontFamily: 'Arial, sans-serif', width: '100%', border: '2px solid #0f3d2e', borderRadius: '10px' }}>
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const filteredNotas = notas.filter(n => {
+    const matchesSearch = n.cliente.toLowerCase().includes(filterData.search.toLowerCase()) || 
+                         n.numero.includes(filterData.search);
+    return matchesSearch;
+  });
+
+  const ReceiptPreview = () => (
+    <div id="receipt-print" style={{ 
+      width: '100%', 
+      maxWidth: '800px', 
+      background: 'white', 
+      padding: '40px', 
+      borderRadius: '8px', 
+      border: '1px solid #e5e7eb',
+      boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+      color: '#1f2937',
+      fontFamily: 'serif'
+    }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #0f3d2e', paddingBottom: '20px', marginBottom: '30px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{ width: '60px', height: '60px', background: '#0f3d2e', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-            <FileText size={32} />
-          </div>
-          <div>
-            <h2 style={{ margin: 0, color: '#0f3d2e', fontSize: '1.6rem' }}>RECIBO DE PAGAMENTO</h2>
-            <p style={{ margin: '5px 0', color: '#666' }}>{companyData.nome}</p>
-          </div>
+        <div>
+          <h1 style={{ margin: 0, color: '#0f3d2e', fontSize: '1.8rem', fontWeight: 'bold' }}>RECIBO DE PAGAMENTO</h1>
+          <p style={{ margin: '5px 0', color: '#6b7280' }}>Número: #{nota.numero || 'XXXX'}</p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <h3 style={{ margin: 0, color: '#0f3d2e' }}>RECIBO Nº {nota.numero}</h3>
-          <p style={{ margin: '5px 0', fontWeight: 'bold' }}>Data: {nota.data.split('-').reverse().join('/')}</p>
+          <img src={companyData.logo} alt="Logo" style={{ height: '50px', marginBottom: '10px' }} />
+          <p style={{ margin: 0, fontWeight: 'bold' }}>{companyData.nome}</p>
         </div>
       </div>
 
-      <div style={{ marginBottom: '30px', background: '#f9fafb', padding: '20px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+      <div style={{ marginBottom: '30px' }}>
         <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-          Recebi(emos) de <strong>{nota.cliente}</strong>, a importância de <strong>{nota.valor}</strong> referente aos serviços de:
+          Recebemos de <strong>{nota.cliente || '____________________________________'}</strong>, 
+          a importância de <strong>{nota.valor || 'R$ 0,00'}</strong> referente aos serviços de:
         </p>
         <div style={{ marginTop: '15px', padding: '15px', background: 'white', border: '1px solid #d1d5db', borderRadius: '6px', fontWeight: 'bold', fontSize: '1.2rem', color: '#0f3d2e' }}>
           {nota.servico || 'Serviços de Podologia Especializada'}
@@ -134,127 +124,154 @@ export default function NfsE({ preSelectedClient, preSelectedService, onResetSel
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
+      <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
         <FileText size={28} color="#0f3d2e" />
         <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
           Emissão de Recibos
         </h2>
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '25px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+      <div className="no-print" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '25px', alignItems: 'flex-end' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Buscar Cliente / Recibo</label>
-            <div style={{ position: 'relative' }}>
-              <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-              <input type="text" placeholder="Nome ou número..." value={filterData.search} onChange={(e) => setFilterData({...filterData, search: e.target.value})} style={{ width: '100%', padding: '10px 10px 10px 32px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+        {/* List Section */}
+        <div style={{ flex: '1 1 450px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '25px', alignItems: 'flex-end' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Buscar Cliente / Recibo</label>
+              <div style={{ position: 'relative' }}>
+                <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <input type="text" placeholder="Nome ou número..." value={filterData.search} onChange={(e) => setFilterData({...filterData, search: e.target.value})} style={{ width: '100%', padding: '10px 10px 10px 32px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              </div>
             </div>
+            <button 
+              onClick={() => {
+                setNota({
+                  numero: (notas.length + 1).toString().padStart(4, '0'),
+                  data: new Date().toISOString().split('T')[0],
+                  cliente: '',
+                  servico: '',
+                  valor: 'R$ 0,00',
+                  status: 'Emitida'
+                });
+                setShowModal(true);
+              }}
+              style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
+            >
+              <Plus size={18} /> NOVO RECIBO
+            </button>
           </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Período (De / Até)</label>
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <input type="date" value={filterData.inicio} onChange={(e) => setFilterData({...filterData, inicio: e.target.value})} style={{ width: '50%', padding: '9px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.85rem' }} />
-              <input type="date" value={filterData.fim} onChange={(e) => setFilterData({...filterData, fim: e.target.value})} style={{ width: '50%', padding: '9px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.85rem' }} />
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={handleFilter} style={{ flex: 1, backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>FILTRAR</button>
-            <button onClick={handleClear} style={{ backgroundColor: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}><X size={18} /></button>
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <button onClick={() => setShowModal(true)} style={{ backgroundColor: '#22c55e', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(34,197,94,0.2)' }}>
-            <Plus size={18} /> GERAR NOVO RECIBO
-          </button>
-          <div style={{ background: '#f3f4f6', padding: '6px 12px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: '700', color: '#4b5563' }}>{filteredNotas.length} RECIBO(S)</div>
-        </div>
-
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
-            <thead>
-              <tr style={{ background: '#f9fafb' }}>
-                <th style={{ textAlign: 'left', padding: '15px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase' }}>Nº Recibo</th>
-                <th style={{ textAlign: 'left', padding: '15px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase' }}>Cliente</th>
-                <th style={{ textAlign: 'left', padding: '15px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase' }}>Data</th>
-                <th style={{ textAlign: 'left', padding: '15px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase' }}>Valor</th>
-                <th style={{ textAlign: 'center', padding: '15px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ textAlign: 'center', padding: '15px', borderBottom: '2px solid #e5e7eb', color: '#374151', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredNotas.map((n) => (
-                <tr key={n.id} style={{ transition: 'background 0.2s' }}>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>{n.numero}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#374151', fontWeight: '600' }}>{n.cliente}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280' }}><div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Calendar size={14} /> {n.data.split('-').reverse().join('/')}</div></td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '800' }}>{n.valor}</td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
-                    <span style={{ backgroundColor: '#ecfdf5', color: '#059669', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: '800' }}>{n.status}</span>
-                  </td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                      <button onClick={() => handleOpenPrint(n)} style={{ border: '1px solid #d1d5db', background: 'white', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#4b5563' }} title="Imprimir Recibo"><Printer size={16} /></button>
-                      <button onClick={() => handleRemove(n.id)} style={{ border: 'none', background: '#fef2f2', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#ef4444' }} title="Excluir Recibo"><Trash2 size={16} /></button>
-                    </div>
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                  <th style={{ padding: '12px', textAlign: 'left', fontSize: '0.85rem' }}>NÚMERO</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontSize: '0.85rem' }}>CLIENTE</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontSize: '0.85rem' }}>VALOR</th>
+                  <th style={{ padding: '12px', textAlign: 'center', fontSize: '0.85rem' }}>AÇÕES</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredNotas.length === 0 ? (
+                  <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#9ca3af' }}>Nenhum recibo encontrado.</td></tr>
+                ) : (
+                  filteredNotas.map(n => (
+                    <tr key={n.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '12px', fontWeight: 'bold', color: '#0f3d2e' }}>#{n.numero}</td>
+                      <td style={{ padding: '12px' }}>{n.cliente}</td>
+                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{n.valor}</td>
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                          <button onClick={() => { setNota(n); handlePrint(); }} style={{ background: '#f3f4f6', border: 'none', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}><Printer size={16} color="#4b5563" /></button>
+                          <button onClick={() => handleDelete(n.id)} style={{ background: '#fee2e2', border: 'none', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}><Trash2 size={16} color="#ef4444" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Preview Section - Desktop Only or Scrollable */}
+        <div style={{ flex: '1 1 450px', position: 'sticky', top: '20px', height: 'fit-content', overflowX: 'auto', padding: '10px', background: '#f3f4f6', borderRadius: '12px' }}>
+          <div style={{ marginBottom: '10px', fontWeight: 'bold', color: '#6b7280', fontSize: '0.8rem', textAlign: 'center' }}>PRÉ-VISUALIZAÇÃO DO RECIBO</div>
+          <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center' }}>
+            <ReceiptPreview />
+          </div>
         </div>
       </div>
 
       {/* Modal Novo Recibo */}
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'white', padding: '30px', borderRadius: '16px', width: '100%', maxWidth: '500px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: '#0f3d2e' }}>Novo Recibo</h3>
-              <X size={24} style={{ cursor: 'pointer', color: '#9ca3af' }} onClick={() => setShowModal(false)} />
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '10px' }}>
+          <form 
+            onSubmit={handleSave} 
+            style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '500px', width: '100%', maxHeight: '95vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0 }}>Gerar Novo Recibo</h3>
+              <button type="button" onClick={() => { setShowModal(false); if(onResetSelections) onResetSelections(); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
             </div>
-            {success ? (
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <div style={{ background: '#f0fdf4', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}><CheckCircle2 size={48} color="#16a34a" /></div>
-                <h4 style={{ margin: 0, color: '#16a34a', fontSize: '1.4rem', fontWeight: '800' }}>Recibo Gerado!</h4>
-                <p style={{ color: '#6b7280', fontSize: '0.95rem', marginTop: '10px' }}>O recibo já está disponível na lista.</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>CLIENTE</label>
+                <div style={{ position: 'relative' }}>
+                  <User size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                  <input required value={nota.cliente} onChange={(e) => setNota({...nota, cliente: e.target.value})} style={{ width: '100%', padding: '10px 10px 10px 32px', borderRadius: '8px', border: '1px solid #d1d5db' }} placeholder="Nome do Paciente" />
+                </div>
               </div>
-            ) : (
-              <form onSubmit={handleEmitir} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>SERVIÇO / DESCRIÇÃO</label>
+                <input required value={nota.servico} onChange={(e) => setNota({...nota, servico: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db' }} placeholder="Ex: Podoprofilaxia" />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: '#374151' }}>Cliente</label>
-                  <input type="text" placeholder="Nome do cliente..." required value={newNota.cliente} onChange={(e) => setNewNota({...newNota, cliente: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>VALOR</label>
+                  <div style={{ position: 'relative' }}>
+                    <CreditCard size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    <input required value={nota.valor} onChange={(e) => setNota({...nota, valor: e.target.value})} style={{ width: '100%', padding: '10px 10px 10px 32px', borderRadius: '8px', border: '1px solid #d1d5db' }} placeholder="R$ 0,00" />
+                  </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: '#374151' }}>Serviço / Procedimento</label>
-                  <input type="text" placeholder="Ex: Podoprofilaxia Completa" required value={newNota.servico} onChange={(e) => setNewNota({...newNota, servico: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>DATA</label>
+                  <div style={{ position: 'relative' }}>
+                    <Calendar size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    <input type="date" required value={nota.data} onChange={(e) => setNota({...nota, data: e.target.value})} style={{ width: '100%', padding: '10px 10px 10px 32px', borderRadius: '8px', border: '1px solid #d1d5db' }} />
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '8px', color: '#374151' }}>Valor Total (R$)</label>
-                  <input type="number" placeholder="0,00" step="0.01" required value={newNota.valor} onChange={(e) => setNewNota({...newNota, valor: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
-                </div>
-                <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
-                  <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>CANCELAR</button>
-                  <button type="submit" style={{ flex: 1, padding: '14px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>GERAR RECIBO</button>
-                </div>
-              </form>
-            )}
-          </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+               <button type="button" onClick={() => { setShowModal(false); if(onResetSelections) onResetSelections(); }} style={{ flex: 1, padding: '12px', background: '#f3f4f6', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>CANCELAR</button>
+               <button type="submit" style={{ flex: 1, padding: '12px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                 {saved ? <><CheckCircle2 size={18} /> SALVO!</> : <><Save size={18} /> GERAR RECIBO</>}
+               </button>
+            </div>
+          </form>
         </div>
       )}
 
-      {showPrintModal && selectedNota && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-              <button onClick={() => window.print()} style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}><Printer size={18} /> IMPRIMIR AGORA</button>
-              <button onClick={() => setShowPrintModal(false)} style={{ background: '#f3f4f6', color: '#374151', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>FECHAR</button>
-            </div>
-            <PrintPreview nota={selectedNota} />
-          </div>
-        </div>
-      )}
+      {/* Actual print area hidden from screen */}
+      <div className="only-print" style={{ display: 'none' }}>
+         <ReceiptPreview />
+      </div>
+
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .only-print { display: block !important; }
+          body { background: white !important; }
+          .sa-app-container, .sa-main-body, .sa-content, .sa-page-card { display: block !important; padding: 0 !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
+        }
+      `}</style>
+
     </div>
   );
 }

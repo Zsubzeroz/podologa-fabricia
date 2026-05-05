@@ -413,7 +413,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="sa-table-container">
           <table className="sa-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #f3f4f6' }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>

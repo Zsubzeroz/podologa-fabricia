@@ -41,7 +41,7 @@ export default function ConfiguracoesDadosEmpresa() {
 
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', padding: '20px', background: '#f9fafb', borderRadius: '12px', border: '2px dashed #e5e7eb' }}>
             <div style={{ position: 'relative', width: '150px', height: '150px', background: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -55,7 +55,7 @@ export default function ConfiguracoesDadosEmpresa() {
           </div>
 
           <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>NOME DA EMPRESA</label>
                 <input name="nome" value={empresa.nome} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
@@ -66,7 +66,7 @@ export default function ConfiguracoesDadosEmpresa() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>EMAIL DE CONTATO</label>
                 <div style={{ position: 'relative' }}>
@@ -91,7 +91,7 @@ export default function ConfiguracoesDadosEmpresa() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>CIDADE</label>
                 <input name="cidade" value={empresa.cidade} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />

@@ -169,7 +169,7 @@ export default function ConfiguracoesGeral() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '25px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#374151', marginBottom: '12px', textTransform: 'uppercase' }}>
                   Mensagem Personalizada
