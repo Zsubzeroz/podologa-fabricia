@@ -486,6 +486,7 @@ export default function PublicPortal() {
 
                     const updated = [...currentAppts, newAppointment];
                     window.localStorage.setItem('appointments', JSON.stringify(updated));
+                    window.dispatchEvent(new Event('storage'));
                     setIsConfirmed(true);
                   }}
                   style={{ background: '#c6a75e', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: '100%', marginTop: '10px' }}
