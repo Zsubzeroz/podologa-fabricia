@@ -26,6 +26,8 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     status: 'Agendado',
     notifySms: 'SIM',
     notes: '',
+    source: 'manual',
+    status: 'Agendado'
   });
 
   useEffect(() => {

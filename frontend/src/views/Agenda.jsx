@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle } from 'lucide-react';
 import { AppointmentManager } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
@@ -84,8 +84,8 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
         return { background: '#eff6ff', border: '1px solid #3b82f6', color: '#1e40af' };
       case 'Atendido':
         return { background: '#f3f4f6', border: '1px solid #9ca3af', color: '#374151', opacity: 0.8 };
-      default: // Agendado
-        return { background: '#ecfdf5', border: '1px solid #10b981', color: '#065f46' };
+      default: // Agendado / Pendente
+        return { background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b' };
     }
   };
 
@@ -154,10 +154,22 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                           const statusStyle = getStatusStyles(appt.status);
                           return (
                             <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', ...statusStyle, padding: '12px 18px', borderRadius: '10px', marginBottom: apptsInHour.length > 1 ? '8px' : 0, transition: 'all 0.3s' }}>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: '800', fontSize: '1rem' }}>{appt.clientName}</div>
-                                <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
-                                <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase' }}>● {appt.status || 'Agendado'}</div>
+                              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div>
+                                  {appt.source === 'portal' && <Calendar size={20} style={{ color: statusStyle.color }} title="Agendado pelo Portal" />}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontWeight: '800', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {appt.clientName}
+                                    {appt.status === 'Confirmado' && <CheckCircle2 size={16} color="#3b82f6" title="Confirmado" />}
+                                    {appt.status === 'Agendado' && <AlertCircle size={16} color="#ef4444" title="Pendente de Confirmação" />}
+                                  </div>
+                                  <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
+                                  <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase' }}>
+                                    ● {appt.status || 'Agendado'} 
+                                    {appt.source === 'portal' ? ' (ONLINE)' : ' (MANUAL)'}
+                                  </div>
+                                </div>
                               </div>
                               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                 <select 

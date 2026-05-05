@@ -471,7 +471,9 @@ export default function PublicPortal() {
                       service: selectedService.name,
                       date: selectedDate,
                       startTime: selectedTime,
-                      endTime
+                      endTime,
+                      source: 'portal',
+                      status: 'Agendado'
                     };
 
                     const updated = [...currentAppts, newAppointment];
