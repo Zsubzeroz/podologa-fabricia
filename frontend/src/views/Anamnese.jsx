@@ -131,7 +131,7 @@ Data: ____/____/______   Assinatura Paciente: _________________________________`
 
   // Clients for selection
   const [clients, setClients] = useState(() => {
-    const saved = window.localStorage.getItem('clients');
+    const saved = window.localStorage.getItem('clientes');
     return saved ? JSON.parse(saved) : [];
   });
 
