@@ -96,7 +96,7 @@ export default function PublicPortal() {
             
             {/* Endereço embaixo de tudo */}
             <p className="clinic-address" style={{ textAlign: 'center', margin: '8px 0 0 0', fontSize: '0.8rem', color: '#6b7280', borderTop: '1px solid #f3f4f6', paddingTop: '6px' }}>
-              Rua Papa João Paulo II, 256 • Artur Nogueira / SP
+              R. Papa João Paulo II, 256 - Orlando Corrêa Barbosa, Artur Nogueira - SP, 13164-114
             </p>
           </div>
         </div>

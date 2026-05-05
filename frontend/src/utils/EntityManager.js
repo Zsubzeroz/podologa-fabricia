@@ -50,11 +50,12 @@ export class CompanySettings {
     return saved ? JSON.parse(saved) : {
       nome: 'Fabrícia Rodrigues Saúde Bem-Estar',
       cnpj: '00.000.000/0001-00',
-      endereco: 'Rua das Flores, 123',
-      bairro: 'Centro',
-      cidade: 'Campinas',
+      endereco: 'R. Papa João Paulo II, 256',
+      bairro: 'Orlando Corrêa Barbosa',
+      cidade: 'Artur Nogueira',
       estado: 'SP',
-      logo: '/Logo.jpeg'
+      cep: '13164-114',
+      logo: '/logo.png'
     };
   }
 
