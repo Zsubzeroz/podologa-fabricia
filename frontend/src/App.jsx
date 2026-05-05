@@ -126,9 +126,43 @@ function App() {
   };
 
   const updateAppointment = (id, data) => {
-    const updated = appointments.map(appt => appt.id === id ? { ...appt, ...data } : appt);
+    const apptIndex = appointments.findIndex(a => a.id === id);
+    if (apptIndex === -1) return;
+    
+    const oldAppt = appointments[apptIndex];
+    const newAppt = { ...oldAppt, ...data };
+    
+    // Auto Financial Entry when Attended
+    if (newAppt.status === 'Atendido' && oldAppt.status !== 'Atendido') {
+      const services = JSON.parse(window.localStorage.getItem('services') || '[]');
+      const serviceObj = services.find(s => s.name === newAppt.service);
+      let priceVal = 0;
+      if (serviceObj && serviceObj.price) {
+        priceVal = parseFloat(serviceObj.price.replace(/[R$\s,.]/g, '')) / 100 || 0;
+      }
+      
+      const financeiro = JSON.parse(window.localStorage.getItem('financeiro_entries') || '[]');
+      const newFinanceEntry = {
+        id: Date.now(),
+        data: newAppt.date,
+        descricao: `Atendimento - ${newAppt.clientName} (${newAppt.service})`,
+        tipo: 'Receber',
+        categoria: 'Atendimento',
+        forma: 'Dinheiro', // Default
+        valor: priceVal
+      };
+      
+      window.localStorage.setItem('financeiro_entries', JSON.stringify([newFinanceEntry, ...financeiro]));
+      newAppt.financeEntryId = newFinanceEntry.id;
+    }
+
+    const updated = [...appointments];
+    updated[apptIndex] = newAppt;
     setAppointments(updated);
     window.localStorage.setItem('appointments', JSON.stringify(updated));
+    
+    // Notify storage change
+    window.dispatchEvent(new Event('storage'));
   };
 
   if (isClientPath) return <PublicPortal />;
