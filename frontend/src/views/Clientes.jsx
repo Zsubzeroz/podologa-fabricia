@@ -67,12 +67,10 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
   };
 
   const handleDelete = (id) => {
-    if (!id) {
-      alert('Erro: ID do cliente não encontrado. Tente recarregar a página.');
-      return;
-    }
-    if (window.confirm('Tem certeza de que deseja excluir este cliente?')) {
+    console.log('Solicitação de exclusão para ID:', id);
+    if (window.confirm('Tem certeza de que deseja excluir este item?')) {
       const updated = ClientManager.remove(id);
+      console.log('Itens restantes após exclusão:', updated.length);
       setClientes(updated);
     }
   };
