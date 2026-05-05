@@ -378,7 +378,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                     }}
                                     style={{ background: '#25d366', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
                                   >
-                                    <Smartphone size={14} /> WHATSAPP
+                                    <Smartphone size={14} /> LEMBRETE
                                   </button>
                                   <button 
                                     onClick={(e) => { e.stopPropagation(); onCancelAppointment(appt.id); }} 

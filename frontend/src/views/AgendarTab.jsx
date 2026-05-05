@@ -231,6 +231,21 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
 
           <div>
             <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Mail size={16} /> E-mail do Cliente
+            </label>
+            <input 
+              type="email" 
+              name="clientEmail" 
+              className="form-control" 
+              placeholder="seu@email.com" 
+              value={formData.clientEmail || ''} 
+              onChange={handleChange} 
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '13px', color: '#374151', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <Calendar size={16} /> Data do Atendimento
             </label>
             <input 
