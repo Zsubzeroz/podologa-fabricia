@@ -214,8 +214,8 @@ function App() {
           {currentView === 'produtos' && <Produtos />}
           {currentView === 'clientes' && (
             <Clientes 
-              onSchedule={(clientName) => handleAddAppointment(new Date(), '10:00', clientName)}
-              onGenerateReceipt={(clientName) => handleGenerateReceipt(clientName, '')}
+              onSchedule={(client) => handleAddAppointment(new Date(), '10:00', client.nome)}
+              onGenerateReceipt={(client) => handleGenerateReceipt(client.nome, '')}
             />
           )}
           {currentView === 'anamnese' && <Anamnese />}
