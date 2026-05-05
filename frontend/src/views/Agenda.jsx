@@ -332,7 +332,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                               <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', ...statusStyle, padding: '12px 18px', borderRadius: '10px', marginBottom: apptsInHour.length > 1 ? '8px' : 0, transition: 'all 0.3s' }}>
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
                                   <div>
-                                    {appt.source === 'portal' && <Calendar size={20} style={{ color: statusStyle.color }} title="Agendado pelo Portal" />}
+                                    {appt.source === 'online' && <Calendar size={20} style={{ color: statusStyle.color }} title="Agendado pelo Portal" />}
                                   </div>
                                   <div style={{ flex: 1 }}>
                                     <div style={{ fontWeight: '800', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -343,7 +343,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                     <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
                                     <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase' }}>
                                       ● {appt.status || 'Agendado'} 
-                                      {appt.source === 'portal' ? ' (ONLINE)' : ' (MANUAL)'}
+                                      {appt.source === 'online' ? ' (ONLINE)' : ' (MANUAL)'}
                                     </div>
                                   </div>
                                 </div>

@@ -472,7 +472,7 @@ export default function PublicPortal() {
                       date: selectedDate,
                       startTime: selectedTime,
                       endTime,
-                      source: 'portal',
+                      source: 'online',
                       status: 'Agendado'
                     };
 
