@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Save, Smartphone, MessageCircle, Layout as LayoutIcon, CheckCircle2, Clock } from 'lucide-react';
+import { Settings, Save, Smartphone, MessageCircle, Layout as LayoutIcon, CheckCircle2, Clock, Mail } from 'lucide-react';
 import { GeneralSettings } from '../utils/EntityManager';
 
 export default function ConfiguracoesGeral() {
