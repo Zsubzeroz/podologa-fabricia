@@ -120,6 +120,55 @@ Eu, _________________________________ RG: _________________ CPF: _______________
 
 Data: ____/____/______   Assinatura Paciente: _________________________________`
       },
+      { 
+        id: 6, 
+        nome: 'FICHA DE PACOTE (TRATAMENTO CONTÍNUO)', 
+        status: 'ATIVO',
+        conteudo: `FICHA DE CONTROLE DE PACOTE - TRATAMENTO CONTÍNUO
+
+Paciente: _________________________________________________
+Procedimento Contratado: __________________________________
+Valor do Pacote: R$ ______________  Forma de Pagamento: ___________
+
+CRONOGRAMA DE SESSÕES:
+
+1ª Sessão: ____/____/______   Assinatura: ________________
+2ª Sessão: ____/____/______   Assinatura: ________________
+3ª Sessão: ____/____/______   Assinatura: ________________
+4ª Sessão: ____/____/______   Assinatura: ________________
+5ª Sessão: ____/____/______   Assinatura: ________________
+6ª Sessão: ____/____/______   Assinatura: ________________
+
+Observações:
+__________________________________________________________________`
+      },
+      { 
+        id: 7, 
+        nome: 'FICHA DE PRESTAÇÃO DE SERVIÇO INDIVIDUAL', 
+        status: 'ATIVO',
+        conteudo: `FICHA DE PRESTAÇÃO DE SERVIÇO PODOLÓGICO
+
+Data: ____/____/______
+Paciente: _________________________________________________
+Profissional: Fabrícia Rodrigues
+
+SERVIÇO REALIZADO:
+( ) Podoprofilaxia Completa
+( ) Tratamento de Onicocriptose
+( ) Curativo/Retorno
+( ) Outro: ________________________________________________
+
+DESCRIÇÃO DO PROCEDIMENTO:
+__________________________________________________________________
+__________________________________________________________________
+
+RECOMENDAÇÕES HOMECARE (PÓS-PROCEDIMENTO):
+__________________________________________________________________
+
+Próximo Agendamento: ____/____/______ às _____:_____
+
+Assinatura do Profissional: _______________________________`
+      },
     ];
   });
 
