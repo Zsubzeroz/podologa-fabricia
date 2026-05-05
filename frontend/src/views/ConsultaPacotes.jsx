@@ -1,33 +1,98 @@
-import { useState } from 'react';
-import { Search, Package, Filter, Download, ChevronRight, User, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Package, Filter, Download, ChevronRight, User, Calendar, Plus, Trash2, Edit } from 'lucide-react';
+import { PacoteManager, ClientManager } from '../utils/EntityManager';
 
 export default function ConsultaPacotes() {
-  const [allPacotes] = useState([
-    { id: 1, cliente: 'Alessandra Rodrigues', pacote: 'Pacote Podologia 5 Sessões', total: 5, usadas: 2, saldo: 3, status: 'EM ANDAMENTO', pagamento: 'PAGO' },
-    { id: 2, cliente: 'Beatriz Lima', pacote: 'Pacote Verruga 3 Sessões', total: 3, usadas: 3, saldo: 0, status: 'FINALIZADO', pagamento: 'PAGO' },
-  ]);
-
+  const [pacotes, setPacotes] = useState([]);
+  const [clients] = useState(() => ClientManager.getAll());
+  
   const [search, setSearch] = useState('');
-  const [filtered, setFiltered] = useState(allPacotes);
+  const [filtered, setFiltered] = useState([]);
+  
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [formData, setFormData] = useState({
+    cliente: '',
+    pacote: '',
+    total: 5,
+    usadas: 0,
+    status: 'EM ANDAMENTO'
+  });
+
+  useEffect(() => {
+    const data = PacoteManager.getAll();
+    setPacotes(data);
+    setFiltered(data);
+  }, []);
 
   const handleSearch = () => {
-    setFiltered(allPacotes.filter(p => p.cliente.toLowerCase().includes(search.toLowerCase())));
+    setFiltered(pacotes.filter(p => p.cliente.toLowerCase().includes(search.toLowerCase())));
   };
 
   const handleClear = () => {
     setSearch('');
-    setFiltered(allPacotes);
+    setFiltered(pacotes);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Tem certeza de que deseja excluir este pacote?')) {
+      const updated = PacoteManager.remove(id);
+      setPacotes(updated);
+      setFiltered(updated);
+    }
+  };
+
+  const handleOpenAdd = () => {
+    setFormData({
+      cliente: '',
+      pacote: '',
+      total: 5,
+      usadas: 0,
+      status: 'EM ANDAMENTO'
+    });
+    setIsEditing(false);
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (p) => {
+    setFormData({ ...p });
+    setEditId(p.id);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      const updated = PacoteManager.update(editId, formData);
+      setPacotes(updated);
+      setFiltered(updated);
+    } else {
+      const added = PacoteManager.add(formData);
+      const updated = [added, ...pacotes];
+      setPacotes(updated);
+      setFiltered(updated);
+    }
+    setShowModal(false);
   };
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      {/* Header section */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
-        <Package size={28} color="#0f3d2e" />
-        <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
-          Pacotes por Cliente
-        </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Package size={28} color="#0f3d2e" />
+          <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
+            Pacotes por Cliente
+          </h2>
+        </div>
+        <button 
+          onClick={handleOpenAdd}
+          style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <Plus size={18} /> NOVO PACOTE
+        </button>
       </div>
 
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
@@ -46,16 +111,6 @@ export default function ConsultaPacotes() {
                 style={{ width: '100%', padding: '8px 8px 8px 32px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} 
               />
             </div>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', textTransform: 'uppercase' }}>Status do Pacote</label>
-            <select style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }}>
-              <option>TODOS</option>
-              <option>EM ANDAMENTO</option>
-              <option>FINALIZADO</option>
-              <option>CANCELADO</option>
-            </select>
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -92,11 +147,11 @@ export default function ConsultaPacotes() {
                       <div style={{ width: `${(p.usadas/p.total)*100}%`, background: '#0f3d2e', height: '100%' }}></div>
                     </div>
                   </td>
-                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center', color: '#0f3d2e', fontWeight: '800' }}>{p.saldo}</td>
+                  <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center', color: '#0f3d2e', fontWeight: '800' }}>{p.total - p.usadas}</td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
                     <span style={{ 
-                      backgroundColor: p.status === 'EM ANDAMENTO' ? '#ecfdf5' : '#f3f4f6', 
-                      color: p.status === 'EM ANDAMENTO' ? '#059669' : '#6b7280', 
+                      backgroundColor: p.status === 'EM ANDAMENTO' ? '#ecfdf5' : p.status === 'FINALIZADO' ? '#f3f4f6' : '#fef2f2', 
+                      color: p.status === 'EM ANDAMENTO' ? '#059669' : p.status === 'FINALIZADO' ? '#6b7280' : '#dc2626', 
                       padding: '4px 10px', 
                       borderRadius: '9999px', 
                       fontSize: '0.75rem', 
@@ -106,9 +161,14 @@ export default function ConsultaPacotes() {
                     </span>
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
-                    <button style={{ border: 'none', background: 'none', color: '#0f3d2e', cursor: 'pointer' }} title="Ver detalhes">
-                      <ChevronRight size={20} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button onClick={() => handleOpenEdit(p)} style={{ border: 'none', background: '#eff6ff', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#2563eb' }}>
+                        <Edit size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(p.id)} style={{ border: 'none', background: '#fef2f2', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#dc2626' }}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -121,6 +181,87 @@ export default function ConsultaPacotes() {
           </table>
         </div>
       </div>
+
+      {/* Modal Add/Edit */}
+      {showModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <form 
+            onSubmit={handleSave} 
+            style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: '15px' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>{isEditing ? 'Editar Pacote' : 'Novo Pacote'}</h3>
+              <button type="button" onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Cliente</label>
+              <select 
+                value={formData.cliente} 
+                onChange={(e) => setFormData({...formData, cliente: e.target.value})}
+                required
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              >
+                <option value="">Selecione...</option>
+                {clients.map(c => <option key={c.id} value={c.nome}>{c.nome}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Nome do Pacote</label>
+              <input 
+                type="text" 
+                value={formData.pacote} 
+                onChange={(e) => setFormData({...formData, pacote: e.target.value})}
+                placeholder="Ex: Pacote Podologia 5 Sessões"
+                required
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Total de Sessões</label>
+                <input 
+                  type="number" 
+                  value={formData.total} 
+                  onChange={(e) => setFormData({...formData, total: e.target.value})}
+                  required
+                  style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Sessões Usadas</label>
+                <input 
+                  type="number" 
+                  value={formData.usadas} 
+                  onChange={(e) => setFormData({...formData, usadas: e.target.value})}
+                  required
+                  style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Status</label>
+              <select 
+                value={formData.status} 
+                onChange={(e) => setFormData({...formData, status: e.target.value})}
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              >
+                <option value="EM ANDAMENTO">EM ANDAMENTO</option>
+                <option value="FINALIZADO">FINALIZADO</option>
+                <option value="CANCELADO">CANCELADO</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: '#f3f4f6', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancelar</button>
+              <button type="submit" style={{ flex: 1, padding: '12px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Salvar</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

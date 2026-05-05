@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { Search, Calendar, User, Filter, X, ChevronRight, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Calendar, User, Filter, X, ChevronRight, FileText, Plus, Trash2, Edit } from 'lucide-react';
+import { AppointmentManager, ClientManager, ServiceManager } from '../utils/EntityManager';
 
 export default function ConsultaAgendas() {
-  const [allAppointments] = useState([
-    { id: 1, data: '2026-04-16', hora: '14:00', cliente: 'Maria Silva', profissional: 'Fabricia Rodrigues', servico: 'Podologia Preventiva', status: 'CONFIRMADO' },
-    { id: 2, data: '2026-04-16', hora: '15:30', cliente: 'João Pereira', profissional: 'Fabricia Rodrigues', servico: 'Tratamento de Calos', status: 'PENDENTE' },
-  ]);
-
-  const [filtered, setFiltered] = useState(allAppointments);
+  const [appointments, setAppointments] = useState([]);
+  const [clients] = useState(() => ClientManager.getAll());
+  const [services] = useState(() => ServiceManager.getAll());
+  
+  const [filtered, setFiltered] = useState([]);
   const [filterData, setFilterData] = useState({
     inicio: '',
     fim: '',
@@ -15,8 +15,26 @@ export default function ConsultaAgendas() {
     status: 'TODOS'
   });
 
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [formData, setFormData] = useState({
+    data: new Date().toISOString().split('T')[0],
+    hora: '08:00',
+    cliente: '',
+    profissional: 'Fabricia Rodrigues',
+    servico: '',
+    status: 'PENDENTE'
+  });
+
+  useEffect(() => {
+    const data = AppointmentManager.getAll();
+    setAppointments(data);
+    setFiltered(data);
+  }, []);
+
   const handleSearch = () => {
-    let result = allAppointments;
+    let result = appointments;
     if (filterData.status !== 'TODOS') {
       result = result.filter(a => a.status === filterData.status);
     }
@@ -34,18 +52,68 @@ export default function ConsultaAgendas() {
 
   const handleClear = () => {
     setFilterData({ inicio: '', fim: '', cliente: '', status: 'TODOS' });
-    setFiltered(allAppointments);
+    setFiltered(appointments);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Tem certeza de que deseja excluir este agendamento?')) {
+      const updated = AppointmentManager.remove(id);
+      setAppointments(updated);
+      setFiltered(updated);
+    }
+  };
+
+  const handleOpenAdd = () => {
+    setFormData({
+      data: new Date().toISOString().split('T')[0],
+      hora: '08:00',
+      cliente: '',
+      profissional: 'Fabricia Rodrigues',
+      servico: '',
+      status: 'PENDENTE'
+    });
+    setIsEditing(false);
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (appt) => {
+    setFormData({ ...appt });
+    setEditId(appt.id);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      const updated = AppointmentManager.update(editId, formData);
+      setAppointments(updated);
+      setFiltered(updated);
+    } else {
+      const added = AppointmentManager.add(formData);
+      const updated = [added, ...appointments];
+      setAppointments(updated);
+      setFiltered(updated);
+    }
+    setShowModal(false);
   };
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       
-      {/* Header section */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '20px' }}>
-        <Calendar size={28} color="#0f3d2e" />
-        <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
-          Consulta de Agendas
-        </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Calendar size={28} color="#0f3d2e" />
+          <h2 style={{ fontWeight: '700', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
+            Consulta de Agendas
+          </h2>
+        </div>
+        <button 
+          onClick={handleOpenAdd}
+          style={{ backgroundColor: '#0f3d2e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <Plus size={18} /> NOVO AGENDAMENTO
+        </button>
       </div>
 
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
@@ -145,9 +213,14 @@ export default function ConsultaAgendas() {
                     </span>
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
-                    <button onClick={() => alert('Visualizando detalhes do agendamento...')} style={{ border: 'none', background: 'none', color: '#0f3d2e', cursor: 'pointer' }} title="Ver detalhes">
-                      <ChevronRight size={20} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button onClick={() => handleOpenEdit(appt)} style={{ border: 'none', background: '#eff6ff', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#2563eb' }}>
+                        <Edit size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(appt.id)} style={{ border: 'none', background: '#fef2f2', padding: '8px', borderRadius: '6px', cursor: 'pointer', color: '#dc2626' }}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -160,6 +233,88 @@ export default function ConsultaAgendas() {
           </table>
         </div>
       </div>
+
+      {/* Modal Add/Edit */}
+      {showModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <form 
+            onSubmit={handleSave} 
+            style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: '15px' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>{isEditing ? 'Editar Agendamento' : 'Novo Agendamento'}</h3>
+              <button type="button" onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Cliente</label>
+              <select 
+                value={formData.cliente} 
+                onChange={(e) => setFormData({...formData, cliente: e.target.value})}
+                required
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              >
+                <option value="">Selecione...</option>
+                {clients.map(c => <option key={c.id} value={c.nome}>{c.nome}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Serviço</label>
+              <select 
+                value={formData.servico} 
+                onChange={(e) => setFormData({...formData, servico: e.target.value})}
+                required
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              >
+                <option value="">Selecione...</option>
+                {services.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Data</label>
+                <input 
+                  type="date" 
+                  value={formData.data} 
+                  onChange={(e) => setFormData({...formData, data: e.target.value})}
+                  required
+                  style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Hora</label>
+                <input 
+                  type="time" 
+                  value={formData.hora} 
+                  onChange={(e) => setFormData({...formData, hora: e.target.value})}
+                  required
+                  style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }} 
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Status</label>
+              <select 
+                value={formData.status} 
+                onChange={(e) => setFormData({...formData, status: e.target.value})}
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              >
+                <option value="PENDENTE">PENDENTE</option>
+                <option value="CONFIRMADO">CONFIRMADO</option>
+                <option value="CANCELADO">CANCELADO</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: '#f3f4f6', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancelar</button>
+              <button type="submit" style={{ flex: 1, padding: '12px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Salvar</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

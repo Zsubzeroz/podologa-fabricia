@@ -43,6 +43,9 @@ export const ClientManager = new EntityManager('clientes');
 export const ReceiptManager = new EntityManager('nfs_list');
 export const ProductManager = new EntityManager('produtos_list');
 export const ServiceManager = new EntityManager('services');
+export const SaleManager = new EntityManager('vendas_list');
+export const OrcamentoManager = new EntityManager('orcamentos_list');
+export const PacoteManager = new EntityManager('pacotes_list');
 
 export class CompanySettings {
   static get() {
