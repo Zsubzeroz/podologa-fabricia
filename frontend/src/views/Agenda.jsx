@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X } from 'lucide-react';
 import { AppointmentManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia'); // 'Dia' ou 'Mês'
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const shareRef = useRef(null);
 
   const getWorkHoursForDay = (dateObj) => {
     if (!dateObj) return { start: 8, end: 20 };
@@ -282,12 +285,20 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
           </button>
         </div>
 
-        <button 
-          onClick={() => onAddAppointment(currentDate, '10:00')}
-          style={{ backgroundColor: '#22c55e', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(34,197,94,0.2)' }}
-        >
-          <Plus size={20} /> NOVO AGENDAMENTO
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            onClick={() => setShowShareModal(true)}
+            style={{ backgroundColor: '#fff', color: '#0f3d2e', border: '1px solid #0f3d2e', padding: '12px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Share2 size={18} /> COMPARTILHAR VAGAS
+          </button>
+          <button 
+            onClick={() => onAddAppointment(currentDate, '10:00')}
+            style={{ backgroundColor: '#22c55e', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(34,197,94,0.2)' }}
+          >
+            <Plus size={20} /> NOVO AGENDAMENTO
+          </button>
+        </div>
       </div>
       
       <div style={{ fontSize: '1.2rem', color: '#111827', fontWeight: '700', marginBottom: '1.5rem', textTransform: 'capitalize', borderBottom: '2px solid #0f3d2e', paddingBottom: '10px', display: 'inline-block' }}>
@@ -432,9 +443,125 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
           background: #f0fdf4;
           padding-left: 10px;
           border-radius: 6px;
+          transition: all 0.2s;
+        }
+        @media print {
+          .no-print { display: none !important; }
         }
       `}</style>
 
-    </div>
+      {/* Modal de Compartilhamento de Vagas */}
+      {showShareModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }} className="no-print">
+          <div style={{ background: '#fff', borderRadius: '16px', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '25px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Share2 size={24} color="#0f3d2e" />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800' }}>Compartilhar Horários</h3>
+              </div>
+              <X size={24} color="#6b7280" style={{ cursor: 'pointer' }} onClick={() => setShowShareModal(false)} />
+            </div>
+
+            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '20px' }}>
+              Abaixo estão os horários livres para os próximos dias. Copie para o WhatsApp ou mostre a imagem para o cliente.
+            </p>
+
+            {/* Preview Section */}
+            <div ref={shareRef} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '25px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                <div style={{ color: '#0f3d2e', fontWeight: '800', fontSize: '1.1rem' }}>🕒 VAGAS DISPONÍVEIS</div>
+                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Fabrícia Rodrigues - Podologia</div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {Array.from({ length: 7 }).map((_, i) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + i);
+                  if (d.getDay() === 0) return null; // Pula domingo
+
+                  const ymd = formatDateForInput(d);
+                  const workHours = getWorkHoursForDay(d);
+                  if (workHours.closed) return null;
+
+                  const freeSlots = [];
+                  for (let h = workHours.start; h < workHours.end; h++) {
+                    const hSt = `${h.toString().padStart(2, '0')}:00`;
+                    const hasAppt = appointments.some(a => a.date === ymd && a.startTime === hSt);
+                    const blocked = isTimeBlocked(hSt, ymd);
+                    if (!hasAppt && !blocked) {
+                      freeSlots.push(`${h}h`);
+                    }
+                  }
+
+                  if (freeSlots.length === 0) return null;
+
+                  return (
+                    <div key={ymd} style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#1e293b', textTransform: 'capitalize' }}>
+                        {d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                        {freeSlots.map(s => (
+                          <span key={s} style={{ background: '#fff', border: '1px solid #0f3d2e', color: '#0f3d2e', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>{s}</span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <button 
+                onClick={() => {
+                  let text = `🕒 *HORÁRIOS DISPONÍVEIS - Fabrícia Rodrigues Podologia*\n\nOlá! Seguem os horários que tenho livre para atendimento:\n\n`;
+                  
+                  Array.from({ length: 7 }).forEach((_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + i);
+                    if (d.getDay() === 0) return;
+                    const ymd = formatDateForInput(d);
+                    const workHours = getWorkHoursForDay(d);
+                    if (workHours.closed) return;
+
+                    const freeSlots = [];
+                    for (let h = workHours.start; h < workHours.end; h++) {
+                      const hSt = `${h.toString().padStart(2, '0')}:00`;
+                      const hasAppt = appointments.some(a => a.date === ymd && a.startTime === hSt);
+                      const blocked = isTimeBlocked(hSt, ymd);
+                      if (!hasAppt && !blocked) freeSlots.push(`${h}h`);
+                    }
+
+                    if (freeSlots.length > 0) {
+                      const dayName = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
+                      text += `📌 *${dayName.toUpperCase()}*\n✅ ${freeSlots.join(', ')}\n\n`;
+                    }
+                  });
+
+                  text += `Para agendar, basta me responder aqui! 😊`;
+                  navigator.clipboard.writeText(text);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                style={{ background: '#25d366', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                {copied ? <CheckCircle size={20} /> : <Copy size={20} />} 
+                {copied ? 'COPIADO!' : 'COPIAR WHATSAPP'}
+              </button>
+              
+              <button 
+                onClick={() => window.print()}
+                style={{ background: '#0f3d2e', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                <Download size={20} /> BAIXAR / PRINT
+              </button>
+            </div>
+            
+            <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', marginTop: '15px' }}>
+              Ao clicar em "BAIXAR", você pode salvar como PDF ou tirar um print da tela para enviar a foto.
+            </p>
+          </div>
+        </div>
+      )}
   );
 }
