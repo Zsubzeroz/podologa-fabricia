@@ -233,8 +233,11 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
               onChange={handleChange}
               style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
             >
+              <option value="">Selecione um serviço...</option>
               {services.map((srv, index) => (
-                <option key={index} value={srv.name}>{srv.name}</option>
+                <option key={index} value={srv.name}>
+                  {srv.name} {srv.onlyAdmin ? '(Adm)' : ''}
+                </option>
               ))}
             </select>
           </div>

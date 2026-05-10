@@ -22,43 +22,15 @@ export default function PublicPortal() {
 
   const [services, setServices] = useState(() => {
     const saved = window.localStorage.getItem('services');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 1,
-        name: 'AVALIAÇÃO',
-        duration: '1h 00min',
-        price: 'R$ 50,00',
-        professional: 'FABRICIA RODRIGUES'
-      },
-      {
-        id: 2,
-        name: 'CALOS E CALOSIDADE',
-        duration: '1h 00min',
-        price: 'Consulte',
-        professional: 'FABRICIA RODRIGUES'
-      },
-      {
-        id: 3,
-        name: 'ONICOCRIPTOSE (UNHA ENCRAVADA)',
-        duration: '1h 00min',
-        price: 'Consulte',
-        professional: 'FABRICIA RODRIGUES'
-      },
-      {
-        id: 4,
-        name: 'PODOROFILAXIA (limpeza)',
-        duration: '30min',
-        price: 'R$ 70,00',
-        professional: 'FABRICIA RODRIGUES'
-      },
-      {
-        id: 5,
-        name: 'VERRUGA PLANTAR (olho de peixe)',
-        duration: '30min',
-        price: 'Consulte',
-        professional: 'FABRICIA RODRIGUES'
-      }
+    const allServices = saved ? JSON.parse(saved) : [
+      { id: 1, name: 'AVALIAÇÃO', duration: '1h 00min', price: 'R$ 50,00', professional: 'FABRICIA RODRIGUES' },
+      { id: 2, name: 'CALOS E CALOSIDADE', duration: '1h 00min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' },
+      { id: 3, name: 'ONICOCRIPTOSE (UNHA ENCRAVADA)', duration: '1h 00min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' },
+      { id: 4, name: 'PODOROFILAXIA (limpeza)', duration: '30min', price: 'R$ 70,00', professional: 'FABRICIA RODRIGUES' },
+      { id: 5, name: 'VERRUGA PLANTAR (olho de peixe)', duration: '30min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' }
     ];
+    // Filter out services that are only for admin
+    return allServices.filter(s => !s.onlyAdmin);
   });
 
   const sendAutomaticEmail = async (appointmentData) => {

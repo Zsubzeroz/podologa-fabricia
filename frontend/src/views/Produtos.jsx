@@ -22,6 +22,7 @@ export default function Produtos() {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
   const [price, setPrice] = useState('');
+  const [onlyAdmin, setOnlyAdmin] = useState(false);
 
   const saveToLocalStorage = (list) => {
     setServices(list);
@@ -32,6 +33,7 @@ export default function Produtos() {
     setName('');
     setDuration('1h 00min');
     setPrice('Consulte');
+    setOnlyAdmin(false);
     setIsEditing(false);
     setShowModal(true);
   };
@@ -40,6 +42,7 @@ export default function Produtos() {
     setName(service.name);
     setDuration(service.duration);
     setPrice(service.price);
+    setOnlyAdmin(!!service.onlyAdmin);
     setEditId(service.id);
     setIsEditing(true);
     setShowModal(true);
@@ -50,7 +53,7 @@ export default function Produtos() {
     if (!name.trim()) return;
 
     if (isEditing) {
-      const updated = services.map(s => String(s.id) === String(editId) ? { ...s, name, duration, price } : s);
+      const updated = services.map(s => String(s.id) === String(editId) ? { ...s, name, duration, price, onlyAdmin } : s);
       saveToLocalStorage(updated);
     } else {
       const newService = {
@@ -58,6 +61,7 @@ export default function Produtos() {
         name,
         duration,
         price,
+        onlyAdmin,
         professional: 'FABRICIA RODRIGUES'
       };
       saveToLocalStorage([...services, newService]);
@@ -143,7 +147,7 @@ export default function Produtos() {
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>NOME DO SERVIÇO</th>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>DURAÇÃO</th>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>PREÇO</th>
-                <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>PROFISSIONAL</th>
+                <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>VISIBILIDADE</th>
                 <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>AÇÕES</th>
               </tr>
             </thead>
@@ -160,7 +164,13 @@ export default function Produtos() {
                       <Clock size={16} color="#6b7280" /> {s.duration}
                     </td>
                     <td style={{ padding: '14px', color: '#0f3d2e', fontWeight: 'bold' }}>{s.price}</td>
-                    <td style={{ padding: '14px', color: '#4b5563' }}>{s.professional}</td>
+                    <td style={{ padding: '14px' }}>
+                      {s.onlyAdmin ? (
+                        <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>APENAS ADMIN</span>
+                      ) : (
+                        <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>PÚBLICO</span>
+                      )}
+                    </td>
                     <td style={{ padding: '14px' }}>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button 
@@ -235,6 +245,19 @@ export default function Produtos() {
               />
             </div>
 
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0' }}>
+              <input 
+                type="checkbox" 
+                id="onlyAdmin"
+                checked={onlyAdmin}
+                onChange={(e) => setOnlyAdmin(e.target.checked)}
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <label htmlFor="onlyAdmin" style={{ fontSize: '14px', color: '#374151', fontWeight: '600', cursor: 'pointer' }}>
+                Apenas Administrativo (Não aparece no Portal do Cliente)
+              </label>
+            </div>
+
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button 
                 type="button" 
@@ -253,6 +276,7 @@ export default function Produtos() {
           </form>
         </div>
       )}
+
     </div>
   );
 }
