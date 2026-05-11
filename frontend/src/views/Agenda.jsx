@@ -538,28 +538,17 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                     }
                   });
 
-                  text += `Para agendar, basta me responder aqui! 😊`;
+                  text += `✨ Caso tenha interesse, me informe o horário desejado para confirmação 😊`;
                   navigator.clipboard.writeText(text);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
                 }}
-                style={{ background: '#25d366', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{ background: '#25d366', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', gridColumn: 'span 2' }}
               >
                 {copied ? <CheckCircle size={20} /> : <Copy size={20} />} 
-                {copied ? 'COPIADO!' : 'COPIAR WHATSAPP'}
-              </button>
-              
-              <button 
-                onClick={() => window.print()}
-                style={{ background: '#0f3d2e', color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-              >
-                <Download size={20} /> BAIXAR / PRINT
+                {copied ? 'COPIADO!' : 'COPIAR TEXTO PARA WHATSAPP'}
               </button>
             </div>
-            
-            <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', marginTop: '15px' }}>
-              Ao clicar em "BAIXAR", você pode salvar como PDF ou tirar um print da tela para enviar a foto.
-            </p>
           </div>
         </div>
       )}
