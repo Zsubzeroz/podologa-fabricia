@@ -6,6 +6,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const [viewMode, setViewMode] = useState('Dia'); // 'Dia' ou 'Mês'
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hideBusy, setHideBusy] = useState(false);
   const shareRef = useRef(null);
 
   const getWorkHoursForDay = (dateObj) => {
@@ -283,6 +284,19 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
           <button onClick={() => setCurrentDate(new Date())} style={{ background: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', padding: '10px 16px', fontWeight: 'bold', cursor: 'pointer' }}>
             Hoje
           </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '10px', background: '#fff', padding: '6px 12px', borderRadius: '8px', border: '1px solid #d1d5db' }}>
+            <input 
+              type="checkbox" 
+              id="hideBusy" 
+              checked={hideBusy} 
+              onChange={(e) => setHideBusy(e.target.checked)} 
+              style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+            />
+            <label htmlFor="hideBusy" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#374151', cursor: 'pointer' }}>
+              OCULTAR OCUPADOS
+            </label>
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -327,8 +341,11 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                   const apptsInHour = appointments.filter(a => a.date === currentYMD && parseInt(a.startTime.split(':')[0], 10) === hour);
                   const block = isTimeBlocked(hourSt);
                   
+                  // Filtro: Ocultar horários ocupados
+                  if (hideBusy && (apptsInHour.length > 0 || block)) return null;
+
                   return (
-                    <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6', background: block && !block.startTime ? '#fff1f2' : '#fff' }}>
+                    <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6', background: block && !block.startTime ? '#fff1f2' : (apptsInHour.length > 0 ? '#fff5f5' : '#fff') }}>
                       <td style={{ padding: '20px', color: '#111827', fontSize: '1.1rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: block && !block.startTime ? '#ffe4e6' : '#fcfcfc', textAlign: 'center' }}>
                         {hour}h
                       </td>
@@ -463,7 +480,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
             </div>
 
             <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '20px' }}>
-              Abaixo estão os horários livres para os próximos dias. Copie para o WhatsApp ou mostre a imagem para o cliente.
+              Abaixo estão os horários livres para os próximos dias. Copie o texto abaixo e envie para o WhatsApp do cliente.
             </p>
 
             {/* Preview Section */}
@@ -508,6 +525,10 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                     </div>
                   );
                 })}
+              </div>
+
+              <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px dashed #cbd5e1', color: '#0f3d2e', fontWeight: 'bold', fontSize: '0.85rem', fontStyle: 'italic' }}>
+                ✨ Caso tenha interesse, me informe o horário desejado para confirmação 😊
               </div>
             </div>
 
