@@ -563,5 +563,6 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
           </div>
         </div>
       )}
+    </div>
   );
 }
