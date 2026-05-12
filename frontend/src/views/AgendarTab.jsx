@@ -26,9 +26,11 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     };
   }, []);
 
+  const [clients, setClients] = useState(() => ClientManager.getAll());
   const [formData, setFormData] = useState({
     clientName: preSelectedClient || '',
     phone: '',
+    clientEmail: '',
     startTime: preSelectedTime || '10:00',
     duration: '01:00',
     repeat: 'Nunca',
@@ -36,16 +38,53 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     notifyEmail: 'SIM',
     notes: '',
     source: 'manual',
-    status: 'Agendado'
+    date: formatDateForInput(currentDate)
   });
 
   useEffect(() => {
-    if (preSelectedClient) {
-      setFormData(prev => ({ ...prev, clientName: preSelectedClient }));
-    }
-  }, [preSelectedClient]);
+    const handleSyncClients = () => setClients(ClientManager.getAll());
+    window.addEventListener('dataSync', handleSyncClients);
+    window.addEventListener('storage', handleSyncClients);
+    return () => {
+      window.removeEventListener('dataSync', handleSyncClients);
+      window.removeEventListener('storage', handleSyncClients);
+    };
+  }, []);
 
-  const handleChange = (e) => setFormData({...formData, [e.target.name]: e.target.value});
+  useEffect(() => {
+    if (preSelectedClient) {
+      const client = clients.find(c => c.nome === preSelectedClient);
+      if (client) {
+        setFormData(prev => ({ 
+          ...prev, 
+          clientName: client.nome,
+          phone: client.contato || '',
+          clientEmail: client.email || ''
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, clientName: preSelectedClient }));
+      }
+    }
+  }, [preSelectedClient, clients]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === 'clientName') {
+      const client = clients.find(c => c.nome === value);
+      if (client) {
+        setFormData({
+          ...formData,
+          clientName: value,
+          phone: client.contato || formData.phone,
+          clientEmail: client.email || formData.clientEmail
+        });
+        return;
+      }
+    }
+    
+    setFormData({...formData, [name]: value});
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -201,9 +240,15 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
               placeholder="Digite o nome..." 
               value={formData.clientName} 
               onChange={handleChange} 
+              list="client-list"
               required 
               style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
             />
+            <datalist id="client-list">
+              {clients.map((c, i) => (
+                <option key={i} value={c.nome} />
+              ))}
+            </datalist>
           </div>
 
           <div>

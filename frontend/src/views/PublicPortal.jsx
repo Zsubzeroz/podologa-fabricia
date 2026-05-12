@@ -325,6 +325,16 @@ export default function PublicPortal() {
                       if (cleaned.length > 2) masked += `) ${cleaned.slice(2, 7)}`;
                       if (cleaned.length > 7) masked += `-${cleaned.slice(7, 11)}`;
                       setClientPhone(masked);
+
+                      // Auto-fill logic
+                      if (cleaned.length >= 10) {
+                        const allClients = JSON.parse(window.localStorage.getItem('clientes') || '[]');
+                        const existingClient = allClients.find(c => c.contato.replace(/\D/g, '') === cleaned);
+                        if (existingClient) {
+                          if (!clientName) setClientName(existingClient.nome);
+                          if (!clientEmail) setClientEmail(existingClient.email || '');
+                        }
+                      }
                     }} 
                     style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
                   />
