@@ -11,8 +11,15 @@ export default function Dashboard({ setCurrentView }) {
   });
 
   useEffect(() => {
+    const today = new Date().toDateString();
+    const todayAppointments = AppointmentManager.getAll().filter(a => {
+      if (!a.date && !a.data) return false;
+      const apptDate = new Date(a.date || a.data).toDateString();
+      return apptDate === today;
+    });
+
     setStats({
-      appointments: AppointmentManager.getAll().length,
+      appointments: todayAppointments.length,
       services: ServiceManager.getAll().length,
       clients: ClientManager.getAll().length,
       sales: SaleManager.getAll().filter(s => (s.status || 'PAGO') === 'PAGO').reduce((acc, s) => acc + Number(s.total || s.valor || 0), 0)
