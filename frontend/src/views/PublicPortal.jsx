@@ -213,12 +213,12 @@ export default function PublicPortal() {
                 const allApps = JSON.parse(window.localStorage.getItem('appointments') || '[]');
                 const cleanedPhone = phone.replace(/\D/g, '');
                 const userApps = allApps.filter(app => {
-                  const appPhone = app.cliente_contato ? app.cliente_contato.replace(/\D/g, '') : '';
+                  const appPhone = (app.clientPhone || app.cliente_contato || '').replace(/\D/g, '');
                   return appPhone === cleanedPhone && app.status !== 'Cancelado';
                 });
                 
                 // Sort by date/time (most recent first for future ones)
-                userApps.sort((a, b) => new Date(a.data) - new Date(b.data));
+                userApps.sort((a, b) => new Date(a.date || a.data) - new Date(b.date || b.data));
 
                 setFoundAppointments(userApps);
                 setHasSearched(true);
@@ -238,9 +238,9 @@ export default function PublicPortal() {
                     <p style={{ fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', marginBottom: '5px' }}>Encontramos {foundAppointments.length} agendamento(s):</p>
                     {foundAppointments.map((app, idx) => (
                       <div key={idx} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px' }}>
-                        <div style={{ fontWeight: 'bold', color: '#166534' }}>{app.servico}</div>
+                        <div style={{ fontWeight: 'bold', color: '#166534' }}>{app.service || app.servico}</div>
                         <div style={{ fontSize: '0.85rem', color: '#14532d' }}>
-                          📅 {app.data.split('-').reverse().join('/')} às {app.hora}
+                          📅 {(app.date || app.data || '').split('-').reverse().join('/')} às {app.startTime || app.hora}
                         </div>
                         <div style={{ fontSize: '0.8rem', color: '#15803d', marginTop: '4px' }}>
                           Status: {app.status || 'Confirmado'}
