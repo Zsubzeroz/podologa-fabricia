@@ -33,6 +33,22 @@ export default function PublicPortal() {
     return allServices.filter(s => !s.onlyAdmin);
   });
 
+  useEffect(() => {
+    const handleSync = () => {
+      const saved = window.localStorage.getItem('services');
+      if (saved) {
+        const allServices = JSON.parse(saved);
+        setServices(allServices.filter(s => !s.onlyAdmin));
+      }
+    };
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
+
   const sendAutomaticEmail = async (appointmentData) => {
     try {
       const config = GeneralSettings.get();

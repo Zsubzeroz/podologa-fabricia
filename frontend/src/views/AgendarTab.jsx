@@ -14,7 +14,17 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     return `${year}-${month}-${day}`;
   };
 
-  const services = ServiceManager.getAll();
+  const [services, setServices] = useState(() => ServiceManager.getAll());
+
+  useEffect(() => {
+    const handleSync = () => setServices(ServiceManager.getAll());
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
 
   const [formData, setFormData] = useState({
     clientName: preSelectedClient || '',

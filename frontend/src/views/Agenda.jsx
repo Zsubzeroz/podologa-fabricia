@@ -338,7 +338,19 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                   </tr>
                 ) : hours.map(hour => {
                   const hourSt = `${hour.toString().padStart(2, '0')}:00`;
-                  const apptsInHour = appointments.filter(a => a.date === currentYMD && parseInt(a.startTime.split(':')[0], 10) === hour);
+                  const apptsInHour = appointments.filter(a => {
+                    if (a.date !== currentYMD) return false;
+                    const getMins = t => {
+                      if (!t) return 0;
+                      const [h, m] = t.split(':').map(Number);
+                      return h * 60 + m;
+                    };
+                    const aStart = getMins(a.startTime);
+                    const aEnd = getMins(a.endTime) || (aStart + 60);
+                    const slotStart = hour * 60;
+                    const slotEnd = hour * 60 + 60;
+                    return aStart < slotEnd && aEnd > slotStart;
+                  });
                   const block = isTimeBlocked(hourSt);
                   
                   // Filtro: Ocultar horários ocupados
