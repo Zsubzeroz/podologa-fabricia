@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit } from 'lucide-react';
 import { AppointmentManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
@@ -7,6 +7,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [hideBusy, setHideBusy] = useState(false);
+  const [editingAppt, setEditingAppt] = useState(null);
   const shareRef = useRef(null);
 
   const getWorkHoursForDay = (dateObj) => {
@@ -421,6 +422,12 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                     <Smartphone size={14} /> LEMBRETE
                                   </button>
                                   <button 
+                                    onClick={(e) => { e.stopPropagation(); setEditingAppt(appt); }} 
+                                    style={{ background: '#fef08a', border: 'none', color: '#854d0e', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                  >
+                                    <Edit size={14} /> EDITAR
+                                  </button>
+                                  <button 
                                     onClick={(e) => { e.stopPropagation(); onCancelAppointment(appt.id); }} 
                                     style={{ background: '#fee2e2', border: 'none', color: '#ef4444', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
                                   >
@@ -580,6 +587,74 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
               >
                 {copied ? <CheckCircle size={20} /> : <Copy size={20} />} 
                 {copied ? 'COPIADO!' : 'COPIAR TEXTO PARA WHATSAPP'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição */}
+      {editingAppt && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', maxWidth: '500px', width: '100%', padding: '25px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800' }}>Editar Agendamento</h3>
+              <X size={24} color="#6b7280" style={{ cursor: 'pointer' }} onClick={() => setEditingAppt(null)} />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '5px', display: 'block' }}>Nome do Cliente</label>
+                <input 
+                  type="text" 
+                  value={editingAppt.clientName}
+                  onChange={(e) => setEditingAppt({...editingAppt, clientName: e.target.value})}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '5px', display: 'block' }}>Data (AAAA-MM-DD)</label>
+                <input 
+                  type="date" 
+                  value={editingAppt.date}
+                  onChange={(e) => setEditingAppt({...editingAppt, date: e.target.value})}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '5px', display: 'block' }}>Início</label>
+                  <input 
+                    type="time" 
+                    value={editingAppt.startTime}
+                    onChange={(e) => setEditingAppt({...editingAppt, startTime: e.target.value})}
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '5px', display: 'block' }}>Fim</label>
+                  <input 
+                    type="time" 
+                    value={editingAppt.endTime}
+                    onChange={(e) => setEditingAppt({...editingAppt, endTime: e.target.value})}
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                  />
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  onUpdateAppointment(editingAppt.id, {
+                    clientName: editingAppt.clientName,
+                    date: editingAppt.date,
+                    startTime: editingAppt.startTime,
+                    endTime: editingAppt.endTime
+                  });
+                  setEditingAppt(null);
+                }}
+                style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}
+              >
+                SALVAR ALTERAÇÕES
               </button>
             </div>
           </div>
