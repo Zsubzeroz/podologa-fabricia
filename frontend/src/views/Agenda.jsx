@@ -621,6 +621,19 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                   style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
                 />
               </div>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '5px', display: 'block' }}>Procedimento / Serviço</label>
+                <select 
+                  value={editingAppt.service}
+                  onChange={(e) => setEditingAppt({...editingAppt, service: e.target.value})}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db', background: '#fff' }}
+                >
+                  <option value={editingAppt.service}>{editingAppt.service}</option>
+                  {(JSON.parse(window.localStorage.getItem('services') || '[]')).filter(s => s.name !== editingAppt.service).map((s, i) => (
+                    <option key={i} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151', marginBottom: '5px', display: 'block' }}>Início</label>
@@ -646,6 +659,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                 onClick={() => {
                   onUpdateAppointment(editingAppt.id, {
                     clientName: editingAppt.clientName,
+                    service: editingAppt.service,
                     date: editingAppt.date,
                     startTime: editingAppt.startTime,
                     endTime: editingAppt.endTime
