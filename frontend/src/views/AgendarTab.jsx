@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, User, Phone, Clock, FileText, CheckCircle, Mail } from 'lucide-react';
-import { AppointmentManager, ServiceManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
+import { AppointmentManager, ServiceManager, ClientManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
 import emailjs from '@emailjs/browser';
 import { EMAIL_CONFIG } from '../utils/emailConfig';
 

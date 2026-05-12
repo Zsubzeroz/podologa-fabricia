@@ -329,7 +329,7 @@ export default function PublicPortal() {
                       // Auto-fill logic
                       if (cleaned.length >= 10) {
                         const allClients = JSON.parse(window.localStorage.getItem('clientes') || '[]');
-                        const existingClient = allClients.find(c => c.contato.replace(/\D/g, '') === cleaned);
+                        const existingClient = allClients.find(c => (c.contato || '').replace(/\D/g, '') === cleaned);
                         if (existingClient) {
                           if (!clientName) setClientName(existingClient.nome);
                           if (!clientEmail) setClientEmail(existingClient.email || '');
