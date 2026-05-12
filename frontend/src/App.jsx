@@ -1,6 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import Layout from './components/Layout';
 import { SecurityManager } from './utils/EntityManager';
+import { auth } from './utils/firebase';
+import { signOut } from 'firebase/auth';
 
 // Core Views
 import Login from './views/Login';
@@ -107,8 +109,12 @@ function App() {
   const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
   const isClientPath = currentPath === '/cliente';
   const isAdminPath = currentPath === '/admin';
-
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(e);
+    }
     setAuth(null);
     window.localStorage.removeItem('adminAuth');
     window.location.href = '/';

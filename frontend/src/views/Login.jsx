@@ -1,21 +1,44 @@
 import { useState } from 'react';
 import { LogIn, Mail, Lock, ShieldCheck } from 'lucide-react';
 import '../styles/login.css';
-import { SecurityManager } from '../utils/EntityManager';
+import { auth } from '../utils/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError('Conectando ao banco de dados...');
 
-    if (SecurityManager.verify(email, password)) {
-      onLogin({ role: 'admin', email });
-    } else {
-      setError('Email ou senha incorretos');
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      onLogin({ role: 'admin', email: userCredential.user.email, uid: userCredential.user.uid });
+    } catch (err) {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
+        // Auto-criação na primeira vez se for o email oficial
+        if (email === 'fabriciapodologa@gmail.com' || email === 'zsubzeroz12345@gmail.com') {
+          try {
+            const newUser = await createUserWithEmailAndPassword(auth, email, password);
+            onLogin({ role: 'admin', email: newUser.user.email, uid: newUser.user.uid });
+            return;
+          } catch (createErr) {
+            if (createErr.code === 'auth/operation-not-allowed') {
+              setError('ERRO: Você precisa habilitar o Login por E-mail/Senha no console do Firebase!');
+            } else {
+              setError('Erro ao criar conta: ' + createErr.message);
+            }
+            return;
+          }
+        }
+        setError('Email ou senha incorretos.');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('ERRO: Você precisa habilitar o Login por E-mail/Senha no console do Firebase!');
+      } else {
+        setError('Erro: ' + err.message);
+      }
     }
   };
 

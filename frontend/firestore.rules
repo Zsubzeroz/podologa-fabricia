@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras Específicas
+    match /appData/appointments {
+      // Público pode ler e escrever (para agendar via portal)
+      allow read, write: if true; 
+    }
+    match /appData/clientes {
+      // Público pode ler e escrever (para se cadastrar no agendamento)
+      allow read, write: if true;
+    }
+    
+    // Regra Padrão: Apenas administradores logados podem alterar os dados do sistema
+    // Todo mundo pode ler (necessário para o portal puxar serviços, horários, configurações da clínica)
+    match /{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
