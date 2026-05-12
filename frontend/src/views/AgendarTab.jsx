@@ -134,6 +134,10 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     // Validate against blocked days/times
     const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
     const matchingBlock = blockedDays.find(b => {
+      if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
+        const d = new Date(formData.date + 'T00:00:00');
+        return String(d.getDay()) === String(b.dayOfWeek);
+      }
       const start = b.date;
       const end = b.endDate || b.date;
       return formData.date >= start && formData.date <= end;

@@ -426,6 +426,10 @@ export default function PublicPortal() {
 
                         // 1. Check blocked times
                         const matchingBlock = blockedDays.find(b => {
+                          if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
+                            const d = new Date(selectedDate + 'T00:00:00');
+                            return String(d.getDay()) === String(b.dayOfWeek);
+                          }
                           const start = b.date;
                           const end = b.endDate || b.date;
                           return selectedDate >= start && selectedDate <= end;
@@ -543,6 +547,10 @@ export default function PublicPortal() {
                     // 2. Validate against blocked dates and times
                     const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
                     const matchingBlock = blockedDays.find(b => {
+                      if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
+                        const d = new Date(selectedDate + 'T00:00:00');
+                        return String(d.getDay()) === String(b.dayOfWeek);
+                      }
                       const start = b.date;
                       const end = b.endDate || b.date;
                       return selectedDate >= start && selectedDate <= end;

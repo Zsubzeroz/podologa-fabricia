@@ -17,7 +17,8 @@ export default function CadastrosFeriado() {
     description: '',
     type: 'Feriado',
     startTime: '',
-    endTime: ''
+    endTime: '',
+    dayOfWeek: '' // '' means no recurrence, '0'-'6' for Sun-Sat
   });
 
   const [search, setSearch] = useState('');
@@ -55,8 +56,18 @@ export default function CadastrosFeriado() {
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (!formData.date || !formData.description) {
-      alert('Por favor, preencha a data de início e a descrição.');
+    if (!formData.description) {
+      alert('Por favor, preencha a descrição.');
+      return;
+    }
+
+    if (formData.type !== 'Recorrente Semanal' && !formData.date) {
+      alert('Por favor, preencha a data de início.');
+      return;
+    }
+
+    if (formData.type === 'Recorrente Semanal' && formData.dayOfWeek === '') {
+      alert('Por favor, selecione o dia da semana.');
       return;
     }
 
@@ -77,7 +88,7 @@ export default function CadastrosFeriado() {
       setBlockedDays(prev => [...prev, newBlock]);
     }
 
-    setFormData({ id: null, date: '', endDate: '', description: '', type: 'Feriado', startTime: '', endTime: '' });
+    setFormData({ id: null, date: '', endDate: '', description: '', type: 'Feriado', startTime: '', endTime: '', dayOfWeek: '' });
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
   };
@@ -99,8 +110,12 @@ export default function CadastrosFeriado() {
 
   const filtered = blockedDays.filter(b => 
     b.description.toLowerCase().includes(search.toLowerCase()) ||
-    b.date.includes(search)
-  ).sort((a, b) => new Date(a.date) - new Date(b.date));
+    (b.date && b.date.includes(search))
+  ).sort((a, b) => {
+    if (a.dayOfWeek && !b.dayOfWeek) return -1;
+    if (!a.dayOfWeek && b.dayOfWeek) return 1;
+    return new Date(a.date) - new Date(b.date);
+  });
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
@@ -163,9 +178,25 @@ export default function CadastrosFeriado() {
                 <option>Feriado</option>
                 <option>Férias</option>
                 <option>Folga</option>
+                <option>Recorrente Semanal</option>
                 <option>Outro</option>
               </select>
             </div>
+            {formData.type === 'Recorrente Semanal' && (
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>DIA DA SEMANA</label>
+                <select name="dayOfWeek" value={formData.dayOfWeek} onChange={handleChange} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }}>
+                  <option value="">Selecione...</option>
+                  <option value="1">Segunda-feira</option>
+                  <option value="2">Terça-feira</option>
+                  <option value="3">Quarta-feira</option>
+                  <option value="4">Quinta-feira</option>
+                  <option value="5">Sexta-feira</option>
+                  <option value="6">Sábado</option>
+                  <option value="0">Domingo</option>
+                </select>
+              </div>
+            )}
             <div>
               <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>HORA INÍCIO (OPCIONAL)</label>
               <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
@@ -181,7 +212,7 @@ export default function CadastrosFeriado() {
             </div>
           </form>
           {isEditing && (
-            <button onClick={() => { setIsEditing(false); setFormData({ id: null, date: '', endDate: '', description: '', type: 'Feriado', startTime: '', endTime: '' }); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: 'bold', fontSize: '0.8rem', marginTop: '10px', cursor: 'pointer' }}>CANCELAR EDIÇÃO</button>
+            <button onClick={() => { setIsEditing(false); setFormData({ id: null, date: '', endDate: '', description: '', type: 'Feriado', startTime: '', endTime: '', dayOfWeek: '' }); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: 'bold', fontSize: '0.8rem', marginTop: '10px', cursor: 'pointer' }}>CANCELAR EDIÇÃO</button>
           )}
         </div>
 
@@ -210,8 +241,16 @@ export default function CadastrosFeriado() {
                 {filtered.map((b) => (
                   <tr key={b.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                     <td style={{ padding: '15px', fontWeight: 'bold', color: '#111827' }}>
-                      {b.date.split('-').reverse().join('/')} 
-                      {b.endDate && b.endDate !== b.date ? ` até ${b.endDate.split('-').reverse().join('/')}` : ''}
+                      {b.dayOfWeek !== undefined && b.dayOfWeek !== '' ? (
+                        <span style={{ color: '#0f3d2e' }}>
+                          Toda {['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][b.dayOfWeek]}
+                        </span>
+                      ) : (
+                        <>
+                          {b.date.split('-').reverse().join('/')} 
+                          {b.endDate && b.endDate !== b.date ? ` até ${b.endDate.split('-').reverse().join('/')}` : ''}
+                        </>
+                      )}
                     </td>
                     <td style={{ padding: '15px', color: '#4b5563' }}>{b.description}</td>
                     <td style={{ padding: '15px' }}>
