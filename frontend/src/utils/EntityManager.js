@@ -95,6 +95,7 @@ export const OrcamentoManager = new EntityManager('orcamentos_list');
 export const PacoteManager = new EntityManager('pacotes_list');
 export const ProfessionalManager = new EntityManager('professionals_list');
 export const AuditManager = new EntityManager('audit_logs');
+export const BlockedDaysManager = new EntityManager('blockedDays');
 
 export class SecurityManager {
   static getCredentials() {
@@ -205,4 +206,10 @@ export const GeneralSettingsManager = new SettingsManager('configuracoes_gerais'
 export class GeneralSettings {
   static get() { return GeneralSettingsManager.get(); }
   static save(data) { GeneralSettingsManager.save(data); }
+}
+
+export const WorkingHoursManager = new SettingsManager('workingHours', { start: '08:00', end: '19:00' });
+export class WorkingHours {
+  static get() { return WorkingHoursManager.get(); }
+  static save(data) { WorkingHoursManager.save(data); }
 }

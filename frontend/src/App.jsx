@@ -54,6 +54,8 @@ const LoadingSpinner = () => (
   </div>
 );
 
+import { AppointmentManager, ServiceManager } from './utils/EntityManager';
+
 function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [openMenu, setOpenMenu] = useState('cadastros'); 
@@ -67,34 +69,16 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [appointments, setAppointments] = useState(() => {
-    const saved = window.localStorage.getItem('appointments');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 1,
-        clientName: 'Maria Silva',
-        service: 'Podologia Preventiva',
-        date: '2026-05-10',
-        startTime: '14:00',
-        endTime: '15:00',
-        status: 'Agendado'
-      }
-    ];
-  });
+  const [appointments, setAppointments] = useState(() => AppointmentManager.getAll());
 
   useEffect(() => {
-    const load = () => {
-      const saved = window.localStorage.getItem('appointments');
-      if (saved) {
-        setAppointments(JSON.parse(saved));
-      }
-    };
+    const load = () => setAppointments(AppointmentManager.getAll());
     load();
     window.addEventListener('storage', load);
-    const interval = setInterval(load, 2000);
+    window.addEventListener('dataSync', load);
     return () => {
       window.removeEventListener('storage', load);
-      clearInterval(interval);
+      window.removeEventListener('dataSync', load);
     };
   }, []);
 
@@ -141,24 +125,20 @@ function App() {
 
   const cancelAppointment = (id) => {
     if (window.confirm('Deseja realmente cancelar este agendamento?')) {
-      const appt = appointments.find(a => a.id === id);
-      const updated = appointments.filter(a => a.id !== id);
+      const updated = AppointmentManager.remove(id);
       setAppointments(updated);
-      window.localStorage.setItem('appointments', JSON.stringify(updated));
-      window.dispatchEvent(new Event('storage'));
     }
   };
 
   const updateAppointment = (id, data) => {
-    const apptIndex = appointments.findIndex(a => a.id === id);
-    if (apptIndex === -1) return;
+    const oldAppt = appointments.find(a => a.id === id);
+    if (!oldAppt) return;
     
-    const oldAppt = appointments[apptIndex];
-    const newAppt = { ...oldAppt, ...data };
+    let newAppt = { ...oldAppt, ...data };
 
     // Automatic financial entry for 'Atendido' status
     if (data.status === 'Atendido' && oldAppt.status !== 'Atendido') {
-      const services = JSON.parse(window.localStorage.getItem('services') || '[]');
+      const services = ServiceManager.getAll();
       const serviceObj = services.find(s => s.name === oldAppt.service);
       const priceVal = serviceObj ? parseFloat(serviceObj.price) : 0;
       
@@ -208,10 +188,9 @@ function App() {
               currentDate={currentDate} 
               preSelectedTime={preSelectedTime}
               preSelectedClient={preSelectedClient}
-              onSave={(newAppt) => {
-                const updated = [...appointments, { ...newAppt, id: Date.now() }];
+              onSave={(newApptData) => {
+                const updated = AppointmentManager.add(newApptData);
                 setAppointments(updated);
-                window.localStorage.setItem('appointments', JSON.stringify(updated));
                 resetPreSelections();
                 setCurrentView('agenda');
               }} 

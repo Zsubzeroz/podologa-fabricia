@@ -1,24 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ShoppingCart, User, Plus, Trash2, DollarSign, List, CheckSquare } from 'lucide-react';
+import { ClientManager, ServiceManager, SaleManager } from '../utils/EntityManager';
 
 export default function Caixa() {
-  const [clientes, setClientes] = useState(() => {
-    const saved = window.localStorage.getItem('clientes');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [services, setServices] = useState(() => {
-    const saved = window.localStorage.getItem('services');
-    return saved ? JSON.parse(saved) : [
-      { name: 'Avaliação', price: 'R$ 50,00' },
-      { name: 'Podoprofilaxia Completa', price: 'R$ 70,00' }
-    ];
-  });
-
-  const [vendas, setVendas] = useState(() => {
-    const saved = window.localStorage.getItem('vendas');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [clientes, setClientes] = useState(() => ClientManager.getAll());
+  const [services, setServices] = useState(() => ServiceManager.getAll());
+  const [vendas, setVendas] = useState(() => SaleManager.getAll());
 
   const [currentSale, setCurrentSale] = useState({
     cliente: '',
@@ -28,14 +15,34 @@ export default function Caixa() {
   });
 
   const [itemForm, setItemForm] = useState({
-    nome: services[0]?.name || 'Avaliação',
-    preco: services[0]?.price ? parseFloat(services[0].price.replace(/[^\d.,]/g, '').replace(',', '.')) : 50,
+    nome: '',
+    preco: 0,
     quantidade: 1
   });
 
   useEffect(() => {
-    window.localStorage.setItem('vendas', JSON.stringify(vendas));
-  }, [vendas]);
+    if (services.length > 0 && !itemForm.nome) {
+      setItemForm({
+        nome: services[0].name,
+        preco: parseFloat(services[0].price.replace(/[^\d.,]/g, '').replace(',', '.')) || 0,
+        quantidade: 1
+      });
+    }
+  }, [services]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      setClientes(ClientManager.getAll());
+      setServices(ServiceManager.getAll());
+      setVendas(SaleManager.getAll());
+    };
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
 
   const handleAddItem = (e) => {
     e.preventDefault();
@@ -87,13 +94,13 @@ export default function Caixa() {
     }
 
     const completedSale = {
-      id: Date.now(),
       ...currentSale,
       data: new Date().toLocaleDateString('pt-BR'),
       hora: new Date().toLocaleTimeString('pt-BR')
     };
 
-    setVendas([completedSale, ...vendas]);
+    const updated = SaleManager.add(completedSale);
+    setVendas(updated);
     alert('Venda registrada com sucesso!');
 
     setCurrentSale({
@@ -328,6 +335,7 @@ export default function Caixa() {
             <button 
               onClick={() => {
                 if (window.confirm('Tem certeza de que deseja excluir todo o histórico de vendas?')) {
+                  SaleManager.save([]);
                   setVendas([]);
                 }
               }}
@@ -370,7 +378,8 @@ export default function Caixa() {
                       <button 
                         onClick={() => {
                           if (window.confirm('Tem certeza de que deseja excluir esta venda?')) {
-                            setVendas(vendas.filter(v => String(v.id) !== String(venda.id)));
+                            const updated = SaleManager.remove(venda.id);
+                            setVendas(updated);
                           }
                         }}
                         style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}

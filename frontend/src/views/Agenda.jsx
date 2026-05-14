@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit } from 'lucide-react';
-import { AppointmentManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
+import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia'); // 'Dia' ou 'Mês'
@@ -8,7 +8,18 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const [copied, setCopied] = useState(false);
   const [hideBusy, setHideBusy] = useState(false);
   const [editingAppt, setEditingAppt] = useState(null);
+  const [blockedDays, setBlockedDays] = useState(() => BlockedDaysManager.getAll());
   const shareRef = useRef(null);
+
+  useEffect(() => {
+    const handleSync = () => setBlockedDays(BlockedDaysManager.getAll());
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
 
   const getWorkHoursForDay = (dateObj) => {
     if (!dateObj) return { start: 8, end: 20 };
@@ -55,7 +66,6 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const currentYMD = formatDateForInput(currentDate);
 
   const handleBlockHour = (hourSt) => {
-    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
     const endH = parseInt(hourSt.split(':')[0], 10) + 1;
     const endSt = `${endH.toString().padStart(2, '0')}:00`;
 
@@ -68,25 +78,29 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
       endTime: endSt
     };
 
-    const updated = [...blockedDays, newBlock];
-    window.localStorage.setItem('blockedDays', JSON.stringify(updated));
+    const updated = BlockedDaysManager.add(newBlock);
+    setBlockedDays(updated);
     setCurrentDate(new Date(currentDate)); 
   };
 
   const handleUnblockHour = (blockId) => {
-    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
-    const updated = blockedDays.filter(b => b.id !== blockId);
-    window.localStorage.setItem('blockedDays', JSON.stringify(updated));
+    const updated = BlockedDaysManager.remove(blockId);
+    setBlockedDays(updated);
     setCurrentDate(new Date(currentDate));
   };
 
   const isTimeBlocked = (hourSt, customYMD) => {
     const targetYMD = customYMD || currentYMD;
-    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
     return blockedDays.find(b => {
-      const startDate = b.date;
-      const endDate = b.endDate || b.date;
-      if (targetYMD < startDate || targetYMD > endDate) return false;
+      if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
+        const d = new Date(targetYMD + 'T00:00:00');
+        if (String(d.getDay()) !== String(b.dayOfWeek)) return false;
+      } else {
+        const startDate = b.date;
+        const endDate = b.endDate || b.date;
+        if (targetYMD < startDate || targetYMD > endDate) return false;
+      }
+
       if (!b.startTime && !b.endTime) return true; 
       if (hourSt) {
         return hourSt >= b.startTime && hourSt < b.endTime;

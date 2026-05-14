@@ -1,14 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Trash2, Edit2, Plus, Search, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { BlockedDaysManager, WorkingHours } from '../utils/EntityManager';
 
 export default function CadastrosFeriado() {
-  const [blockedDays, setBlockedDays] = useState(() => {
-    const saved = window.localStorage.getItem('blockedDays');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, date: '2026-04-10', endDate: '2026-04-10', description: 'Aniversário da cidade', type: 'Feriado', startTime: '', endTime: '' },
-      { id: 2, date: '2026-04-21', endDate: '2026-04-21', description: 'Tiradentes', type: 'Feriado', startTime: '', endTime: '' },
-    ];
-  });
+  const [blockedDays, setBlockedDays] = useState(() => BlockedDaysManager.getAll());
+  const [workingHours, setWorkingHours] = useState(() => WorkingHours.get());
+
+  useEffect(() => {
+    const handleSync = () => {
+      setBlockedDays(BlockedDaysManager.getAll());
+      setWorkingHours(WorkingHours.get());
+    };
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
 
   const [formData, setFormData] = useState({
     id: null,
@@ -25,22 +34,10 @@ export default function CadastrosFeriado() {
   const [isEditing, setIsEditing] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const [workingHours, setWorkingHours] = useState(() => {
-    const saved = window.localStorage.getItem('workingHours');
-    return saved ? JSON.parse(saved) : { start: '08:00', end: '19:00' };
-  });
-
-  // Effect to keep localStorage in sync
-  useEffect(() => {
-    window.localStorage.setItem('blockedDays', JSON.stringify(blockedDays));
-    // Dispatch storage event to notify other components (like Agenda)
-    window.dispatchEvent(new Event('storage'));
-  }, [blockedDays]);
-
-  useEffect(() => {
-    window.localStorage.setItem('workingHours', JSON.stringify(workingHours));
-    window.dispatchEvent(new Event('storage'));
-  }, [workingHours]);
+  const updateWorkingHours = (newHours) => {
+    setWorkingHours(newHours);
+    WorkingHours.save(newHours);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,16 +74,13 @@ export default function CadastrosFeriado() {
     };
 
     if (isEditing) {
-      const updated = blockedDays.map(b => b.id === formData.id ? { ...finalData } : b);
-      setBlockedDays(updated);
+      BlockedDaysManager.update(formData.id, finalData);
       setIsEditing(false);
     } else {
-      const newBlock = {
-        ...finalData,
-        id: Date.now(),
-      };
-      setBlockedDays(prev => [...prev, newBlock]);
+      BlockedDaysManager.add(finalData);
     }
+
+    setBlockedDays(BlockedDaysManager.getAll());
 
     setFormData({ id: null, date: '', endDate: '', description: '', type: 'Feriado', startTime: '', endTime: '', dayOfWeek: '' });
     setSuccess(true);
@@ -104,7 +98,8 @@ export default function CadastrosFeriado() {
 
   const handleDelete = (id) => {
     if (window.confirm('Tem certeza de que deseja excluir este bloqueio permanentemente?')) {
-      setBlockedDays(prev => prev.filter(b => b.id !== id));
+      const updated = BlockedDaysManager.remove(id);
+      setBlockedDays(updated);
     }
   };
 
@@ -138,11 +133,11 @@ export default function CadastrosFeriado() {
           <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '150px' }}>
               <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>INÍCIO DO EXPEDIENTE</label>
-              <input type="time" value={workingHours.start} onChange={(e) => setWorkingHours({ ...workingHours, start: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              <input type="time" value={workingHours.start} onChange={(e) => updateWorkingHours({ ...workingHours, start: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
             </div>
             <div style={{ flex: 1, minWidth: '150px' }}>
               <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '5px', display: 'block' }}>FIM DO EXPEDIENTE</label>
-              <input type="time" value={workingHours.end} onChange={(e) => setWorkingHours({ ...workingHours, end: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+              <input type="time" value={workingHours.end} onChange={(e) => updateWorkingHours({ ...workingHours, end: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
             </div>
             <div style={{ flex: 2, fontSize: '0.85rem', color: '#6b7280' }}>
               * Estes horários delimitam a visualização padrão da sua agenda.

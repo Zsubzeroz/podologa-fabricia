@@ -1,17 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, Search, Plus, Edit, Trash2, X, Clock, DollarSign } from 'lucide-react';
+import { ServiceManager } from '../utils/EntityManager';
 
 export default function Produtos() {
-  const [services, setServices] = useState(() => {
-    const saved = window.localStorage.getItem('services');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: 'AVALIAÇÃO', duration: '1h 00min', price: 'R$ 50,00', professional: 'FABRICIA RODRIGUES' },
-      { id: 2, name: 'CALOS E CALOSIDADE', duration: '1h 00min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' },
-      { id: 3, name: 'ONICOCRIPTOSE (UNHA ENCRAVADA)', duration: '1h 00min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' },
-      { id: 4, name: 'PODOROFILAXIA (limpeza)', duration: '30min', price: 'R$ 70,00', professional: 'FABRICIA RODRIGUES' },
-      { id: 5, name: 'VERRUGA PLANTAR (olho de peixe)', duration: '30min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' }
-    ];
-  });
+  const [services, setServices] = useState(() => ServiceManager.getAll());
+
+  useEffect(() => {
+    const handleSync = () => setServices(ServiceManager.getAll());
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
 
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -23,11 +25,6 @@ export default function Produtos() {
   const [duration, setDuration] = useState('');
   const [price, setPrice] = useState('');
   const [onlyAdmin, setOnlyAdmin] = useState(false);
-
-  const saveToLocalStorage = (list) => {
-    setServices(list);
-    window.localStorage.setItem('services', JSON.stringify(list));
-  };
 
   const handleOpenAddModal = () => {
     setName('');
@@ -53,30 +50,24 @@ export default function Produtos() {
     if (!name.trim()) return;
 
     if (isEditing) {
-      const updated = services.map(s => String(s.id) === String(editId) ? { ...s, name, duration, price, onlyAdmin } : s);
-      saveToLocalStorage(updated);
+      ServiceManager.update(editId, { name, duration, price, onlyAdmin });
     } else {
-      const newService = {
-        id: Date.now().toString(),
+      ServiceManager.add({
         name,
         duration,
         price,
         onlyAdmin,
         professional: 'FABRICIA RODRIGUES'
-      };
-      saveToLocalStorage([...services, newService]);
+      });
     }
+    setServices(ServiceManager.getAll());
     setShowModal(false);
   };
 
   const handleDelete = (id) => {
-    console.log('CLIQUE EXCLUIR SERVIÇO. ID:', id);
     if (window.confirm('Deseja realmente excluir este serviço?')) {
-      console.log('Confirmação confirmada.');
-      const filtered = services.filter(s => String(s.id) !== String(id));
-      console.log('Total após filtro:', filtered.length);
-      saveToLocalStorage(filtered);
-      console.log('saveToLocalStorage chamado.');
+      const updated = ServiceManager.remove(id);
+      setServices(updated);
     }
   };
 
