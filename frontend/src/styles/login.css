@@ -365,12 +365,17 @@
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .btn-schedule:hover {
   background: #b1944e;
+  transform: scale(1.05);
+}
+
+.btn-schedule:active {
+  transform: scale(0.95);
 }
 
 /* Modals */

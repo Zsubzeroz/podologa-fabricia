@@ -151,6 +151,7 @@ export default function PublicPortal() {
                 </div>
               </div>
               <button 
+                className="btn-schedule"
                 onClick={() => {
                   setSelectedService(service);
                   setIsConfirmed(false);
@@ -160,9 +161,17 @@ export default function PublicPortal() {
                   setSelectedTime('');
                   setShowScheduleModal(true);
                 }}
-                style={{ background: '#c6a75e', color: 'white', border: 'none', padding: '10px 18px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                style={{ 
+                  background: '#c6a75e', 
+                  color: 'white', 
+                  border: 'none', 
+                  padding: '10px 18px', 
+                  borderRadius: '6px', 
+                  fontWeight: 'bold', 
+                  cursor: 'pointer', 
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  marginTop: '10px' // Added for better spacing on mobile column layout
+                }}
               >
                 AGENDAR
               </button>
