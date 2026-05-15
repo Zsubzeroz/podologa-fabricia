@@ -428,18 +428,16 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                     <div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{appt.clientName}</div>
                                     <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
                                   </div>
-                                  <div style={{ display: 'flex', gap: '5px' }}>
+                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
                                     {appt.status === 'Atendido' ? (
                                       <button 
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          if (window.confirm('Deseja desfazer a marcação de atendido?')) {
-                                            onUpdateAppointment(appt.id, { status: 'Confirmado' });
-                                          }
+                                          onUpdateAppointment(appt.id, { status: 'Confirmado' });
                                         }} 
-                                        style={{ background: '#d1d5db', color: '#374151', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+                                        style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}
                                       >
-                                        Desfazer
+                                        <X size={14} /> Desfazer Atendido
                                       </button>
                                     ) : (
                                       <button 
@@ -447,12 +445,18 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                           e.stopPropagation(); 
                                           onUpdateAppointment(appt.id, { status: 'Atendido' }); 
                                         }} 
-                                        style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+                                        style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}
                                       >
-                                        Atendido
+                                        <Check size={14} /> Marcar Atendido
                                       </button>
                                     )}
-                                    <button onClick={(e) => { e.stopPropagation(); setEditingAppt(appt); }} style={{ background: '#fef08a', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>Edit</button>
+                                    
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); setEditingAppt(appt); }} 
+                                      style={{ background: '#f3f4f6', border: '1px solid #d1d5db', color: '#374151', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}
+                                    >
+                                      <Edit size={14} /> Editar
+                                    </button>
                                   </div>
                                 </div>
                               </div>
