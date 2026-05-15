@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Search, Package, Filter, Download, ChevronRight, User, Calendar, Plus, Trash2, Edit } from 'lucide-react';
 import { PacoteManager, ClientManager } from '../utils/EntityManager';
 
-export default function ConsultaPacotes() {
+export default function ConsultaPacotes({ initialClient }) {
   const [pacotes, setPacotes] = useState([]);
   const [clients] = useState(() => ClientManager.getAll());
   
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialClient || '');
   const [filtered, setFiltered] = useState([]);
   
   const [showModal, setShowModal] = useState(false);

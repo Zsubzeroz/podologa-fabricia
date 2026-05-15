@@ -265,6 +265,10 @@ function App() {
             <Clientes 
               onSchedule={(client) => handleAddAppointment(new Date(), '10:00', client.nome)}
               onGenerateReceipt={(client) => handleGenerateReceipt(client.nome, '')}
+              onViewPacotes={(client) => {
+                setPreSelectedClient(client.nome);
+                setCurrentView('pacotes');
+              }}
             />
           )}
           {currentView === 'anamnese' && <Anamnese />}
@@ -288,7 +292,7 @@ function App() {
           {currentView === 'consulta_analise' && <ConsultaAnalise />}
           {currentView === 'comissao' && <ComissaoProfissional />}
           {currentView === 'estoque' && <ProdutosEstoque />}
-          {currentView === 'pacotes' && <ConsultaPacotes />}
+          {currentView === 'pacotes' && <ConsultaPacotes initialClient={preSelectedClient} />}
           {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
           {currentView === 'orcamentos' && <ConsultaOrcamentos />}
           {currentView === 'vendas' && <ConsultaVendas />}

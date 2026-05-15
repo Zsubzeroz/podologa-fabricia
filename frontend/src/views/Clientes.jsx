@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Plus, Search, Trash2, FileText, Printer, X, ClipboardList, Edit, Calendar, AlertCircle, Package } from 'lucide-react';
 import { ClientManager, PatientFormManager } from '../utils/EntityManager';
 
-export default function Clientes({ onSchedule, onGenerateReceipt }) {
+export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes }) {
   const [clientes, setClientes] = useState(() => ClientManager.getAll());
 
   const [showNewModal, setShowNewModal] = useState(false);
@@ -205,7 +205,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                           <FileText size={14} /> NF-E / RECIBO
                         </button>
                         <button 
-                          onClick={() => window.location.hash = '#pacotes'} // Simple way to suggest navigation
+                          onClick={() => onViewPacotes && onViewPacotes(c)}
                           style={{ background: '#fff', color: '#7c3aed', border: '1px solid #7c3aed', padding: '8px 14px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
                         >
                           <Package size={14} /> PACOTES
