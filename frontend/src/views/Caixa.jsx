@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { ShoppingCart, User, Plus, Trash2, DollarSign, List, CheckSquare } from 'lucide-react';
 import { ClientManager, ServiceManager, SaleManager } from '../utils/EntityManager';
 
-export default function Caixa() {
+export default function Caixa({ initialClient, initialService }) {
   const [clientes, setClientes] = useState(() => ClientManager.getAll());
   const [services, setServices] = useState(() => ServiceManager.getAll());
   const [vendas, setVendas] = useState(() => SaleManager.getAll());
 
   const [currentSale, setCurrentSale] = useState({
-    cliente: '',
+    cliente: initialClient || '',
     itens: [],
     formaPagamento: 'Dinheiro',
     total: 0
@@ -29,6 +29,27 @@ export default function Caixa() {
       });
     }
   }, [services]);
+
+  useEffect(() => {
+    if (initialService && services.length > 0) {
+      const found = services.find(s => s.name === initialService);
+      if (found) {
+        const parsedPrice = parseFloat(found.price.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+        const newItem = {
+          id: Date.now(),
+          nome: found.name,
+          preco: parsedPrice,
+          quantidade: 1,
+          subtotal: parsedPrice
+        };
+        setCurrentSale(prev => ({
+          ...prev,
+          itens: [newItem],
+          total: parsedPrice
+        }));
+      }
+    }
+  }, [initialService, services]);
 
   useEffect(() => {
     const handleSync = () => {

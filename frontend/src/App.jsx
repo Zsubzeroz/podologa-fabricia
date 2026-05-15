@@ -180,9 +180,17 @@ function App() {
     
     // Redirect to Checkout if status is 'Atendido'
     if (data.status === 'Atendido' && oldAppt.status !== 'Atendido') {
-      setPreSelectedClient(oldAppt.clientName);
-      setPreSelectedService(oldAppt.service);
-      setCurrentView('caixa');
+      const isSigned = PatientFormManager.getAll().some(f => String(f.clientId) === String(oldAppt.clientId) && f.signature);
+      
+      if (!isSigned) {
+        alert('Atenção: Este paciente ainda não assinou a Ficha de Anamnese obrigatória!');
+      }
+
+      if (window.confirm('Atendimento concluído! Deseja ir para o Caixa registrar o pagamento agora?')) {
+        setPreSelectedClient(oldAppt.clientName);
+        setPreSelectedService(oldAppt.service);
+        setCurrentView('caixa');
+      }
     }
   };
 
@@ -246,7 +254,12 @@ function App() {
               }} 
             />
           )}
-          {currentView === 'caixa' && <Caixa />}
+          {currentView === 'caixa' && (
+            <Caixa 
+              initialClient={preSelectedClient} 
+              initialService={preSelectedService} 
+            />
+          )}
           {currentView === 'produtos' && <Produtos />}
           {currentView === 'clientes' && (
             <Clientes 
