@@ -39,6 +39,7 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     notes: '',
     source: 'manual',
     date: formatDateForInput(currentDate),
+    service: services[0]?.name || '', // Initialize with first service
     autoEvaluation: true // Default to true as per user request 'Primeiro'
   });
 

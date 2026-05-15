@@ -31,28 +31,39 @@ export default function Caixa({ initialClient, initialService }) {
   }, [services]);
 
   useEffect(() => {
-    if (initialClient) {
+    if (initialClient && currentSale.cliente !== initialClient) {
       setCurrentSale(prev => ({ ...prev, cliente: initialClient }));
     }
   }, [initialClient]);
 
   useEffect(() => {
     if (initialService && services.length > 0) {
-      const found = services.find(s => s.name === initialService);
+      // Find service with case-insensitive match
+      const found = services.find(s => 
+        s.name.toLowerCase().trim() === initialService.toLowerCase().trim() ||
+        initialService.toLowerCase().includes(s.name.toLowerCase()) ||
+        s.name.toLowerCase().includes(initialService.toLowerCase())
+      );
+      
       if (found) {
         const parsedPrice = parseFloat(found.price.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
         const newItem = {
-          id: Date.now(),
+          id: 'init-' + Date.now(),
           nome: found.name,
           preco: parsedPrice,
           quantidade: 1,
           subtotal: parsedPrice
         };
-        setCurrentSale(prev => ({
-          ...prev,
-          itens: [newItem],
-          total: parsedPrice
-        }));
+        
+        setCurrentSale(prev => {
+          // Avoid duplicate initial items
+          if (prev.itens.some(item => item.nome === found.name)) return prev;
+          return {
+            ...prev,
+            itens: [...prev.itens, newItem],
+            total: prev.total + parsedPrice
+          };
+        });
       }
     }
   }, [initialService, services]);
