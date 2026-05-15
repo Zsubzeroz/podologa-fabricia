@@ -130,7 +130,7 @@ export default function ConfiguracoesGeral() {
                   <div>
                     <div style={{ fontWeight: '800', color: '#065f46', fontSize: '1.1rem' }}>WhatsApp Automático</div>
                     <div style={{ fontSize: '0.85rem', color: '#047857', fontWeight: '600' }}>
-                      {config.whatsappConectado ? '✓ Servidor Conectado' : '⚠ Desconectado'}
+                      {config.whatsappConectado !== false ? '✓ Servidor Conectado' : '⚠ Desconectado'}
                     </div>
                   </div>
                 </div>

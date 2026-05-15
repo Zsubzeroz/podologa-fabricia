@@ -209,8 +209,14 @@ class SettingsManager {
   }
 
   get() {
-    const saved = window.localStorage.getItem(this.key);
-    return saved ? JSON.parse(saved) : this.defaultData;
+    try {
+      const saved = window.localStorage.getItem(this.key);
+      if (!saved) return this.defaultData;
+      const parsed = JSON.parse(saved);
+      return { ...this.defaultData, ...parsed }; // Merge to ensure new fields exist
+    } catch (e) {
+      return this.defaultData;
+    }
   }
 
   save(data) {
@@ -232,6 +238,8 @@ export const CompanySettingsManager = new SettingsManager('dados_empresa', {
   cidade: 'Artur Nogueira',
   estado: 'SP',
   cep: '13164-114',
+  email: 'fabriciapodologa@gmail.com',
+  telefone: '(19) 99722-2694',
   logo: '/logo.png'
 });
 
@@ -246,7 +254,8 @@ export const GeneralSettingsManager = new SettingsManager('configuracoes_gerais'
   enviarLembrete: true,
   tempoLembrete: '24',
   mensagemLembrete: 'Olá @CLIENTE, passando para confirmar seu atendimento de @NOMESERVICO no dia @DIA às @HORA. Por favor, responda "SIM" para confirmar ou nos avise se precisar desmarcar. Atenciosamente, @NOMEEMPRESA.',
-  mensagemEmail: 'Olá @CLIENTE, seu agendamento de @NOMESERVICO na @NOMEEMPRESA foi confirmado com sucesso para o dia @DIA às @HORA. Solicitamos pontualidade de até 10 minutos. Agradecemos a preferência!'
+  mensagemEmail: 'Olá @CLIENTE, seu agendamento de @NOMESERVICO na @NOMEEMPRESA foi confirmado com sucesso para o dia @DIA às @HORA. Solicitamos pontualidade de até 10 minutos. Agradecemos a preferência!',
+  whatsappConectado: true
 });
 
 export class GeneralSettings {

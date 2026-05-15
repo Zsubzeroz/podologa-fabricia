@@ -211,10 +211,11 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     };
 
     onSave({ ...formData, endTime });
-    alert('Agendamento realizado com sucesso!');
     
-    // DISPARO 100% AUTOMÁTICO
+    // DISPARO 100% AUTOMÁTICO - sem bloquear a UI
     sendAutomaticEmail();
+    
+    alert('Agendamento realizado com sucesso!');
   };
 
   return (
