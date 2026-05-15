@@ -429,8 +429,28 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                     <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
                                   </div>
                                   <div style={{ display: 'flex', gap: '5px' }}>
-                                    {appt.status !== 'Atendido' && (
-                                      <button onClick={(e) => { e.stopPropagation(); onUpdateAppointment(appt.id, { status: 'Atendido' }); }} style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>Atendido</button>
+                                    {appt.status === 'Atendido' ? (
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (window.confirm('Deseja desfazer a marcação de atendido?')) {
+                                            onUpdateAppointment(appt.id, { status: 'Confirmado' });
+                                          }
+                                        }} 
+                                        style={{ background: '#d1d5db', color: '#374151', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+                                      >
+                                        Desfazer
+                                      </button>
+                                    ) : (
+                                      <button 
+                                        onClick={(e) => { 
+                                          e.stopPropagation(); 
+                                          onUpdateAppointment(appt.id, { status: 'Atendido' }); 
+                                        }} 
+                                        style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+                                      >
+                                        Atendido
+                                      </button>
                                     )}
                                     <button onClick={(e) => { e.stopPropagation(); setEditingAppt(appt); }} style={{ background: '#fef08a', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>Edit</button>
                                   </div>
