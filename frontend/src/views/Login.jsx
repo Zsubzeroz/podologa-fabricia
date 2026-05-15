@@ -19,7 +19,7 @@ export default function Login({ onLogin }) {
     } catch (err) {
       if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
         // Auto-criação na primeira vez se for o email oficial
-        if (email === 'fabriciapodologa@gmail.com' || email === 'zsubzeroz12345@gmail.com') {
+        if (email === 'fabriciapodologa@gmail.com') {
           try {
             const newUser = await createUserWithEmailAndPassword(auth, email, password);
             onLogin({ role: 'admin', email: newUser.user.email, uid: newUser.user.uid });
@@ -40,12 +40,20 @@ export default function Login({ onLogin }) {
         setError('Erro: ' + err.message);
       }
     }
+  };
+
   const handleGoogleLogin = async () => {
     setError('Conectando ao Google...');
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      onLogin({ role: 'admin', email: result.user.email, uid: result.user.uid });
+      const email = result.user.email;
+      if (email === 'fabriciapodologa@gmail.com' || email === 'estifer88@gmail.com') { // Keep dev backup just in case
+        onLogin({ role: 'admin', email: result.user.email, uid: result.user.uid });
+      } else {
+        await auth.signOut();
+        setError('Acesso negado. Apenas a podóloga Fabrícia tem permissão para acessar este sistema.');
+      }
     } catch (err) {
       setError('Erro ao entrar com Google: ' + err.message);
     }
