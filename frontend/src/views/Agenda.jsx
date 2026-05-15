@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit } from 'lucide-react';
-import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit, Check } from 'lucide-react';
+import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings, ServiceManager } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia'); // 'Dia' ou 'Mês'
@@ -8,11 +8,18 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const [copied, setCopied] = useState(false);
   const [hideBusy, setHideBusy] = useState(false);
   const [editingAppt, setEditingAppt] = useState(null);
+  const [config, setConfig] = useState(() => GeneralSettings.get());
   const [blockedDays, setBlockedDays] = useState(() => BlockedDaysManager.getAll());
+  const [patientForms, setPatientForms] = useState([]);
   const shareRef = useRef(null);
-
+  
   useEffect(() => {
-    const handleSync = () => setBlockedDays(BlockedDaysManager.getAll());
+    const handleSync = () => {
+      setBlockedDays(BlockedDaysManager.getAll());
+      setConfig(GeneralSettings.get());
+      const savedForms = window.localStorage.getItem('patient_forms');
+      setPatientForms(savedForms ? JSON.parse(savedForms) : []);
+    };
     window.addEventListener('dataSync', handleSync);
     window.addEventListener('storage', handleSync);
     return () => {
@@ -34,8 +41,16 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const workLimits = getWorkHoursForDay(currentDate);
   const startH = workLimits.start;
   const endH = workLimits.end;
-  const totalHours = Math.max(1, endH - startH + 1);
-  const hours = workLimits.closed ? [] : Array.from({ length: totalHours }, (_, i) => i + startH);
+  
+  const slots = [];
+  if (!workLimits.closed) {
+    for (let h = startH; h < endH; h++) {
+      slots.push(`${h.toString().padStart(2, '0')}:00`);
+      slots.push(`${h.toString().padStart(2, '0')}:30`);
+    }
+    slots.push(`${endH.toString().padStart(2, '0')}:00`);
+  }
+  const hours = slots;
 
   const formatDateForDisplay = (dateObj) => {
     if (viewMode === 'Dia') {
@@ -55,6 +70,8 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
 
   const changeDate = (days) => {
     const newDate = new Date(currentDate);
+    // Fix for timezone issues
+    newDate.setHours(12, 0, 0, 0); 
     if (viewMode === 'Dia') {
       newDate.setDate(newDate.getDate() + days);
     } else {
@@ -352,33 +369,25 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                     </td>
                   </tr>
                 ) : hours.map(hour => {
-                  const hourSt = `${hour.toString().padStart(2, '0')}:00`;
                   const apptsInHour = appointments.filter(a => {
                     if (a.date !== currentYMD) return false;
-                    const getMins = t => {
-                      if (!t) return 0;
-                      const [h, m] = t.split(':').map(Number);
-                      return h * 60 + m;
-                    };
-                    const aStart = getMins(a.startTime);
-                    const aEnd = getMins(a.endTime) || (aStart + 60);
-                    const slotStart = hour * 60;
-                    const slotEnd = hour * 60 + 60;
-                    return aStart < slotEnd && aEnd > slotStart;
+                    const aStart = a.startTime;
+                    // Only show in the slot where it STARTS to avoid double entries
+                    return aStart === hour;
                   });
-                  const block = isTimeBlocked(hourSt);
+                  const block = isTimeBlocked(hour);
                   
                   // Filtro: Ocultar horários ocupados
                   if (hideBusy && (apptsInHour.length > 0 || block)) return null;
 
                   return (
                     <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6', background: block && !block.startTime ? '#fff1f2' : (apptsInHour.length > 0 ? '#fff5f5' : '#fff') }}>
-                      <td style={{ padding: '20px', color: '#111827', fontSize: '1.1rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: block && !block.startTime ? '#ffe4e6' : '#fcfcfc', textAlign: 'center' }}>
-                        {hour}h
+                      <td style={{ padding: '20px', color: '#111827', fontSize: '0.9rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: block && !block.startTime ? '#ffe4e6' : '#fcfcfc', textAlign: 'center' }}>
+                        {hour}
                       </td>
                       <td 
                         style={{ padding: '8px 15px', position: 'relative', cursor: apptsInHour.length === 0 && !block ? 'pointer' : 'default' }}
-                        onClick={() => { if (apptsInHour.length === 0 && !block) onAddAppointment(currentDate, hourSt); }}
+                        onClick={() => { if (apptsInHour.length === 0 && !block) onAddAppointment(currentDate, hour); }}
                       >
                         {apptsInHour.length > 0 ? (
                           apptsInHour.map(appt => {
@@ -394,6 +403,11 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                       {appt.clientName}
                                       {appt.status === 'Confirmado' && <CheckCircle2 size={16} color="#3b82f6" title="Confirmado" />}
                                       {appt.status === 'Agendado' && <AlertCircle size={16} color="#ef4444" title="Pendente de Confirmação" />}
+                                      {patientForms.some(f => String(f.clientId) === String(appt.clientId) && f.signature) ? (
+                                        <Check size={16} color="#10b981" title="Ficha assinada" />
+                                      ) : (
+                                        <AlertCircle size={16} color="#f59e0b" title="Ficha não assinada" />
+                                      )}
                                     </div>
                                     <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
                                     <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase' }}>
@@ -401,21 +415,30 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                     {(appt.source === 'online' || appt.source === 'portal') ? ' (ONLINE)' : ' (MANUAL)'}
                                     </div>
                                   </div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                  <select 
-                                    value={appt.status || 'Agendado'}
-                                    onClick={(e) => e.stopPropagation()}
-                                    onChange={(e) => {
-                                      e.stopPropagation();
-                                      onUpdateAppointment(appt.id, { status: e.target.value });
-                                    }}
-                                    style={{ background: '#fff', border: `1px solid ${statusStyle.color}`, color: statusStyle.color, padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', outline: 'none' }}
-                                  >
-                                    <option value="Agendado">Agendado</option>
-                                    <option value="Confirmado">Confirmado</option>
-                                    <option value="Atendido">Atendido</option>
-                                  </select>
+                                                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                  {appt.status !== 'Atendido' && (
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onUpdateAppointment(appt.id, { status: 'Atendido' });
+                                      }}
+                                      style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                    >
+                                      MARCAR ATENDIDO
+                                    </button>
+                                  )}
+                                  
+                                  {appt.status !== 'Atendido' && (
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onUpdateAppointment(appt.id, { status: 'Confirmado' });
+                                      }}
+                                      style={{ background: '#fff', border: '1px solid #3b82f6', color: '#3b82f6', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                    >
+                                      CONFIRMAR
+                                    </button>
+                                  )}
 
                                   <button 
                                     onClick={(e) => {
@@ -448,6 +471,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                     CANCELAR
                                   </button>
                                 </div>
+               </div>
                               </div>
                             );
                           })
@@ -643,7 +667,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                   style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db', background: '#fff' }}
                 >
                   <option value={editingAppt.service}>{editingAppt.service}</option>
-                  {(JSON.parse(window.localStorage.getItem('services') || '[]')).filter(s => s.name !== editingAppt.service).map((s, i) => (
+                  {ServiceManager.getAll().filter(s => s.name !== editingAppt.service).map((s, i) => (
                     <option key={i} value={s.name}>{s.name}</option>
                   ))}
                 </select>

@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import Layout from './components/Layout';
 import { SecurityManager } from './utils/EntityManager';
 import { auth } from './utils/firebase';
-import { signOut } from 'firebase/auth';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 
 // Core Views
 import Login from './views/Login';
@@ -54,7 +54,7 @@ const LoadingSpinner = () => (
   </div>
 );
 
-import { AppointmentManager, ServiceManager } from './utils/EntityManager';
+import { AppointmentManager, ServiceManager, ClientManager } from './utils/EntityManager';
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -64,10 +64,24 @@ function App() {
   const [preSelectedClient, setPreSelectedClient] = useState(null);
   const [preSelectedService, setPreSelectedService] = useState(null);
 
-  const [auth, setAuth] = useState(() => {
+  const [authState, setAuthState] = useState(() => {
     const saved = window.localStorage.getItem('adminAuth');
     return saved ? JSON.parse(saved) : null;
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userData = { role: 'admin', email: user.email, uid: user.uid };
+        setAuthState(userData);
+        window.localStorage.setItem('adminAuth', JSON.stringify(userData));
+      } else {
+        setAuthState(null);
+        window.localStorage.removeItem('adminAuth');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const [appointments, setAppointments] = useState(() => AppointmentManager.getAll());
 
@@ -96,12 +110,12 @@ function App() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      setAuthState(null);
+      window.localStorage.removeItem('adminAuth');
+      window.location.href = '/';
     } catch (e) {
       console.error(e);
     }
-    setAuth(null);
-    window.localStorage.removeItem('adminAuth');
-    window.location.href = '/';
   };
 
   const handleAddAppointment = (date, time, clientName = null) => {
@@ -157,17 +171,27 @@ function App() {
       newAppt.financeEntryId = newFinanceEntry.id;
     }
 
+    const apptIndex = appointments.findIndex(a => a.id === id);
+    if (apptIndex === -1) return;
+
     const updated = [...appointments];
     updated[apptIndex] = newAppt;
+    
     setAppointments(updated);
-    window.localStorage.setItem('appointments', JSON.stringify(updated));
-    window.dispatchEvent(new Event('storage'));
+    AppointmentManager.save(updated);
+    
+    // Redirect to Checkout if status is 'Atendido'
+    if (data.status === 'Atendido' && oldAppt.status !== 'Atendido') {
+      setPreSelectedClient(oldAppt.clientName);
+      setPreSelectedService(oldAppt.service);
+      setCurrentView('caixa');
+    }
   };
 
   if (isClientPath) return <PublicPortal />;
-  if (isAdminPath && !auth) return <Login onLogin={setAuth} />;
+  if (isAdminPath && !authState) return <Login onLogin={setAuthState} />;
   
-  if (isAdminPath && auth) {
+  if (isAdminPath && authState) {
     return (
       <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
         <Suspense fallback={<LoadingSpinner />}>
@@ -189,6 +213,37 @@ function App() {
               preSelectedTime={preSelectedTime}
               preSelectedClient={preSelectedClient}
               onSave={(newApptData) => {
+                // Auto-register client if not exists
+                const allClients = ClientManager.getAll();
+                let client = allClients.find(c => c.nome.toLowerCase() === newApptData.clientName.toLowerCase());
+                
+                if (!client) {
+                  client = ClientManager.add({
+                    nome: newApptData.clientName,
+                    contato: newApptData.phone || '',
+                    email: newApptData.clientEmail || '',
+                    data: new Date().toLocaleDateString('pt-BR'),
+                    status: 'ATIVO'
+                  });
+                }
+
+                // Auto-create evaluation form if requested
+                if (newApptData.autoEvaluation) {
+                  const savedForms = JSON.parse(window.localStorage.getItem('patient_forms') || '[]');
+                  const newForm = {
+                    id: Date.now(),
+                    clientId: client.id,
+                    clientName: client.nome,
+                    date: newApptData.date,
+                    time: newApptData.startTime,
+                    service: newApptData.service,
+                    status: 'PENDENTE',
+                    templateId: 8 // Default to the new Diabetic Foot template or 1 for general
+                  };
+                  window.localStorage.setItem('patient_forms', JSON.stringify([newForm, ...savedForms]));
+                  window.dispatchEvent(new CustomEvent('dataSync', { detail: 'patient_forms' }));
+                }
+
                 const updated = AppointmentManager.add(newApptData);
                 setAppointments(updated);
                 resetPreSelections();

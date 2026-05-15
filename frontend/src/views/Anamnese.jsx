@@ -244,6 +244,75 @@ Próximo Agendamento: ____/____/______ às _____:_____
 
 Assinatura do Profissional: _______________________________`
       },
+      {
+        id: 8,
+        nome: 'PRONTUÁRIO ESPECIALIZADO: PÉ DIABÉTICO',
+        status: 'ATIVO',
+        conteudo: `PRONTUÁRIO ESPECIALIZADO: PÉ DIABÉTICO
+AVALIAÇÃO INTEGRADA (PODOLOGIA & ENFERMAGEM CLÍNICA)
+Responsável: Fabrícia Rodrigues | Artur Nogueira - SP
+
+1. DADOS DO PACIENTE E CONTROLE GLICÊMICO
+Nome: _________________________________________________ Data: ___/___/___
+Tipo de DM: ( ) Tipo 1 ( ) Tipo 2 Tempo de Diagnóstico: ________ Última HGT: ________ mg/dL
+HbA1c recente: ________ % Insulinodependente: ( ) Sim ( ) Não Tabagista: ( ) Sim ( ) Não
+
+2. AVALIAÇÃO DE ENFERMAGEM (SINAIS VITAIS E SISTÊMICOS)
+PA: ________ x ________ mmHg FC: ________ bpm FR: ________ irpm Temp: ________ °C
+Edema: ( ) Ausente ( ) +/4+ ( ) ++/4+ ( ) +++/4+ | Cacifo (Sinal de Godet): ( ) Positivo ( ) Negativo
+Perfusão Periférica: ( ) < 3 seg ( ) > 3 seg | Varizes: ( ) Sim ( ) Não
+
+3. EXAME FÍSICO PODOLÓGICO E NEUROLÓGICO
+Testes de Sensibilidade | Pé Direito | Pé Esquerdo
+Monofilamento (10g): ( ) Presente ( ) Ausente | ( ) Presente ( ) Ausente
+Vibratória (Diapasão 128Hz): ( ) Presente ( ) Ausente | ( ) Presente ( ) Ausente
+Pulso Pedioso / Tibial Posterior: ( ) Normal ( ) Diminuído ( ) Ausente | ( ) Normal ( ) Diminuído ( ) Ausente
+
+4. CLASSIFICAÇÃO DE RISCO E LESÕES (ESCALA DE WAGNER)
+Grau: ( ) 0 - Sem lesão aparente ( ) 1 - Úlcera Superficial ( ) 2 - Úlcera Profunda ( ) 3 - Abscesso/Osteomielite
+Deformidades: ( ) Hálux Valgo ( ) Dedos em Garra ( ) Charcot ( ) Proeminências Ósseas
+Alterações de Pele: ( ) Anidrose ( ) Fissuras ( ) Micose ( ) Calo com Hemorragia Subjacente
+
+5. CONDUTA E PLANEJAMENTO DE CUIDADO
+( ) Podoprofilaxia ( ) Desbridamento Mecânico ( ) Curativo Especial: __________________________
+( ) Encaminhamento Médico/Vascular ( ) Educação em Saúde: __________________________
+Evolução: __________________________________________________________________________
+
+Assinatura do Paciente: __________________________________________
+Fabrícia Rodrigues - Podóloga/Enfermagem: __________________________________________`
+      },
+      {
+        id: 9,
+        nome: 'FICHA DE CONTRATAÇÃO: SAÚDE DOS PÉS',
+        status: 'ATIVO',
+        conteudo: `PROGRAMA SAÚDE DOS PÉS
+Ficha de Contratação e Acompanhamento
+
+Nome: __________________________________________________________________
+CPF: ___________________________ Data de Nasc.: ____/____/_______
+Telefone: (____) _________________________
+
+1. SELEÇÃO DO PACOTE OU SERVIÇO
+( ) PACOTE MENSAL - 1x por semana (4 sessões) - R$ 680,00
+( ) PACOTE INTENSIVO - 2x por semana (6 sessões) - R$ 990,00
+( ) PACOTE VIP - 1x por semana (4 sessões) + Brinde - R$ 720,00
+( ) PACOTE ECONÔMICO - Quinzenal (3 sessões) - R$ 540,00
+( ) SESSÃO AVULSA - Spa dos Pés (Sessão Única) - R$ 190,00
+* Inclui: Podoprofilaxia, Reflexologia Podal, Escalda Pés e Terapia com Parafina.
+
+2. REGRAS E TERMOS
+• Validade: Plano válido por 30 dias após a contratação.
+• Agendamento: Somente com agendamento prévio e conforme disponibilidade.
+• Faltas: Faltas sem aviso (24h) não acumulam sessões (serão cobradas).
+• Pagamento: Antecipado ou na 1ª sessão do mês.
+• Uso: O plano é pessoal e intransferível.
+
+3. CIÊNCIA E CONCORDÂNCIA
+Declaro estar ciente de todos os termos, regras e condições do Programa Saúde dos Pés.
+
+Assinatura da Cliente: _________________________________
+Local e Data: ________________________________, ____/____/_______`
+      }
     ];
   });
 

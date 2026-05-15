@@ -141,8 +141,11 @@ class SettingsManager {
       const docRef = doc(db, 'appSettings', this.key);
       getDoc(docRef).then(docSnap => {
         if (docSnap.exists() && Object.keys(docSnap.data()).length > 0) {
+          console.log(`[EntityManager] Loading ${this.key} from Cloud`);
           window.localStorage.setItem(this.key, JSON.stringify(docSnap.data()));
+          window.dispatchEvent(new CustomEvent('dataSync', { detail: this.key }));
         } else {
+          console.log(`[EntityManager] Cloud empty for ${this.key}, uploading local`);
           const localData = window.localStorage.getItem(this.key);
           if (localData) {
             setDoc(docRef, JSON.parse(localData)).catch(console.error);
@@ -152,13 +155,18 @@ class SettingsManager {
         }
         onSnapshot(docRef, (snapshot) => {
           if (snapshot.exists()) {
-            window.localStorage.setItem(this.key, JSON.stringify(snapshot.data()));
-            window.dispatchEvent(new CustomEvent('dataSync', { detail: this.key }));
+            const cloudData = snapshot.data();
+            const localDataStr = window.localStorage.getItem(this.key);
+            if (localDataStr !== JSON.stringify(cloudData)) {
+              console.log(`[EntityManager] Remote update for ${this.key}`);
+              window.localStorage.setItem(this.key, JSON.stringify(cloudData));
+              window.dispatchEvent(new CustomEvent('dataSync', { detail: this.key }));
+            }
           }
         });
-      }).catch(err => console.warn("Settings sync error:", err));
+      }).catch(err => console.warn(`[EntityManager] Error syncing ${this.key}:`, err));
     } catch (e) {
-      console.warn("Firebase not ready for settings:", e);
+      console.warn(`[EntityManager] Firebase not ready for ${this.key}:`, e);
     }
   }
 

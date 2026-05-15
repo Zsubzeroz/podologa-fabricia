@@ -38,7 +38,8 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     notifyEmail: 'SIM',
     notes: '',
     source: 'manual',
-    date: formatDateForInput(currentDate)
+    date: formatDateForInput(currentDate),
+    autoEvaluation: true // Default to true as per user request 'Primeiro'
   });
 
   useEffect(() => {
@@ -81,6 +82,11 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
         });
         return;
       }
+    }
+    
+    if (e.target.type === 'checkbox') {
+      setFormData({...formData, [name]: e.target.checked});
+      return;
     }
     
     setFormData({...formData, [name]: value});
@@ -376,6 +382,19 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
             onChange={handleChange}
             style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db' }}
           ></textarea>
+        </div>
+
+        <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '10px', border: '1px solid #e5e7eb' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'bold', color: '#0f3d2e' }}>
+            <input 
+              type="checkbox" 
+              name="autoEvaluation" 
+              checked={formData.autoEvaluation} 
+              onChange={handleChange}
+              style={{ width: '18px', height: '18px' }}
+            />
+            Criar ficha de avaliação (Anamnese) automaticamente com este horário
+          </label>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', borderTop: '1px solid #f3f4f6', paddingTop: '1.5rem' }}>

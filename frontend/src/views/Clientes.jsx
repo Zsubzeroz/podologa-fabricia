@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, Search, Trash2, FileText, Printer, X, ClipboardList, Edit, Calendar } from 'lucide-react';
+import { Users, Plus, Search, Trash2, FileText, Printer, X, ClipboardList, Edit, Calendar, AlertCircle, Package } from 'lucide-react';
 import { ClientManager } from '../utils/EntityManager';
 
 export default function Clientes({ onSchedule, onGenerateReceipt }) {
@@ -12,6 +12,10 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
 
   const [activeClient, setActiveClient] = useState(null);
   const [search, setSearch] = useState('');
+  const [patientForms, setPatientForms] = useState(() => {
+    const saved = window.localStorage.getItem('patient_forms');
+    return saved ? JSON.parse(saved) : [];
+  });
   
   // Forms states
   const [formData, setFormData] = useState({
@@ -159,7 +163,14 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                 filtered.map((c) => (
                   <tr key={c.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
-                      <span style={{ color: '#111827', fontWeight: 'bold', fontSize: '1rem' }}>{c.nome}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ color: '#111827', fontWeight: 'bold', fontSize: '1rem' }}>{c.nome}</span>
+                        {!patientForms.some(f => String(f.clientId) === String(c.id)) && (
+                          <span title="Ficha de Anamnese Obrigatória Faltando" style={{ color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                            <AlertCircle size={16} />
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ padding: '14px', verticalAlign: 'middle', color: '#374151' }}>
                       {c.data}
@@ -182,6 +193,12 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
                           style={{ background: '#fff', color: '#0f3d2e', border: '1px solid #0f3d2e', padding: '8px 14px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
                         >
                           <FileText size={14} /> NF-E / RECIBO
+                        </button>
+                        <button 
+                          onClick={() => window.location.hash = '#pacotes'} // Simple way to suggest navigation
+                          style={{ background: '#fff', color: '#7c3aed', border: '1px solid #7c3aed', padding: '8px 14px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        >
+                          <Package size={14} /> PACOTES
                         </button>
                       </div>
                     </td>

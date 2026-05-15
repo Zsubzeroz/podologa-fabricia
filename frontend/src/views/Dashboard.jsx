@@ -133,6 +133,55 @@ export default function Dashboard({ setCurrentView }) {
 
       </div>
 
+      {/* Tasks / Roadmap Section */}
+      <div style={{ marginTop: '40px', background: 'white', borderRadius: '16px', padding: '25px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+        <h3 style={{ margin: '0 0 20px 0', color: '#111827', fontSize: '1.2rem', fontWeight: '700' }}>🛠️ CONFIGURAÇÕES E AJUSTES - 15/05</h3>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+          
+          <div>
+            <h4 style={{ color: '#0f3d2e', borderBottom: '2px solid #0f3d2e', paddingBottom: '5px', marginBottom: '10px' }}>Sistema de Clientes</h4>
+            <ul style={{ listStyle: 'none', padding: 0, fontSize: '0.9rem', color: '#374151' }}>
+              <li>❌ Corrigir: não está registrando cliente</li>
+              <li>❌ Corrigir: pacote não entra junto com cliente</li>
+              <li>🔄 Ajustar fluxo: cliente ir direto para o caixa</li>
+              <li>⚠️ Obrigatório: ficha de avaliação</li>
+              <li>✨ Implementar: verificar assinatura online</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0f3d2e', borderBottom: '2px solid #0f3d2e', paddingBottom: '5px', marginBottom: '10px' }}>Agenda</h4>
+            <ul style={{ listStyle: 'none', padding: 0, fontSize: '0.9rem', color: '#374151' }}>
+              <li>⏰ Corrigir: diferença de 30h no horário</li>
+              <li>📅 Corrigir: horário quebrado 1:30</li>
+              <li>✅ Adicionar: avaliação automática</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0f3d2e', borderBottom: '2px solid #0f3d2e', paddingBottom: '5px', marginBottom: '10px' }}>Interface e UX</h4>
+            <ul style={{ listStyle: 'none', padding: 0, fontSize: '0.9rem', color: '#374151' }}>
+              <li>🔘 Separar: Atendido e Cancelado</li>
+              <li>📝 Corrigir: editar um procedimento</li>
+              <li>💾 Garantir: Salvar alterações</li>
+              <li>📏 Corrigir: Vertical não funciona</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0f3d2e', borderBottom: '2px solid #0f3d2e', paddingBottom: '5px', marginBottom: '10px' }}>Erros e Deploy</h4>
+            <ul style={{ listStyle: 'none', padding: 0, fontSize: '0.9rem', color: '#374151' }}>
+              <li>🏢 Corrigir: dados da empresa não salvam</li>
+              <li>🔔 Corrigir: lembretes não salvam</li>
+              <li>📱 Padronizar: celular e tablet</li>
+              <li>🚀 Finalizar: GitHub e Firebase</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   );
 }
