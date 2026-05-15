@@ -132,9 +132,6 @@ export default function Dashboard({ setCurrentView }) {
         </div>
 
       </div>
-
-      </div>
-
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { LogIn, Mail, Lock, ShieldCheck } from 'lucide-react';
 import '../styles/login.css';
 import { auth } from '../utils/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -42,22 +42,6 @@ export default function Login({ onLogin }) {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setError('Conectando ao Google...');
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const email = result.user.email;
-      if (email === 'fabriciapodologa@gmail.com' || email === 'estifer88@gmail.com') { // Keep dev backup just in case
-        onLogin({ role: 'admin', email: result.user.email, uid: result.user.uid });
-      } else {
-        await auth.signOut();
-        setError('Acesso negado. Apenas a podóloga Fabrícia tem permissão para acessar este sistema.');
-      }
-    } catch (err) {
-      setError('Erro ao entrar com Google: ' + err.message);
-    }
-  };
 
   return (
     <div className="login-container">
@@ -129,29 +113,6 @@ export default function Login({ onLogin }) {
             ACESSAR PAINEL
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '20px 0' }}>
-            <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
-            <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: '600' }}>OU</span>
-            <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
-          </div>
-
-          <button 
-            type="button" 
-            onClick={handleGoogleLogin} 
-            className="login-button" 
-            style={{ 
-              background: '#fff', 
-              color: '#374151', 
-              border: '1px solid #d1d5db', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '10px' 
-            }}
-          >
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '18px' }} />
-            ENTRAR COM GOOGLE
-          </button>
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.8rem', color: '#9ca3af' }}>
