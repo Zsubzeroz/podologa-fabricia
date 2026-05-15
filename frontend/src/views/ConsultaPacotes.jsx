@@ -21,10 +21,27 @@ export default function ConsultaPacotes() {
   });
 
   useEffect(() => {
-    const data = PacoteManager.getAll();
-    setPacotes(data);
-    setFiltered(data);
-  }, []);
+    const handleSync = () => {
+      const data = PacoteManager.getAll();
+      setPacotes(data || []);
+      setFiltered(prev => {
+        // If searching, keep filtering. Otherwise show all.
+        if (search) {
+          return (data || []).filter(p => (p.cliente || p.clientName || '').toLowerCase().includes(search.toLowerCase()));
+        }
+        return data || [];
+      });
+    };
+
+    handleSync(); // Initial load
+
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, [search]);
 
   const handleSearch = () => {
     setFiltered(pacotes.filter(p => p.cliente.toLowerCase().includes(search.toLowerCase())));

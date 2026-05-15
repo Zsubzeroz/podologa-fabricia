@@ -8,7 +8,7 @@ export default function Caixa({ initialClient, initialService }) {
   const [vendas, setVendas] = useState(() => SaleManager.getAll());
 
   const [currentSale, setCurrentSale] = useState({
-    cliente: initialClient || '',
+    cliente: '',
     itens: [],
     formaPagamento: 'Dinheiro',
     total: 0
@@ -29,6 +29,12 @@ export default function Caixa({ initialClient, initialService }) {
       });
     }
   }, [services]);
+
+  useEffect(() => {
+    if (initialClient) {
+      setCurrentSale(prev => ({ ...prev, cliente: initialClient }));
+    }
+  }, [initialClient]);
 
   useEffect(() => {
     if (initialService && services.length > 0) {
