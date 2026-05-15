@@ -54,7 +54,7 @@ const LoadingSpinner = () => (
   </div>
 );
 
-import { AppointmentManager, ServiceManager, ClientManager } from './utils/EntityManager';
+import { AppointmentManager, ServiceManager, ClientManager, FinanceManager, PatientFormManager } from './utils/EntityManager';
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -97,12 +97,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (auth) {
-      window.localStorage.setItem('adminAuth', JSON.stringify(auth));
+    if (authState) {
+      window.localStorage.setItem('adminAuth', JSON.stringify(authState));
     } else {
       window.localStorage.removeItem('adminAuth');
     }
-  }, [auth]);
+  }, [authState]);
 
   const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() || '/';
   const isClientPath = currentPath === '/cliente';
@@ -156,9 +156,7 @@ function App() {
       const serviceObj = services.find(s => s.name === oldAppt.service);
       const priceVal = serviceObj ? parseFloat(serviceObj.price) : 0;
       
-      const financeiro = JSON.parse(window.localStorage.getItem('financeiro_entries') || '[]');
       const newFinanceEntry = {
-        id: Date.now(),
         date: new Date().toISOString().split('T')[0],
         description: `Atendimento: ${oldAppt.clientName} (${oldAppt.service})`,
         tipo: 'Receita',
@@ -167,8 +165,8 @@ function App() {
         valor: priceVal
       };
       
-      window.localStorage.setItem('financeiro_entries', JSON.stringify([newFinanceEntry, ...financeiro]));
-      newAppt.financeEntryId = newFinanceEntry.id;
+      const added = FinanceManager.add(newFinanceEntry);
+      newAppt.financeEntryId = added.id;
     }
 
     const apptIndex = appointments.findIndex(a => a.id === id);
@@ -229,9 +227,7 @@ function App() {
 
                 // Auto-create evaluation form if requested
                 if (newApptData.autoEvaluation) {
-                  const savedForms = JSON.parse(window.localStorage.getItem('patient_forms') || '[]');
                   const newForm = {
-                    id: Date.now(),
                     clientId: client.id,
                     clientName: client.nome,
                     date: newApptData.date,
@@ -240,8 +236,7 @@ function App() {
                     status: 'PENDENTE',
                     templateId: 8 // Default to the new Diabetic Foot template or 1 for general
                   };
-                  window.localStorage.setItem('patient_forms', JSON.stringify([newForm, ...savedForms]));
-                  window.dispatchEvent(new CustomEvent('dataSync', { detail: 'patient_forms' }));
+                  PatientFormManager.add(newForm);
                 }
 
                 const updated = AppointmentManager.add(newApptData);

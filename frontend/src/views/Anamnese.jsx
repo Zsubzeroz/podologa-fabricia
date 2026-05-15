@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ClipboardList, Plus, Search, Trash2, Edit, Printer, X, User, FileText, History, RotateCcw, Check } from 'lucide-react';
-import { SecurityManager } from '../utils/EntityManager';
+import { SecurityManager, AnamnesisTemplateManager, PatientFormManager, ClientManager } from '../utils/EntityManager';
 
 // Componente de Assinatura Digital
 const SignaturePad = ({ onSave, onClear }) => {
@@ -81,252 +81,27 @@ export default function Anamnese() {
   const [activeTab, setActiveTab] = useState('modelos');
 
   // Templates State
-  const [fichas, setFichas] = useState(() => {
-    const saved = window.localStorage.getItem('anamneses_list');
-    return saved ? JSON.parse(saved) : [
-      { 
-        id: 1, 
-        nome: 'FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA', 
-        status: 'ATIVO',
-        conteudo: `FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA
-
-Nome: __________________________________________________
-E-mail: _________________________________________________
-Endereço: _______________________________________________
-Fone: ( ) _________________ Idade: ______
-
-AVALIAÇÃO FÍSICA
-
-Calçado mais utilizado: ( ) Aberto ( ) Fechado  Nº ______
-Meia mais utilizada: ( ) Social ( ) Esportiva
-Cirurgia nos membros inferiores? ( ) SIM ( ) NÃO Especifique: ___________________
-Pratica Esportes? ( ) SIM ( ) NÃO Especifique: _______________________________
-Faz uso de algum medicamento? ( ) SIM ( ) NÃO Especifique: ___________________
-Gestante? ( ) NÃO ( ) SIM / Semanas ________
-Sensibilidade a dor? ( ) NÃO ( ) SIM Especifique: ____________________________
-Tem hipo/hipertensão arterial? ( ) NÃO ( ) SIM
-Diabetes? ( ) NÃO ( ) SIM
-Portador de marcapasso/pinos? ( ) NÃO ( ) SIM
-Hanseníase? ( ) NÃO ( ) SIM
-Cardiopatia? ( ) NÃO ( ) SIM
-Hepatite? ( ) NÃO ( ) SIM
-Distúrbio circulatório? ( ) NÃO ( ) SIM
-Histórico de câncer? ( ) NÃO ( ) SIM
-
-Observações Profissionais:
-PD: ____________________________________________________________________
-PE: ____________________________________________________________________
-PROCEDIMENTO: __________________________________________________________
-
-PATOLOGIAS DERMATOLÓGICAS PRESENTES:
-( ) FISSURAS  ( ) HIPERIDROSE  ( ) DESIDROSE  ( ) BROMIDOSE  ( ) HIPERQUERATOSE
-( ) PSORÍASE  ( ) TINEA PEDIS  ( ) TINEA INTERDIGITAL  ( ) ONICOMICOSE  ( ) ONICOCRIPTOSE
-( ) ONICOFOSE ( ) EXOSTOSE   ( ) GRANULOMA  ( ) OUTRO: ______________________
-
-FORMATOS UNGUEAIS:
-( ) Normal  ( ) Funil  ( ) Involuta  ( ) Telha  ( ) Cunha  ( ) Gancho  ( ) Torquês  ( ) Caracol
-
-DATA: ____/____/______   Ass.: _______________`
-      },
-      { 
-        id: 2, 
-        nome: 'TERMO DE RESPONSABILIDADE', 
-        status: 'ATIVO',
-        conteudo: `TERMO DE RESPONSABILIDADE
-
-Eu, _________________________________ CPF: ________________________________, declaro ter sido informado(a) e esclarecido(a) sobre os procedimentos envolvidos. Declaro que todas as informações sobre minha pessoa e cadastro clínico são de minha inteira veracidade e responsabilidade legal, não omitindo qualquer informação. Declaro também que cumprirei com as normas dos procedimentos indicados para o bom andamento do tratamento podológico. E cumprirei com os horários agendados e na impossibilidade avisarei com antecedência de 24 horas.
-
-Assinatura do Paciente: _________________________________
-Data: ____/____/______`
-      },
-      { 
-        id: 3, 
-        nome: 'ANAMNESE ESPECIAL PARA DIABÉTICOS', 
-        status: 'ATIVO',
-        conteudo: `ANAMNESE ESPECIAL PARA DIABÉTICOS
-
-Cliente: _________________________________________________
-Tipo de Diabetes: ( ) Tipo 1  ( ) Tipo 2
-Faz uso de insulina? ( ) Sim  ( ) Não
-Última glicemia em jejum: _______________
-
-CUIDADOS E SINAIS DE ALERTA
-Sensibilidade nos pés: ( ) Normal ( ) Diminuída ( ) Ausente
-Presença de pulsos: ( ) Presentes ( ) Diminuídos ( ) Ausentes
-Sinais de ulceração? ( ) Sim ( ) Não. Local: ________________
-
-Tratamentos propostos:
-__________________________________________________________________`
-      },
-      { 
-        id: 4, 
-        nome: 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 
-        status: 'ATIVO',
-        conteudo: `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE PODOLOGIA
-
-CONTRATADA: Fabricia Rodrigues Pereira - Podóloga
-CONTRATANTE: _____________________________________________
-CPF: ______________________ RG: ________________________
-
-CLÁUSULA PRIMEIRA - DO OBJETO
-O presente contrato tem como objeto a prestação de serviços especializados em podologia pela contratada, de acordo com as necessidades avaliadas na ficha de anamnese.
-
-CLÁUSULA SEGUNDA - DAS OBRIGAÇÕES
-A contratada se compromete a realizar os procedimentos com materiais esterilizados e biossegurança. O contratante se compromete a seguir as recomendações de homecare para a evolução do tratamento.
-
-Assinatura do Profissional: _______________________________
-Assinatura do Cliente: ___________________________________`
-      },
-      { 
-        id: 5, 
-        nome: 'TERMO DE CONSENTIMENTO FOTOGRÁFICO', 
-        status: 'ATIVO',
-        conteudo: `TERMO DE CONSENTIMENTO E AUTORIZAÇÃO DE REGISTRO FOTOGRÁFICO
-
-Eu, _________________________________ RG: _________________ CPF: _________________, declaro que as informações acima são verdadeiras, que não omiti em relação a minha saúde ou relações alérgicas e que informei todos os medicamentos que eventualmente faço uso, não cabendo ao profissional quaisquer responsabilidade por informações omitidas nesta consulta.
-
-2 - Declaro que estou ciente sobre os procedimentos a serem realizados e me comprometo em seguir todos os cuidados afim de obter o melhor resultado no tratamento.
-
-3 - Compreendo que durante o procedimento poderão apresentar-se outras situações ainda não diagnosticadas, assim como poderão ocorrer situações imprevisíveis.
-
-4 - Confirmo que recebi explicações, li, compreendo e concordo com tudo que me foi esclarecido e que me foi concedido a oportunidade de anular ou questionar qualquer parágrafo ou palavras com as quais não concordasse.
-
-5 - Autorizo o registro fotográfico do tratamento realizado (Antes e Depois) para efeito de divulgação em redes sociais, ebooks, ou qualquer material publicitário. A presente autorização é concedida gratuitamente, sem que nada a ser reclamado a título de direitos ou qualquer outro.
-
-Data: ____/____/______   Assinatura Paciente: _________________________________`
-      },
-      { 
-        id: 6, 
-        nome: 'FICHA DE PACOTE (TRATAMENTO CONTÍNUO)', 
-        status: 'ATIVO',
-        conteudo: `FICHA DE CONTROLE DE PACOTE - TRATAMENTO CONTÍNUO
-
-Paciente: _________________________________________________
-Procedimento Contratado: __________________________________
-Valor do Pacote: R$ ______________  Forma de Pagamento: ___________
-
-CRONOGRAMA DE SESSÕES:
-
-1ª Sessão: ____/____/______   Assinatura: ________________
-2ª Sessão: ____/____/______   Assinatura: ________________
-3ª Sessão: ____/____/______   Assinatura: ________________
-4ª Sessão: ____/____/______   Assinatura: ________________
-5ª Sessão: ____/____/______   Assinatura: ________________
-6ª Sessão: ____/____/______   Assinatura: ________________
-
-Observações:
-__________________________________________________________________`
-      },
-      { 
-        id: 7, 
-        nome: 'FICHA DE PRESTAÇÃO DE SERVIÇO INDIVIDUAL', 
-        status: 'ATIVO',
-        conteudo: `FICHA DE PRESTAÇÃO DE SERVIÇO PODOLÓGICO
-
-Data: ____/____/______
-Paciente: _________________________________________________
-Profissional: Fabrícia Rodrigues
-
-SERVIÇO REALIZADO:
-( ) Podoprofilaxia Completa
-( ) Tratamento de Onicocriptose
-( ) Curativo/Retorno
-( ) Outro: ________________________________________________
-
-DESCRIÇÃO DO PROCEDIMENTO:
-__________________________________________________________________
-__________________________________________________________________
-
-RECOMENDAÇÕES HOMECARE (PÓS-PROCEDIMENTO):
-__________________________________________________________________
-
-Próximo Agendamento: ____/____/______ às _____:_____
-
-Assinatura do Profissional: _______________________________`
-      },
-      {
-        id: 8,
-        nome: 'PRONTUÁRIO ESPECIALIZADO: PÉ DIABÉTICO',
-        status: 'ATIVO',
-        conteudo: `PRONTUÁRIO ESPECIALIZADO: PÉ DIABÉTICO
-AVALIAÇÃO INTEGRADA (PODOLOGIA & ENFERMAGEM CLÍNICA)
-Responsável: Fabrícia Rodrigues | Artur Nogueira - SP
-
-1. DADOS DO PACIENTE E CONTROLE GLICÊMICO
-Nome: _________________________________________________ Data: ___/___/___
-Tipo de DM: ( ) Tipo 1 ( ) Tipo 2 Tempo de Diagnóstico: ________ Última HGT: ________ mg/dL
-HbA1c recente: ________ % Insulinodependente: ( ) Sim ( ) Não Tabagista: ( ) Sim ( ) Não
-
-2. AVALIAÇÃO DE ENFERMAGEM (SINAIS VITAIS E SISTÊMICOS)
-PA: ________ x ________ mmHg FC: ________ bpm FR: ________ irpm Temp: ________ °C
-Edema: ( ) Ausente ( ) +/4+ ( ) ++/4+ ( ) +++/4+ | Cacifo (Sinal de Godet): ( ) Positivo ( ) Negativo
-Perfusão Periférica: ( ) < 3 seg ( ) > 3 seg | Varizes: ( ) Sim ( ) Não
-
-3. EXAME FÍSICO PODOLÓGICO E NEUROLÓGICO
-Testes de Sensibilidade | Pé Direito | Pé Esquerdo
-Monofilamento (10g): ( ) Presente ( ) Ausente | ( ) Presente ( ) Ausente
-Vibratória (Diapasão 128Hz): ( ) Presente ( ) Ausente | ( ) Presente ( ) Ausente
-Pulso Pedioso / Tibial Posterior: ( ) Normal ( ) Diminuído ( ) Ausente | ( ) Normal ( ) Diminuído ( ) Ausente
-
-4. CLASSIFICAÇÃO DE RISCO E LESÕES (ESCALA DE WAGNER)
-Grau: ( ) 0 - Sem lesão aparente ( ) 1 - Úlcera Superficial ( ) 2 - Úlcera Profunda ( ) 3 - Abscesso/Osteomielite
-Deformidades: ( ) Hálux Valgo ( ) Dedos em Garra ( ) Charcot ( ) Proeminências Ósseas
-Alterações de Pele: ( ) Anidrose ( ) Fissuras ( ) Micose ( ) Calo com Hemorragia Subjacente
-
-5. CONDUTA E PLANEJAMENTO DE CUIDADO
-( ) Podoprofilaxia ( ) Desbridamento Mecânico ( ) Curativo Especial: __________________________
-( ) Encaminhamento Médico/Vascular ( ) Educação em Saúde: __________________________
-Evolução: __________________________________________________________________________
-
-Assinatura do Paciente: __________________________________________
-Fabrícia Rodrigues - Podóloga/Enfermagem: __________________________________________`
-      },
-      {
-        id: 9,
-        nome: 'FICHA DE CONTRATAÇÃO: SAÚDE DOS PÉS',
-        status: 'ATIVO',
-        conteudo: `PROGRAMA SAÚDE DOS PÉS
-Ficha de Contratação e Acompanhamento
-
-Nome: __________________________________________________________________
-CPF: ___________________________ Data de Nasc.: ____/____/_______
-Telefone: (____) _________________________
-
-1. SELEÇÃO DO PACOTE OU SERVIÇO
-( ) PACOTE MENSAL - 1x por semana (4 sessões) - R$ 680,00
-( ) PACOTE INTENSIVO - 2x por semana (6 sessões) - R$ 990,00
-( ) PACOTE VIP - 1x por semana (4 sessões) + Brinde - R$ 720,00
-( ) PACOTE ECONÔMICO - Quinzenal (3 sessões) - R$ 540,00
-( ) SESSÃO AVULSA - Spa dos Pés (Sessão Única) - R$ 190,00
-* Inclui: Podoprofilaxia, Reflexologia Podal, Escalda Pés e Terapia com Parafina.
-
-2. REGRAS E TERMOS
-• Validade: Plano válido por 30 dias após a contratação.
-• Agendamento: Somente com agendamento prévio e conforme disponibilidade.
-• Faltas: Faltas sem aviso (24h) não acumulam sessões (serão cobradas).
-• Pagamento: Antecipado ou na 1ª sessão do mês.
-• Uso: O plano é pessoal e intransferível.
-
-3. CIÊNCIA E CONCORDÂNCIA
-Declaro estar ciente de todos os termos, regras e condições do Programa Saúde dos Pés.
-
-Assinatura da Cliente: _________________________________
-Local e Data: ________________________________, ____/____/_______`
-      }
-    ];
-  });
+  const [fichas, setFichas] = useState(() => AnamnesisTemplateManager.getAll());
 
   // Patient Forms State
-  const [patientForms, setPatientForms] = useState(() => {
-    const saved = window.localStorage.getItem('patient_forms');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [patientForms, setPatientForms] = useState(() => PatientFormManager.getAll());
 
   // Clients for selection
-  const [clients, setClients] = useState(() => {
-    const saved = window.localStorage.getItem('clientes');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [clients, setClients] = useState(() => ClientManager.getAll());
+
+  useEffect(() => {
+    const handleSync = () => {
+      setFichas(AnamnesisTemplateManager.getAll());
+      setPatientForms(PatientFormManager.getAll());
+      setClients(ClientManager.getAll());
+    };
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
 
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -398,13 +173,6 @@ Local e Data: ________________________________, ____/____/_______`
     assinatura: null
   });
 
-  useEffect(() => {
-    window.localStorage.setItem('anamneses_list', JSON.stringify(fichas));
-  }, [fichas]);
-
-  useEffect(() => {
-    window.localStorage.setItem('patient_forms', JSON.stringify(patientForms));
-  }, [patientForms]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -432,12 +200,12 @@ Local e Data: ________________________________, ____/____/_______`
     if (!formData.nome.trim()) return;
 
     if (isEditing) {
-      const updated = fichas.map(f => f.id === editId ? { ...formData, id: editId } : f);
+      const updated = AnamnesisTemplateManager.update(editId, formData);
       setFichas(updated);
       SecurityManager.log('Modelo Alterado', 'SISTEMA', `Modelo: ${formData.nome}`);
     } else {
-      const newF = { id: Date.now(), ...formData };
-      setFichas([...fichas, newF]);
+      const newF = AnamnesisTemplateManager.add(formData);
+      setFichas(AnamnesisTemplateManager.getAll());
       SecurityManager.log('Novo Modelo Criado', 'SISTEMA', `Modelo: ${formData.nome}`);
     }
     setShowModal(false);
@@ -446,7 +214,8 @@ Local e Data: ________________________________, ____/____/_______`
   const handleDelete = (id) => {
     if (window.confirm('Tem certeza de que deseja excluir este modelo?')) {
       const ficha = fichas.find(f => f.id === id);
-      setFichas(fichas.filter(f => f.id !== id));
+      AnamnesisTemplateManager.remove(id);
+      setFichas(AnamnesisTemplateManager.getAll());
       if (ficha) {
         SecurityManager.log('Modelo Excluído', 'SISTEMA', `Modelo: ${ficha.nome}`);
       }
@@ -456,7 +225,8 @@ Local e Data: ________________________________, ____/____/_______`
   const handleDeletePatientForm = (id) => {
     if (window.confirm('Tem certeza de que deseja excluir esta ficha de paciente?')) {
       const form = patientForms.find(f => f.id === id);
-      setPatientForms(patientForms.filter(f => f.id !== id));
+      PatientFormManager.remove(id);
+      setPatientForms(PatientFormManager.getAll());
       if (form) {
         SecurityManager.log('Ficha Excluída', form.clientName, `Ficha: ${form.templateName}`);
       }
@@ -567,7 +337,6 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
       : fillData.conteudo;
 
     const newForm = {
-      id: Date.now(),
       clientId: fillData.clientId,
       clientName: client ? client.nome : 'Desconhecido',
       templateId: fillData.templateId,
@@ -577,7 +346,8 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
       date: new Date().toISOString()
     };
 
-    setPatientForms([newForm, ...patientForms]);
+    PatientFormManager.add(newForm);
+    setPatientForms(PatientFormManager.getAll());
     SecurityManager.log('Nova Ficha de Paciente', newForm.clientName, `Documento: ${newForm.templateName}`);
     setShowFillModal(false);
   };

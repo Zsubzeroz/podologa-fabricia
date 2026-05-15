@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Users, Plus, Search, Trash2, FileText, Printer, X, ClipboardList, Edit, Calendar, AlertCircle, Package } from 'lucide-react';
-import { ClientManager } from '../utils/EntityManager';
+import { ClientManager, PatientFormManager } from '../utils/EntityManager';
 
 export default function Clientes({ onSchedule, onGenerateReceipt }) {
   const [clientes, setClientes] = useState(() => ClientManager.getAll());
@@ -12,10 +12,20 @@ export default function Clientes({ onSchedule, onGenerateReceipt }) {
 
   const [activeClient, setActiveClient] = useState(null);
   const [search, setSearch] = useState('');
-  const [patientForms, setPatientForms] = useState(() => {
-    const saved = window.localStorage.getItem('patient_forms');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [patientForms, setPatientForms] = useState(() => PatientFormManager.getAll());
+  
+  useEffect(() => {
+    const handleSync = () => {
+      setClientes(ClientManager.getAll());
+      setPatientForms(PatientFormManager.getAll());
+    };
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
   
   // Forms states
   const [formData, setFormData] = useState({

@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
 import { DollarSign, Plus, Search, Trash2, Calendar, FileText, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { FinanceManager, SaleManager } from '../utils/EntityManager';
 
 export default function Financeiro() {
-  const [vendas, setVendas] = useState(() => {
-    const saved = window.localStorage.getItem('vendas');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [vendas, setVendas] = useState(() => SaleManager.getAll());
+  const [financeiro, setFinanceiro] = useState(() => FinanceManager.getAll());
 
-  const [financeiro, setFinanceiro] = useState(() => {
-    const saved = window.localStorage.getItem('financeiro_entries');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, data: '2026-05-01', descricao: 'Aluguel da Sala', tipo: 'Pagar', categoria: 'Aluguel', forma: 'Boleto', valor: 800.00 },
-      { id: 2, data: '2026-05-02', descricao: 'Compra de EPIs', tipo: 'Pagar', categoria: 'Insumos', forma: 'Pix', valor: 150.00 }
-    ];
-  });
+  useEffect(() => {
+    const handleSync = () => {
+      setVendas(SaleManager.getAll());
+      setFinanceiro(FinanceManager.getAll());
+    };
+    window.addEventListener('dataSync', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('dataSync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState('');
@@ -28,9 +32,6 @@ export default function Financeiro() {
     valor: ''
   });
 
-  useEffect(() => {
-    window.localStorage.setItem('financeiro_entries', JSON.stringify(financeiro));
-  }, [financeiro]);
 
   const handleSaveEntry = (e) => {
     e.preventDefault();
@@ -46,7 +47,8 @@ export default function Financeiro() {
       valor: parseFloat(formData.valor) || 0
     };
 
-    setFinanceiro([newEntry, ...financeiro]);
+    FinanceManager.add(newEntry);
+    setFinanceiro(FinanceManager.getAll());
     setShowModal(false);
     setFormData({
       data: new Date().toISOString().split('T')[0],
@@ -60,7 +62,8 @@ export default function Financeiro() {
 
   const handleDelete = (id) => {
     if (window.confirm('Tem certeza que deseja excluir este lançamento?')) {
-      setFinanceiro(financeiro.filter(f => String(f.id) !== String(id)));
+      FinanceManager.remove(id);
+      setFinanceiro(FinanceManager.getAll());
     }
   };
 

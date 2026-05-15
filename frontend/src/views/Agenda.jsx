@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit, Check } from 'lucide-react';
-import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings, ServiceManager } from '../utils/EntityManager';
+import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings, ServiceManager, ProfessionalManager } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia'); // 'Dia' ou 'Mês'
@@ -11,6 +11,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const [config, setConfig] = useState(() => GeneralSettings.get());
   const [blockedDays, setBlockedDays] = useState(() => BlockedDaysManager.getAll());
   const [patientForms, setPatientForms] = useState([]);
+  const [professionals, setProfessionals] = useState(() => ProfessionalManager.getAll());
   const shareRef = useRef(null);
   
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
       setConfig(GeneralSettings.get());
       const savedForms = window.localStorage.getItem('patient_forms');
       setPatientForms(savedForms ? JSON.parse(savedForms) : []);
+      setProfessionals(ProfessionalManager.getAll());
     };
     window.addEventListener('dataSync', handleSync);
     window.addEventListener('storage', handleSync);
@@ -358,36 +360,63 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
               <thead>
                 <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                   <th style={{ width: '100px', padding: '15px', textAlign: 'center', color: '#6b7280', fontSize: '0.75rem', fontWeight: '800' }}>HORÁRIO</th>
-                  <th style={{ padding: '15px', textAlign: 'left', color: '#6b7280', fontSize: '0.75rem', fontWeight: '800' }}>PACIENTES / DISPONIBILIDADE</th>
+                  {config.calendarioVertical && professionals.length > 0 ? (
+                    professionals.map(p => (
+                      <th key={p.id} style={{ padding: '15px', textAlign: 'center', color: '#0f3d2e', fontSize: '0.85rem', fontWeight: '800', borderLeft: '1px solid #e5e7eb' }}>
+                        {p.nome.toUpperCase()}
+                      </th>
+                    ))
+                  ) : (
+                    <th style={{ padding: '15px', textAlign: 'left', color: '#6b7280', fontSize: '0.75rem', fontWeight: '800' }}>PACIENTES / DISPONIBILIDADE</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {hours.length === 0 ? (
                   <tr>
-                    <td colSpan="2" style={{ padding: '60px', textAlign: 'center', color: '#9ca3af', fontWeight: '600', background: '#fef2f2' }}>
+                    <td colSpan={config.calendarioVertical && professionals.length > 0 ? professionals.length + 1 : 2} style={{ padding: '60px', textAlign: 'center', color: '#9ca3af', fontWeight: '600', background: '#fef2f2' }}>
                       <div style={{ color: '#991b1b', fontWeight: '800' }}>A clínica está fechada neste dia.</div>
                     </td>
                   </tr>
                 ) : hours.map(hour => {
-                  const apptsInHour = appointments.filter(a => {
-                    if (a.date !== currentYMD) return false;
-                    const aStart = a.startTime;
-                    // Only show in the slot where it STARTS to avoid double entries
-                    return aStart === hour;
-                  });
-                  const block = isTimeBlocked(hour);
-                  
-                  // Filtro: Ocultar horários ocupados
-                  if (hideBusy && (apptsInHour.length > 0 || block)) return null;
+                  const getMinutes = (timeStr) => {
+                    if (!timeStr) return 0;
+                    const [h, m] = timeStr.split(':').map(Number);
+                    return h * 60 + m;
+                  };
+                  const currentSlotStart = getMinutes(hour);
 
-                  return (
-                    <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6', background: block && !block.startTime ? '#fff1f2' : (apptsInHour.length > 0 ? '#fff5f5' : '#fff') }}>
-                      <td style={{ padding: '20px', color: '#111827', fontSize: '0.9rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: block && !block.startTime ? '#ffe4e6' : '#fcfcfc', textAlign: 'center' }}>
-                        {hour}
-                      </td>
+                  // Function to render cell content
+                  const renderCell = (profId = null) => {
+                    const apptsInHour = appointments.filter(a => {
+                      if (a.date !== currentYMD) return false;
+                      if (profId && a.professionalId !== profId) return false;
+                      const aStart = getMinutes(a.startTime);
+                      return aStart === currentSlotStart;
+                    });
+
+                    const isOccupiedByDuration = appointments.some(a => {
+                      if (a.date !== currentYMD) return false;
+                      if (profId && a.professionalId !== profId) return false;
+                      const aStart = getMinutes(a.startTime);
+                      const aEnd = getMinutes(a.endTime);
+                      return currentSlotStart > aStart && currentSlotStart < aEnd;
+                    });
+
+                    const block = isTimeBlocked(hour);
+                    if (hideBusy && (apptsInHour.length > 0 || isOccupiedByDuration || block)) return null;
+
+                    return (
                       <td 
-                        style={{ padding: '8px 15px', position: 'relative', cursor: apptsInHour.length === 0 && !block ? 'pointer' : 'default' }}
-                        onClick={() => { if (apptsInHour.length === 0 && !block) onAddAppointment(currentDate, hour); }}
+                        key={profId || 'single'}
+                        style={{ 
+                          padding: '8px 15px', 
+                          position: 'relative', 
+                          cursor: (apptsInHour.length === 0 && !isOccupiedByDuration && !block) ? 'pointer' : 'default',
+                          borderLeft: profId ? '1px solid #f3f4f6' : 'none',
+                          background: (block && !block.startTime) ? '#fff1f2' : (apptsInHour.length > 0 || isOccupiedByDuration ? '#fff5f5' : '#fff')
+                        }}
+                        onClick={() => { if (apptsInHour.length === 0 && !isOccupiedByDuration && !block) onAddAppointment(currentDate, hour, profId); }}
                       >
                         {apptsInHour.length > 0 ? (
                           apptsInHour.map(appt => {
@@ -395,111 +424,43 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                             return (
                               <div key={appt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', ...statusStyle, padding: '12px 18px', borderRadius: '10px', marginBottom: apptsInHour.length > 1 ? '8px' : 0, transition: 'all 0.3s' }}>
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                  <div>
-                                    {(appt.source === 'online' || appt.source === 'portal') && <Calendar size={20} style={{ color: statusStyle.color }} title="Agendado pelo Portal" />}
-                                  </div>
                                   <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: '800', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                      {appt.clientName}
-                                      {appt.status === 'Confirmado' && <CheckCircle2 size={16} color="#3b82f6" title="Confirmado" />}
-                                      {appt.status === 'Agendado' && <AlertCircle size={16} color="#ef4444" title="Pendente de Confirmação" />}
-                                      {patientForms.some(f => String(f.clientId) === String(appt.clientId) && f.signature) ? (
-                                        <Check size={16} color="#10b981" title="Ficha assinada" />
-                                      ) : (
-                                        <AlertCircle size={16} color="#f59e0b" title="Ficha não assinada" />
-                                      )}
-                                    </div>
-                                    <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase' }}>
-                                      ● {appt.status || 'Agendado'} 
-                                    {(appt.source === 'online' || appt.source === 'portal') ? ' (ONLINE)' : ' (MANUAL)'}
-                                    </div>
+                                    <div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{appt.clientName}</div>
+                                    <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{appt.startTime} - {appt.endTime} • {appt.service}</div>
                                   </div>
-                                                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                  {appt.status !== 'Atendido' && (
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onUpdateAppointment(appt.id, { status: 'Atendido' });
-                                      }}
-                                      style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
-                                    >
-                                      MARCAR ATENDIDO
-                                    </button>
-                                  )}
-                                  
-                                  {appt.status !== 'Atendido' && (
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onUpdateAppointment(appt.id, { status: 'Confirmado' });
-                                      }}
-                                      style={{ background: '#fff', border: '1px solid #3b82f6', color: '#3b82f6', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
-                                    >
-                                      CONFIRMAR
-                                    </button>
-                                  )}
-
-                                  <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onGenerateReceipt(appt.clientName, appt.service);
-                                    }}
-                                    style={{ background: '#fff', border: '1px solid #d1d5db', color: '#4b5563', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
-                                  >
-                                    <FileText size={14} /> RECIBO
-                                  </button>
-                                  <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleWhatsAppReminder(appt);
-                                    }}
-                                    style={{ background: '#25d366', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
-                                  >
-                                    <Smartphone size={14} /> LEMBRETE
-                                  </button>
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); setEditingAppt(appt); }} 
-                                    style={{ background: '#fef08a', border: 'none', color: '#854d0e', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', fontSize: '0.75rem' }}
-                                  >
-                                    <Edit size={14} /> EDITAR
-                                  </button>
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); onCancelAppointment(appt.id); }} 
-                                    style={{ background: '#fee2e2', border: 'none', color: '#ef4444', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}
-                                  >
-                                    CANCELAR
-                                  </button>
+                                  <div style={{ display: 'flex', gap: '5px' }}>
+                                    {appt.status !== 'Atendido' && (
+                                      <button onClick={(e) => { e.stopPropagation(); onUpdateAppointment(appt.id, { status: 'Atendido' }); }} style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>Atendido</button>
+                                    )}
+                                    <button onClick={(e) => { e.stopPropagation(); setEditingAppt(appt); }} style={{ background: '#fef08a', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>Edit</button>
+                                  </div>
                                 </div>
-               </div>
                               </div>
                             );
                           })
+                        ) : isOccupiedByDuration ? (
+                          <div style={{ color: '#9ca3af', fontSize: '0.75rem', fontStyle: 'italic', textAlign: 'center' }}>Reservado</div>
                         ) : block ? (
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fef2f2', border: '1px dashed #fca5a5', color: '#991b1b', padding: '12px 18px', borderRadius: '10px' }}>
-                            <span style={{ fontWeight: '600' }}>⛔ BLOQUEADO: {block.description}</span>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleUnblockHour(block.id); }}
-                              style={{ background: '#991b1b', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}
-                            >
-                              LIBERAR
-                            </button>
-                          </div>
+                          <div style={{ textAlign: 'center', fontSize: '0.75rem', color: '#991b1b', fontWeight: 'bold' }}>BLOQUEADO</div>
                         ) : (
-                          <div 
-                            className="agenda-slot-empty"
-                            style={{ height: '50px', display: 'flex', alignItems: 'center', color: '#9ca3af', fontSize: '0.9rem', fontStyle: 'italic', transition: 'all 0.2s' }}
-                          >
-                            <Plus size={16} style={{ marginRight: '8px', opacity: 0.5 }} /> Clique para agendar um paciente às {hourSt}...
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleBlockHour(hourSt); }}
-                              style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #d1d5db', color: '#9ca3af', padding: '4px 10px', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}
-                            >
-                              BLOQUEAR
-                            </button>
+                          <div className="agenda-slot-empty" style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d1d5db' }}>
+                            <Plus size={14} />
                           </div>
                         )}
                       </td>
+                    );
+                  };
+
+                  return (
+                    <tr key={hour} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '15px', color: '#111827', fontSize: '0.9rem', fontWeight: '800', borderRight: '1px solid #f3f4f6', background: '#fcfcfc', textAlign: 'center' }}>
+                        {hour}
+                      </td>
+                      {config.calendarioVertical && professionals.length > 0 ? (
+                        professionals.map(p => renderCell(p.id))
+                      ) : (
+                        renderCell()
+                      )}
                     </tr>
                   );
                 })}
