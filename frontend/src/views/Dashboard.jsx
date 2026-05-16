@@ -68,8 +68,8 @@ export default function Dashboard({ setCurrentView }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
         <StatCard title="Agendamentos" value={stats.appointments} icon={<Calendar />} color="#0f3d2e" onClick={() => setCurrentView('agenda')} />
         <StatCard title="Total de Clientes" value={stats.clients} icon={<Users />} color="#2563eb" onClick={() => setCurrentView('clientes')} />
-        <StatCard title="Serviços Oferecidos" value={stats.services} icon={<Package />} color="#7c3aed" onClick={() => setCurrentView('servicos')} />
-        <StatCard title="Faturamento (PAGO)" value={`R$ ${stats.sales.toFixed(2)}`} icon={<DollarSign />} color="#059669" onClick={() => setCurrentView('financeiro')} />
+        <StatCard title="Serviços Oferecidos" value={stats.services} icon={<Package />} color="#7c3aed" onClick={() => setCurrentView('produtos')} />
+        <StatCard title="Faturamento (PAGO)" value={`R$ ${stats.sales.toFixed(2)}`} icon={<DollarSign />} color="#059669" onClick={() => setCurrentView('lancamentos')} />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
