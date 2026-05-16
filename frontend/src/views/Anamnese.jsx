@@ -342,7 +342,7 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
       templateId: fillData.templateId,
       templateName: template ? template.nome : 'Desconhecido',
       conteudo: finalConteudo,
-      signature: isAnamnesis ? structuredData.assinatura : null,
+      signature: structuredData.assinatura || null,
       date: new Date().toISOString()
     };
 
@@ -780,11 +780,25 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
 
                 </div>
               ) : (
-                <textarea 
-                  value={fillData.conteudo} 
-                  onChange={(e) => setFillData({...fillData, conteudo: e.target.value})} 
-                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', flex: 1, minHeight: '300px', fontFamily: 'monospace' }} 
-                />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <textarea 
+                    value={fillData.conteudo} 
+                    onChange={(e) => setFillData({...fillData, conteudo: e.target.value})} 
+                    style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', minHeight: '300px', fontFamily: 'monospace' }} 
+                  />
+                  <div>
+                    <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>ASSINATURA DO PACIENTE (Tablet)</h5>
+                    <SignaturePad 
+                      onSave={(data) => handleStructuredChange('assinatura', data)} 
+                      onClear={() => handleStructuredChange('assinatura', null)} 
+                    />
+                    {structuredData.assinatura && (
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Check size={14} /> Assinatura capturada com sucesso!
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -858,14 +872,24 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                 </div>
               )}
 
-              <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between', gap: '40px' }}>
-                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
-                  <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+              {!printItem.signature && printItem.isPatientForm && (
+                <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between', gap: '40px' }}>
+                  <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
+                    <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+                  </div>
+                  <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
+                    <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+                  </div>
                 </div>
-                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
-                  <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+              )}
+
+              {printItem.signature && printItem.isPatientForm && (
+                <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'flex-end', gap: '40px' }}>
+                  <div style={{ width: '300px', borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
+                    <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -918,14 +942,31 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
               </div>
             )}
 
-            <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between', gap: '80px' }}>
-              <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
-                <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+            {printItem.signature && (
+              <div style={{ marginTop: '40px', borderTop: '1px solid #000', paddingTop: '10px', maxWidth: '300px' }}>
+                <img src={printItem.signature} alt="Assinatura" style={{ width: '100%', maxHeight: '100px', objectFit: 'contain' }} />
+                <p style={{ margin: 0, fontSize: '12px', textAlign: 'center', fontWeight: 'bold' }}>ASSINATURA DO PACIENTE</p>
               </div>
-              <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
-                <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+            )}
+
+            {!printItem.signature && printItem.isPatientForm && (
+              <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between', gap: '80px' }}>
+                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
+                  <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+                </div>
+                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
+                  <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+                </div>
               </div>
-            </div>
+            )}
+
+            {printItem.signature && printItem.isPatientForm && (
+              <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'flex-end', gap: '80px' }}>
+                <div style={{ width: '300px', borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
+                  <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
