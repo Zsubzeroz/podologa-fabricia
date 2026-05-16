@@ -688,21 +688,32 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                 </div>
               </div>
 
-              <button 
-                onClick={() => {
-                  onUpdateAppointment(editingAppt.id, {
-                    clientName: editingAppt.clientName,
-                    service: editingAppt.service,
-                    date: editingAppt.date,
-                    startTime: editingAppt.startTime,
-                    endTime: editingAppt.endTime
-                  });
-                  setEditingAppt(null);
-                }}
-                style={{ background: '#0f3d2e', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}
-              >
-                SALVAR ALTERAÇÕES
-              </button>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button 
+                  onClick={() => {
+                    onCancelAppointment(editingAppt.id);
+                    setEditingAppt(null);
+                  }}
+                  style={{ flex: 1, background: '#ef4444', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  EXCLUIR / CANCELAR
+                </button>
+                <button 
+                  onClick={() => {
+                    onUpdateAppointment(editingAppt.id, {
+                      clientName: editingAppt.clientName,
+                      service: editingAppt.service,
+                      date: editingAppt.date,
+                      startTime: editingAppt.startTime,
+                      endTime: editingAppt.endTime
+                    });
+                    setEditingAppt(null);
+                  }}
+                  style={{ flex: 1, background: '#0f3d2e', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  SALVAR ALTERAÇÕES
+                </button>
+              </div>
             </div>
           </div>
         </div>
