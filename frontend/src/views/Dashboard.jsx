@@ -66,10 +66,10 @@ export default function Dashboard({ setCurrentView }) {
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-        <StatCard title="Agendamentos" value={stats.appointments} icon={<Calendar />} color="#0f3d2e" />
-        <StatCard title="Total de Clientes" value={stats.clients} icon={<Users />} color="#2563eb" />
-        <StatCard title="Serviços Oferecidos" value={stats.services} icon={<Package />} color="#7c3aed" />
-        <StatCard title="Faturamento (PAGO)" value={`R$ ${stats.sales.toFixed(2)}`} icon={<DollarSign />} color="#059669" />
+        <StatCard title="Agendamentos" value={stats.appointments} icon={<Calendar />} color="#0f3d2e" onClick={() => setCurrentView('agenda')} />
+        <StatCard title="Total de Clientes" value={stats.clients} icon={<Users />} color="#2563eb" onClick={() => setCurrentView('clientes')} />
+        <StatCard title="Serviços Oferecidos" value={stats.services} icon={<Package />} color="#7c3aed" onClick={() => setCurrentView('servicos')} />
+        <StatCard title="Faturamento (PAGO)" value={`R$ ${stats.sales.toFixed(2)}`} icon={<DollarSign />} color="#059669" onClick={() => setCurrentView('financeiro')} />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
@@ -136,9 +136,24 @@ export default function Dashboard({ setCurrentView }) {
   );
 }
 
-function StatCard({ title, value, icon, color }) {
+function StatCard({ title, value, icon, color, onClick }) {
   return (
-    <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+    <div 
+      onClick={onClick}
+      className="stat-card-clickable"
+      style={{ 
+        background: 'white', 
+        border: '1px solid #e5e7eb', 
+        borderRadius: '16px', 
+        padding: '24px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '20px', 
+        boxShadow: '0 4px 6px rgba(0,0,0,0.02)',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'all 0.2s ease',
+      }}
+    >
       <div style={{ background: `${color}15`, color: color, width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {icon}
       </div>
