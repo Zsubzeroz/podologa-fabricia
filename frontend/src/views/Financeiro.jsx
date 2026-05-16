@@ -68,15 +68,24 @@ export default function Financeiro() {
   };
 
   // Build unified view by adding sales as automatic revenue entries
-  const salesEntries = vendas.map(v => ({
-    id: `v-${v.id}`,
-    data: (v.data || '').includes('/') ? v.data.split('/').reverse().join('-') : (v.data || ''),
-    descricao: `Venda - ${v.cliente}`,
-    tipo: 'Receber',
-    categoria: 'Atendimento',
-    forma: v.formaPagamento,
-    valor: v.total
-  }));
+  const salesEntries = vendas.map(v => {
+    let valorNum = 0;
+    if (typeof v.total === 'number') {
+      valorNum = v.total;
+    } else if (typeof v.total === 'string') {
+      valorNum = parseFloat(v.total.replace('R$', '').replace('.', '').replace(',', '.')) || 0;
+    }
+
+    return {
+      id: `v-${v.id}`,
+      data: (v.data || '').includes('/') ? v.data.split('/').reverse().join('-') : (v.data || ''),
+      descricao: `Venda - ${v.cliente || 'Consumidor'}`,
+      tipo: 'Receber',
+      categoria: 'Atendimento',
+      forma: v.formaPagamento || 'Outro',
+      valor: valorNum
+    };
+  });
 
   const allEntries = [...financeiro, ...salesEntries];
 
@@ -85,8 +94,8 @@ export default function Financeiro() {
   ).sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
 
   // Dynamic calculations
-  const totalReceitas = filtered.filter(f => f.tipo === 'Receber').reduce((acc, cur) => acc + cur.valor, 0);
-  const totalDespesas = filtered.filter(f => f.tipo === 'Pagar').reduce((acc, cur) => acc + cur.valor, 0);
+  const totalReceitas = filtered.filter(f => f.tipo === 'Receber').reduce((acc, cur) => acc + (Number(cur.valor) || 0), 0);
+  const totalDespesas = filtered.filter(f => f.tipo === 'Pagar').reduce((acc, cur) => acc + (Number(cur.valor) || 0), 0);
   const saldoGeral = totalReceitas - totalDespesas;
 
   return (
@@ -192,7 +201,7 @@ export default function Financeiro() {
               ) : (
                 filtered.map((entry) => (
                   <tr key={entry.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                    <td style={{ padding: '14px', color: '#111827', fontSize: '0.95rem' }}>{entry.data.split('-').reverse().join('/')}</td>
+                    <td style={{ padding: '14px', color: '#111827', fontSize: '0.95rem' }}>{(entry.data || '').split('-').reverse().join('/')}</td>
                     <td style={{ padding: '14px', color: '#111827', fontWeight: 'bold' }}>{entry.descricao}</td>
                     <td style={{ padding: '14px', color: '#4b5563' }}>{entry.categoria}</td>
                     <td style={{ padding: '14px', textAlign: 'center', color: '#4b5563' }}>{entry.forma}</td>
@@ -209,7 +218,7 @@ export default function Financeiro() {
                       </span>
                     </td>
                     <td style={{ padding: '14px', textAlign: 'right', fontWeight: 'bold', color: entry.tipo === 'Receber' ? '#047857' : '#b91c1c' }}>
-                      R$ {entry.valor.toFixed(2).replace('.', ',')}
+                      R$ {(Number(entry.valor) || 0).toFixed(2).replace('.', ',')}
                     </td>
                     <td style={{ padding: '14px', textAlign: 'center' }}>
                       {typeof entry.id === 'number' ? (
