@@ -5,6 +5,15 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fabrícia Rodrigues Saúde Bem-Estar</title>
+    <script>
+      // Force reload if a lazy-loaded chunk fails (common after new deploys)
+      window.addEventListener('error', function(e) {
+        if (e.message && (e.message.indexOf('module script') > -1 || e.message.indexOf('Loading chunk') > -1)) {
+          console.warn('Falha ao carregar componente. Atualizando sistema...');
+          window.location.reload();
+        }
+      }, true);
+    </script>
   </head>
   <body>
     <div id="root"></div>
