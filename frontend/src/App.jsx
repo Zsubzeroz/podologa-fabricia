@@ -54,6 +54,25 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// Error Boundary for lazy loading failures
+import React from 'react';
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error) { return { hasError: true }; }
+  componentDidCatch(error, errorInfo) {
+    if (error.message && (error.message.includes('module script') || error.message.includes('Loading chunk'))) {
+      window.location.reload();
+    }
+  }
+  render() {
+    if (this.state.hasError) return <LoadingSpinner />;
+    return this.props.children;
+  }
+}
+
 import { AppointmentManager, ServiceManager, ClientManager, FinanceManager, PatientFormManager } from './utils/EntityManager';
 
 function App() {
@@ -200,114 +219,117 @@ function App() {
   if (isAdminPath && authState) {
     return (
       <Layout currentView={currentView} setCurrentView={setCurrentView} openMenu={openMenu} setOpenMenu={setOpenMenu} onLogout={handleLogout}>
-        <Suspense fallback={<LoadingSpinner />}>
-          {currentView === 'dashboard' && <Dashboard setCurrentView={setCurrentView} />}
-          {currentView === 'agenda' && (
-            <Agenda 
-              appointments={appointments} 
-              onCancelAppointment={cancelAppointment}
-              onUpdateAppointment={updateAppointment}
-              currentDate={currentDate}
-              setCurrentDate={setCurrentDate}
-              onAddAppointment={handleAddAppointment}
-              onGenerateReceipt={handleGenerateReceipt}
-            />
-          )}
-          {currentView === 'agendamento' && (
-            <AgendarTab 
-              currentDate={currentDate} 
-              preSelectedTime={preSelectedTime}
-              preSelectedClient={preSelectedClient}
-              onSave={(newApptData) => {
-                // Auto-register client if not exists
-                const allClients = ClientManager.getAll();
-                let client = allClients.find(c => c.nome.toLowerCase() === newApptData.clientName.toLowerCase());
-                
-                if (!client) {
-                  client = ClientManager.add({
-                    nome: newApptData.clientName,
-                    contato: newApptData.phone || '',
-                    email: newApptData.clientEmail || '',
-                    data: new Date().toLocaleDateString('pt-BR'),
-                    status: 'ATIVO'
-                  });
-                }
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingSpinner />}>
+            {currentView === 'dashboard' && <Dashboard setCurrentView={setCurrentView} />}
+            {/* ... rest of the switch ... */}
+            {currentView === 'agenda' && (
+              <Agenda 
+                appointments={appointments} 
+                onCancelAppointment={cancelAppointment}
+                onUpdateAppointment={updateAppointment}
+                currentDate={currentDate}
+                setCurrentDate={setCurrentDate}
+                onAddAppointment={handleAddAppointment}
+                onGenerateReceipt={handleGenerateReceipt}
+              />
+            )}
+            {currentView === 'agendamento' && (
+              <AgendarTab 
+                currentDate={currentDate} 
+                preSelectedTime={preSelectedTime}
+                preSelectedClient={preSelectedClient}
+                onSave={(newApptData) => {
+                  // Auto-register client if not exists
+                  const allClients = ClientManager.getAll();
+                  let client = allClients.find(c => c.nome.toLowerCase() === newApptData.clientName.toLowerCase());
+                  
+                  if (!client) {
+                    client = ClientManager.add({
+                      nome: newApptData.clientName,
+                      contato: newApptData.phone || '',
+                      email: newApptData.clientEmail || '',
+                      data: new Date().toLocaleDateString('pt-BR'),
+                      status: 'ATIVO'
+                    });
+                  }
 
-                // Auto-create evaluation form if requested
-                if (newApptData.autoEvaluation) {
-                  const newForm = {
-                    clientId: client.id,
-                    clientName: client.nome,
-                    date: newApptData.date,
-                    time: newApptData.startTime,
-                    service: newApptData.service,
-                    status: 'PENDENTE',
-                    templateId: 8 // Default to the new Diabetic Foot template or 1 for general
-                  };
-                  PatientFormManager.add(newForm);
-                }
+                  // Auto-create evaluation form if requested
+                  if (newApptData.autoEvaluation) {
+                    const newForm = {
+                      clientId: client.id,
+                      clientName: client.nome,
+                      date: newApptData.date,
+                      time: newApptData.startTime,
+                      service: newApptData.service,
+                      status: 'PENDENTE',
+                      templateId: 8 // Default to the new Diabetic Foot template or 1 for general
+                    };
+                    PatientFormManager.add(newForm);
+                  }
 
-                const updated = AppointmentManager.add(newApptData);
-                setAppointments(updated);
-                resetPreSelections();
-                setCurrentView('agenda');
-              }} 
-            />
-          )}
-          {currentView === 'caixa' && (
-            <Caixa 
-              initialClient={preSelectedClient} 
-              initialService={preSelectedService} 
-            />
-          )}
-          {currentView === 'produtos' && <Produtos />}
-          {currentView === 'clientes' && (
-            <Clientes 
-              onSchedule={(client) => handleAddAppointment(new Date(), '10:00', client.nome)}
-              onGenerateReceipt={(client) => handleGenerateReceipt(client.nome, '')}
-              onViewPacotes={(client) => {
-                setPreSelectedClient(client.nome);
-                setCurrentView('pacotes');
-              }}
-            />
-          )}
-          {currentView === 'anamnese' && <Anamnese />}
-          {currentView === 'profissional' && <Profissional />}
-          {currentView === 'lancamentos' && <Financeiro />}
-          {currentView === 'meus_caixas' && <FinanceiroMeusCaixas />}
-          {currentView === 'categoria' && <FinanceiroCategoria />}
-          {currentView === 'conta' && <FinanceiroConta />}
-          {currentView === 'formas_pagamento' && <FinanceiroFormasPagamento />}
-          {currentView === 'fluxo_anual' && <AnaliseFluxoAnual />}
-          {currentView === 'fluxo_mensal' && <AnaliseFluxoMensal />}
-          {currentView === 'compra' && <ComprasCompra />}
-          {currentView === 'fornecedor' && <ComprasFornecedor />}
-          {currentView === 'campo_personalizado' && <CadastrosCampoPersonalizado />}
-          {currentView === 'como_conheceu' && <CadastrosComoConheceu />}
-          {currentView === 'feriado' && <CadastrosFeriado />}
-          {currentView === 'grupos' && <CadastrosGrupos />}
-          {currentView === 'marcas' && <CadastrosMarcas />}
-          {currentView === 'equipamentos' && <CadastrosEquipamentos />}
-          {currentView === 'consulta_agendas' && <ConsultaAgendas />}
-          {currentView === 'consulta_analise' && <ConsultaAnalise />}
-          {currentView === 'comissao' && <ComissaoProfissional />}
-          {currentView === 'estoque' && <ProdutosEstoque />}
-          {currentView === 'pacotes' && <ConsultaPacotes initialClient={preSelectedClient} />}
-          {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
-          {currentView === 'orcamentos' && <ConsultaOrcamentos />}
-          {currentView === 'vendas' && <ConsultaVendas />}
-          {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
-          {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
-          {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
-          {currentView === 'alterar_senha' && <AlterarSenha />}
-          {currentView === 'nfs' && (
-            <NfsE 
-              preSelectedClient={preSelectedClient} 
-              preSelectedService={preSelectedService} 
-              onResetSelections={resetPreSelections} 
-            />
-          )}
-        </Suspense>
+                  const updated = AppointmentManager.add(newApptData);
+                  setAppointments(updated);
+                  resetPreSelections();
+                  setCurrentView('agenda');
+                }} 
+              />
+            )}
+            {currentView === 'caixa' && (
+              <Caixa 
+                initialClient={preSelectedClient} 
+                initialService={preSelectedService} 
+              />
+            )}
+            {currentView === 'produtos' && <Produtos />}
+            {currentView === 'clientes' && (
+              <Clientes 
+                onSchedule={(client) => handleAddAppointment(new Date(), '10:00', client.nome)}
+                onGenerateReceipt={(client) => handleGenerateReceipt(client.nome, '')}
+                onViewPacotes={(client) => {
+                  setPreSelectedClient(client.nome);
+                  setCurrentView('pacotes');
+                }}
+              />
+            )}
+            {currentView === 'anamnese' && <Anamnese />}
+            {currentView === 'profissional' && <Profissional />}
+            {currentView === 'lancamentos' && <Financeiro />}
+            {currentView === 'meus_caixas' && <FinanceiroMeusCaixas />}
+            {currentView === 'categoria' && <FinanceiroCategoria />}
+            {currentView === 'conta' && <FinanceiroConta />}
+            {currentView === 'formas_pagamento' && <FinanceiroFormasPagamento />}
+            {currentView === 'fluxo_anual' && <AnaliseFluxoAnual />}
+            {currentView === 'fluxo_mensal' && <AnaliseFluxoMensal />}
+            {currentView === 'compra' && <ComprasCompra />}
+            {currentView === 'fornecedor' && <ComprasFornecedor />}
+            {currentView === 'campo_personalizado' && <CadastrosCampoPersonalizado />}
+            {currentView === 'como_conheceu' && <CadastrosComoConheceu />}
+            {currentView === 'feriado' && <CadastrosFeriado />}
+            {currentView === 'grupos' && <CadastrosGrupos />}
+            {currentView === 'marcas' && <CadastrosMarcas />}
+            {currentView === 'equipamentos' && <CadastrosEquipamentos />}
+            {currentView === 'consulta_agendas' && <ConsultaAgendas />}
+            {currentView === 'consulta_analise' && <ConsultaAnalise />}
+            {currentView === 'comissao' && <ComissaoProfissional />}
+            {currentView === 'estoque' && <ProdutosEstoque />}
+            {currentView === 'pacotes' && <ConsultaPacotes initialClient={preSelectedClient} />}
+            {currentView === 'auditoria_anamnese' && <AuditoriaAnamnese />}
+            {currentView === 'orcamentos' && <ConsultaOrcamentos />}
+            {currentView === 'vendas' && <ConsultaVendas />}
+            {currentView === 'vendas_cliente' && <ConsultaVendasPorCliente />}
+            {currentView === 'dados_empresa' && <ConfiguracoesDadosEmpresa />}
+            {currentView === 'configuracao_geral' && <ConfiguracoesGeral />}
+            {currentView === 'alterar_senha' && <AlterarSenha />}
+            {currentView === 'nfs' && (
+              <NfsE 
+                preSelectedClient={preSelectedClient} 
+                preSelectedService={preSelectedService} 
+                onResetSelections={resetPreSelections} 
+              />
+            )}
+          </Suspense>
+        </ErrorBoundary>
       </Layout>
     );
   }
