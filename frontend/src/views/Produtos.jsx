@@ -72,7 +72,7 @@ export default function Produtos() {
   };
 
   const filteredServices = services.filter(s =>
-    s.name.toLowerCase().includes(search.toLowerCase())
+    (s.name || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (

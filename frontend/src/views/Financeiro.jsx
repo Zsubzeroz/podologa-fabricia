@@ -70,7 +70,7 @@ export default function Financeiro() {
   // Build unified view by adding sales as automatic revenue entries
   const salesEntries = vendas.map(v => ({
     id: `v-${v.id}`,
-    data: v.data.split('/').reverse().join('-'),
+    data: (v.data || '').includes('/') ? v.data.split('/').reverse().join('-') : (v.data || ''),
     descricao: `Venda - ${v.cliente}`,
     tipo: 'Receber',
     categoria: 'Atendimento',
@@ -81,8 +81,8 @@ export default function Financeiro() {
   const allEntries = [...financeiro, ...salesEntries];
 
   const filtered = allEntries.filter(entry =>
-    entry.descricao.toLowerCase().includes(search.toLowerCase())
-  ).sort((a, b) => new Date(b.data) - new Date(a.data));
+    (entry.descricao || '').toLowerCase().includes(search.toLowerCase())
+  ).sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
 
   // Dynamic calculations
   const totalReceitas = filtered.filter(f => f.tipo === 'Receber').reduce((acc, cur) => acc + cur.valor, 0);

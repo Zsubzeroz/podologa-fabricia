@@ -91,8 +91,8 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
   };
 
   const filtered = clientes.filter(c => 
-    c.nome.toLowerCase().includes(search.toLowerCase()) ||
-    c.contato.toLowerCase().includes(search.toLowerCase())
+    (c.nome || '').toLowerCase().includes(search.toLowerCase()) ||
+    (c.contato || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
