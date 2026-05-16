@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit, Check } from 'lucide-react';
-import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings, ServiceManager, ProfessionalManager } from '../utils/EntityManager';
+import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings, ServiceManager, ProfessionalManager, WorkingHours } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
   const [viewMode, setViewMode] = useState('Dia'); // 'Dia' ou 'Mês'
@@ -12,6 +12,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const [blockedDays, setBlockedDays] = useState(() => BlockedDaysManager.getAll());
   const [patientForms, setPatientForms] = useState([]);
   const [professionals, setProfessionals] = useState(() => ProfessionalManager.getAll());
+  const [workingHours, setWorkingHours] = useState(() => WorkingHours.get());
   const shareRef = useRef(null);
   
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
       const savedForms = window.localStorage.getItem('patient_forms');
       setPatientForms(savedForms ? JSON.parse(savedForms) : []);
       setProfessionals(ProfessionalManager.getAll());
+      setWorkingHours(WorkingHours.get());
     };
     window.addEventListener('dataSync', handleSync);
     window.addEventListener('storage', handleSync);
@@ -33,11 +35,19 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const getWorkHoursForDay = (dateObj) => {
     if (!dateObj) return { start: 8, end: 20 };
     const dow = dateObj.getDay();
+    
+    // Check for weekly recurring blocks for this specific day of week
+    const weeklyBlock = blockedDays.find(b => String(b.dayOfWeek) === String(dow) && b.type === 'Recorrente Semanal' && !b.startTime);
+    if (weeklyBlock) return { start: 0, end: 0, closed: true };
+
+    // Default behavior for Sunday
     if (dow === 0) return { start: 0, end: 0, closed: true };
-    if (dow === 1 || dow === 2 || dow === 3) return { start: 9, end: 20 };
-    if (dow === 4 || dow === 5) return { start: 8, end: 20 };
-    if (dow === 6) return { start: 8, end: 12 };
-    return { start: 8, end: 20 };
+    
+    // Use user-defined working hours
+    const start = parseInt(workingHours.start.split(':')[0], 10);
+    const end = parseInt(workingHours.end.split(':')[0], 10);
+    
+    return { start, end };
   };
 
   const workLimits = getWorkHoursForDay(currentDate);
