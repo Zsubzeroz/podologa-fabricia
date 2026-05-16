@@ -222,7 +222,6 @@ function App() {
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
             {currentView === 'dashboard' && <Dashboard setCurrentView={setCurrentView} />}
-            {/* ... rest of the switch ... */}
             {currentView === 'agenda' && (
               <Agenda 
                 appointments={appointments} 
