@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Plus, Search, Trash2, FileText, Printer, X, ClipboardList, Edit, Calendar, AlertCircle, Package } from 'lucide-react';
 import { ClientManager, PatientFormManager } from '../utils/EntityManager';
 
-export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes }) {
+export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes, setCurrentView, setPreSelectedClientName, setAutoOpenFormId }) {
   const [clientes, setClientes] = useState(() => ClientManager.getAll());
 
   const [showNewModal, setShowNewModal] = useState(false);
@@ -13,6 +13,34 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
   const [activeClient, setActiveClient] = useState(null);
   const [search, setSearch] = useState('');
   const [patientForms, setPatientForms] = useState(() => PatientFormManager.getAll());
+
+  const [editingClinicalInfo, setEditingClinicalInfo] = useState({
+    tamanhoPe: '',
+    doencas: '',
+    observacoesClinicas: ''
+  });
+
+  const handleOpenProntuario = (client) => {
+    setActiveClient(client);
+    setEditingClinicalInfo({
+      tamanhoPe: client.tamanhoPe || '',
+      doencas: client.doencas || '',
+      observacoesClinicas: client.observacoesClinicas || ''
+    });
+  };
+
+  const handleSaveClinicalInfo = () => {
+    const updatedClient = {
+      ...activeClient,
+      tamanhoPe: editingClinicalInfo.tamanhoPe,
+      doencas: editingClinicalInfo.doencas,
+      observacoesClinicas: editingClinicalInfo.observacoesClinicas
+    };
+    ClientManager.update(activeClient.id, updatedClient);
+    setActiveClient(updatedClient);
+    setClientes(ClientManager.getAll());
+    alert('Dados clínicos salvos com sucesso!');
+  };
   
   useEffect(() => {
     const handleSync = () => {
@@ -97,6 +125,228 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
     (c.nome || '').toLowerCase().includes(search.toLowerCase()) ||
     (c.contato || '').toLowerCase().includes(search.toLowerCase())
   );
+
+  if (activeClient) {
+    const clientForms = patientForms.filter(f => String(f.clientId) === String(activeClient.id));
+
+    return (
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+          <button 
+            onClick={() => setActiveClient(null)}
+            style={{ 
+              background: '#f3f4f6', 
+              color: '#374151', 
+              border: 'none', 
+              padding: '10px 18px', 
+              borderRadius: '8px', 
+              fontWeight: '700', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.9rem'
+            }}
+          >
+            ← Voltar para Clientes
+          </button>
+          
+          <h2 style={{ fontWeight: '800', color: '#111827', fontSize: '1.6rem', margin: 0 }}>
+            Prontuário Clínico: <span style={{ color: '#0f3d2e' }}>{activeClient.nome}</span>
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
+          {/* PAINEL ESQUERDO: DADOS E CONSULTA CLÍNICA */}
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', color: '#1f2937', fontWeight: 'bold', borderBottom: '2px solid #f3f4f6', paddingBottom: '8px' }}>
+              Ficha Clínica & Dados Pessoais
+            </h3>
+
+            {/* Dados Pessoais rápidos */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px', background: '#f9fafb', padding: '15px', borderRadius: '8px' }}>
+              <div>
+                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>CONTATO / WHATSAPP</span>
+                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.contato}</span>
+              </div>
+              <div>
+                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>CADASTRO</span>
+                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.data}</span>
+              </div>
+              <div style={{ gridColumn: 'span 2' }}>
+                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>E-MAIL</span>
+                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.email || 'Não informado'}</span>
+              </div>
+              <div style={{ gridColumn: 'span 2' }}>
+                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>ENDEREÇO</span>
+                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.endereco || 'Não informado'}</span>
+              </div>
+            </div>
+
+            {/* Especificações Clínicas */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>Tamanho do Pé</label>
+                <input 
+                  type="text" 
+                  value={editingClinicalInfo.tamanhoPe}
+                  onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tamanhoPe: e.target.value })}
+                  placeholder="Ex: 37, 38..."
+                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.95rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>Condições de Saúde / Patologias</label>
+                <input 
+                  type="text" 
+                  value={editingClinicalInfo.doencas}
+                  onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, doencas: e.target.value })}
+                  placeholder="Ex: Diabético, hipertensão, alergias..."
+                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.95rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>Observações Clínicas / Histórico do Pé</label>
+                <textarea 
+                  value={editingClinicalInfo.observacoesClinicas}
+                  onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, observacoesClinicas: e.target.value })}
+                  placeholder="Anote detalhes de cirurgias, calosidades recorrentes, tratamentos em andamento ou orientações passadas..."
+                  rows={6}
+                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.95rem', resize: 'vertical', fontFamily: 'inherit' }}
+                />
+              </div>
+
+              <button 
+                onClick={handleSaveClinicalInfo}
+                style={{ 
+                  backgroundColor: '#0f3d2e', 
+                  color: '#fff', 
+                  border: 'none', 
+                  padding: '12px 20px', 
+                  borderRadius: '8px', 
+                  fontWeight: '700', 
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  boxShadow: '0 4px 12px rgba(15,61,46,0.15)',
+                  marginTop: '10px'
+                }}
+              >
+                Salvar Prontuário Clínico
+              </button>
+            </div>
+          </div>
+
+          {/* PAINEL DIREITO: TIMELINE / HISTÓRICO DE ANAMNESE */}
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '2px solid #f3f4f6', paddingBottom: '8px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#1f2937', fontWeight: 'bold' }}>
+                Histórico de Fichas e Contratos
+              </h3>
+              <button 
+                onClick={() => {
+                  setPreSelectedClientName(activeClient.nome);
+                  setCurrentView('anamnese');
+                }}
+                style={{ 
+                  backgroundColor: '#fff', 
+                  color: '#0f3d2e', 
+                  border: '1px solid #0f3d2e', 
+                  padding: '6px 12px', 
+                  borderRadius: '6px', 
+                  fontWeight: '700', 
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Plus size={14} /> Nova Ficha
+              </button>
+            </div>
+
+            {clientForms.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6b7280' }}>
+                <ClipboardList size={40} style={{ margin: '0 auto 10px auto', opacity: 0.5 }} />
+                <p style={{ margin: 0, fontSize: '0.95rem' }}>Nenhuma ficha de anamnese ou contrato preenchido para este paciente.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '550px', overflowY: 'auto', paddingRight: '5px' }}>
+                {clientForms.map((form) => (
+                  <div key={form.id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                      <div>
+                        <h4 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', fontWeight: 'bold', color: '#111827' }}>
+                          {form.templateName}
+                        </h4>
+                        <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                          Data: {new Date(form.date).toLocaleDateString('pt-BR')} às {new Date(form.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <span style={{ 
+                        fontSize: '11px', 
+                        background: form.signature ? '#ecfdf5' : '#fef3c7', 
+                        color: form.signature ? '#047857' : '#d97706', 
+                        padding: '2px 8px', 
+                        borderRadius: '12px', 
+                        fontWeight: 'bold' 
+                      }}>
+                        {form.signature ? 'Assinado' : 'Pendente'}
+                      </span>
+                    </div>
+
+                    {/* Exibição das Fotos de antes e depois */}
+                    {(form.photoAntes || form.photoDepois) && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '5px' }}>
+                        {form.photoAntes && (
+                          <div style={{ textAlign: 'center' }}>
+                            <span style={{ display: 'block', fontSize: '10px', color: '#6b7280', fontWeight: '600', marginBottom: '2px' }}>Antes</span>
+                            <img src={form.photoAntes} alt="Antes" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e5e7eb' }} />
+                          </div>
+                        )}
+                        {form.photoDepois && (
+                          <div style={{ textAlign: 'center' }}>
+                            <span style={{ display: 'block', fontSize: '10px', color: '#6b7280', fontWeight: '600', marginBottom: '2px' }}>Depois</span>
+                            <img src={form.photoDepois} alt="Depois" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e5e7eb' }} />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '5px' }}>
+                      <button 
+                        onClick={() => {
+                          setAutoOpenFormId(form.id);
+                          setCurrentView('anamnese');
+                        }}
+                        style={{ 
+                          background: '#eff6ff', 
+                          color: '#2563eb', 
+                          border: 'none', 
+                          padding: '6px 12px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px', 
+                          fontWeight: 'bold', 
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Edit size={12} /> Visualizar / Editar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
@@ -195,6 +445,12 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
                     </td>
                     <td style={{ padding: '14px', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <button 
+                          onClick={() => handleOpenProntuario(c)}
+                          style={{ background: '#0f3d2e', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        >
+                          <ClipboardList size={14} /> PRONTUÁRIO
+                        </button>
                         <button 
                           onClick={() => onSchedule(c)}
                           style={{ background: '#fff', color: '#0f3d2e', border: '1px solid #0f3d2e', padding: '8px 14px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}

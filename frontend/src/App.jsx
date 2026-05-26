@@ -82,6 +82,8 @@ function App() {
   const [preSelectedTime, setPreSelectedTime] = useState('10:00');
   const [preSelectedClient, setPreSelectedClient] = useState(null);
   const [preSelectedService, setPreSelectedService] = useState(null);
+  const [preSelectedClientName, setPreSelectedClientName] = useState('');
+  const [autoOpenFormId, setAutoOpenFormId] = useState(null);
 
   const [authState, setAuthState] = useState(() => {
     const saved = window.localStorage.getItem('adminAuth');
@@ -289,9 +291,19 @@ function App() {
                   setPreSelectedClient(client.nome);
                   setCurrentView('pacotes');
                 }}
+                setCurrentView={setCurrentView}
+                setPreSelectedClientName={setPreSelectedClientName}
+                setAutoOpenFormId={setAutoOpenFormId}
               />
             )}
-            {currentView === 'anamnese' && <Anamnese />}
+            {currentView === 'anamnese' && (
+              <Anamnese 
+                preSelectedClientName={preSelectedClientName}
+                setPreSelectedClientName={setPreSelectedClientName}
+                autoOpenFormId={autoOpenFormId}
+                setAutoOpenFormId={setAutoOpenFormId}
+              />
+            )}
             {currentView === 'profissional' && <Profissional />}
             {currentView === 'lancamentos' && <Financeiro />}
             {currentView === 'meus_caixas' && <FinanceiroMeusCaixas />}

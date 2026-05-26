@@ -76,7 +76,7 @@ const SignaturePad = ({ onSave, onClear }) => {
   );
 };
 
-export default function Anamnese() {
+export default function Anamnese({ preSelectedClientName, setPreSelectedClientName, autoOpenFormId, setAutoOpenFormId }) {
   // Tabs: 'modelos' or 'pacientes'
   const [activeTab, setActiveTab] = useState('modelos');
 
@@ -102,6 +102,17 @@ export default function Anamnese() {
       window.removeEventListener('storage', handleSync);
     };
   }, []);
+
+  useEffect(() => {
+    if (autoOpenFormId) {
+      const form = patientForms.find(f => String(f.id) === String(autoOpenFormId));
+      if (form) {
+        setActiveTab('pacientes');
+        handleEditPatientForm(form);
+        if (setAutoOpenFormId) setAutoOpenFormId(null);
+      }
+    }
+  }, [autoOpenFormId, patientForms]);
 
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -384,8 +395,18 @@ export default function Anamnese() {
     setEditPatientFormId(null);
     setPhotoAntes(null);
     setPhotoDepois(null);
+    
+    let resolvedClientId = '';
+    if (preSelectedClientName) {
+      const match = clients.find(c => c.nome.toLowerCase() === preSelectedClientName.toLowerCase());
+      if (match) {
+        resolvedClientId = match.id;
+      }
+      if (setPreSelectedClientName) setPreSelectedClientName('');
+    }
+
     setFillData({
-      clientId: '',
+      clientId: resolvedClientId || '',
       templateId: templateId,
       conteudo: templateId ? fichas.find(f => f.id.toString() === templateId.toString())?.conteudo || '' : ''
     });
