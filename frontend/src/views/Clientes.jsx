@@ -15,31 +15,79 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
   const [patientForms, setPatientForms] = useState(() => PatientFormManager.getAll());
 
   const [editingClinicalInfo, setEditingClinicalInfo] = useState({
+    profissao: '',
+    dataNascimento: '',
+    genero: '',
+    cpf: '',
     tamanhoPe: '',
-    doencas: '',
-    observacoesClinicas: ''
+    calcadoPredominante: '',
+    tipoMeia: '',
+    praticaEsportes: '',
+    tabagista: '',
+    diabetes: '',
+    hipertensao: '',
+    circulacao: '',
+    alergias: '',
+    medicamentos: '',
+    cirurgias: '',
+    gestante: '',
+    sensibilidadeDor: '',
+    observacoesClinicas: '',
+    doencas: ''
   });
 
   const handleOpenProntuario = (client) => {
     setActiveClient(client);
     setEditingClinicalInfo({
+      profissao: client.profissao || '',
+      dataNascimento: client.dataNascimento || '',
+      genero: client.genero || '',
+      cpf: client.cpf || '',
       tamanhoPe: client.tamanhoPe || '',
-      doencas: client.doencas || '',
-      observacoesClinicas: client.observacoesClinicas || ''
+      calcadoPredominante: client.calcadoPredominante || '',
+      tipoMeia: client.tipoMeia || '',
+      praticaEsportes: client.praticaEsportes || '',
+      tabagista: client.tabagista || '',
+      diabetes: client.diabetes || '',
+      hipertensao: client.hipertensao || '',
+      circulacao: client.circulacao || '',
+      alergias: client.alergias || '',
+      medicamentos: client.medicamentos || '',
+      cirurgias: client.cirurgias || '',
+      gestante: client.gestante || '',
+      sensibilidadeDor: client.sensibilidadeDor || '',
+      observacoesClinicas: client.observacoesClinicas || '',
+      doencas: client.doencas || ''
     });
   };
 
   const handleSaveClinicalInfo = () => {
     const updatedClient = {
       ...activeClient,
+      profissao: editingClinicalInfo.profissao,
+      dataNascimento: editingClinicalInfo.dataNascimento,
+      genero: editingClinicalInfo.genero,
+      cpf: editingClinicalInfo.cpf,
       tamanhoPe: editingClinicalInfo.tamanhoPe,
-      doencas: editingClinicalInfo.doencas,
-      observacoesClinicas: editingClinicalInfo.observacoesClinicas
+      calcadoPredominante: editingClinicalInfo.calcadoPredominante,
+      tipoMeia: editingClinicalInfo.tipoMeia,
+      praticaEsportes: editingClinicalInfo.praticaEsportes,
+      tabagista: editingClinicalInfo.tabagista,
+      diabetes: editingClinicalInfo.diabetes,
+      hipertensao: editingClinicalInfo.hipertensao,
+      circulacao: editingClinicalInfo.circulacao,
+      alergias: editingClinicalInfo.alergias,
+      medicamentos: editingClinicalInfo.medicamentos,
+      cirurgias: editingClinicalInfo.cirurgias,
+      gestante: editingClinicalInfo.gestante,
+      sensibilidadeDor: editingClinicalInfo.sensibilidadeDor,
+      observacoesClinicas: editingClinicalInfo.observacoesClinicas,
+      doencas: editingClinicalInfo.doencas
     };
     ClientManager.update(activeClient.id, updatedClient);
     setActiveClient(updatedClient);
     setClientes(ClientManager.getAll());
-    alert('Dados clínicos salvos com sucesso!');
+    alert('Ficha clínica salva com sucesso!');
   };
   
   useEffect(() => {
@@ -158,84 +206,309 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
           {/* PAINEL ESQUERDO: DADOS E CONSULTA CLÍNICA */}
-          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', color: '#1f2937', fontWeight: 'bold', borderBottom: '2px solid #f3f4f6', paddingBottom: '8px' }}>
-              Ficha Clínica & Dados Pessoais
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', maxHeight: '720px', overflowY: 'auto' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1.2rem', color: '#1f2937', fontWeight: 'bold', borderBottom: '2px solid #f3f4f6', paddingBottom: '8px', position: 'sticky', top: 0, background: '#fff', zIndex: 10 }}>
+              Ficha Clínica do Paciente
             </h3>
 
-            {/* Dados Pessoais rápidos */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px', background: '#f9fafb', padding: '15px', borderRadius: '8px' }}>
-              <div>
-                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>CONTATO / WHATSAPP</span>
-                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.contato}</span>
-              </div>
-              <div>
-                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>CADASTRO</span>
-                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.data}</span>
-              </div>
-              <div style={{ gridColumn: 'span 2' }}>
-                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>E-MAIL</span>
-                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.email || 'Não informado'}</span>
-              </div>
-              <div style={{ gridColumn: 'span 2' }}>
-                <span style={{ display: 'block', fontSize: '11px', color: '#6b7280', fontWeight: 'bold' }}>ENDEREÇO</span>
-                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>{activeClient.endereco || 'Não informado'}</span>
+            {/* CARD 1: DADOS CADASTRAIS & PESSOAIS */}
+            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
+              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                1. Identificação e Contato
+              </h4>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Profissão</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.profissao}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, profissao: e.target.value })}
+                    placeholder="Ex: Vendedora, Professor..."
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Data de Nascimento</label>
+                  <input 
+                    type="date" 
+                    value={editingClinicalInfo.dataNascimento}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, dataNascimento: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Gênero</label>
+                  <select 
+                    value={editingClinicalInfo.genero}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, genero: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>CPF</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.cpf}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, cpf: e.target.value })}
+                    placeholder="000.000.000-00"
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>WhatsApp / Contato</label>
+                  <input 
+                    type="text" 
+                    value={activeClient.contato}
+                    disabled
+                    style={{ padding: '8px 10px', border: '1px solid #e5e7eb', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.85rem', color: '#9ca3af' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>E-mail</label>
+                  <input 
+                    type="text" 
+                    value={activeClient.email || 'Não informado'}
+                    disabled
+                    style={{ padding: '8px 10px', border: '1px solid #e5e7eb', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.85rem', color: '#9ca3af' }}
+                  />
+                </div>
+                <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Endereço</label>
+                  <input 
+                    type="text" 
+                    value={activeClient.endereco || 'Não informado'}
+                    disabled
+                    style={{ padding: '8px 10px', border: '1px solid #e5e7eb', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.85rem', color: '#9ca3af' }}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Especificações Clínicas */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>Tamanho do Pé</label>
-                <input 
-                  type="text" 
-                  value={editingClinicalInfo.tamanhoPe}
-                  onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tamanhoPe: e.target.value })}
-                  placeholder="Ex: 37, 38..."
-                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.95rem' }}
-                />
+            {/* CARD 2: HÁBITOS E ESTILO DE VIDA */}
+            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
+              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                2. Calçados, Meias e Hábitos
+              </h4>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tamanho do Pé</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.tamanhoPe}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tamanhoPe: e.target.value })}
+                    placeholder="Ex: 37"
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tipo de Calçado mais usado</label>
+                  <select 
+                    value={editingClinicalInfo.calcadoPredominante}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, calcadoPredominante: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Fechado">Fechado (Sapato/Tênis)</option>
+                    <option value="Aberto">Aberto (Sandália/Chinelo)</option>
+                    <option value="Salto Alto">Salto Alto</option>
+                    <option value="Bota de Segurança">Bota de Segurança (EPI)</option>
+                    <option value="Esportivo">Esportivo</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tipo de Meia mais usada</label>
+                  <select 
+                    value={editingClinicalInfo.tipoMeia}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tipoMeia: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Algodão">Algodão</option>
+                    <option value="Sintética">Sintética</option>
+                    <option value="Sem Meia">Sem Meia</option>
+                    <option value="Lã / Outro">Lã / Outro</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Pratica Esportes?</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.praticaEsportes}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, praticaEsportes: e.target.value })}
+                    placeholder="Não / Sim (qual?)"
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Fumante (Tabagista)?</label>
+                  <select 
+                    value={editingClinicalInfo.tabagista}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tabagista: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                  </select>
+                </div>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>Condições de Saúde / Patologias</label>
-                <input 
-                  type="text" 
-                  value={editingClinicalInfo.doencas}
-                  onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, doencas: e.target.value })}
-                  placeholder="Ex: Diabético, hipertensão, alergias..."
-                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.95rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>Observações Clínicas / Histórico do Pé</label>
-                <textarea 
-                  value={editingClinicalInfo.observacoesClinicas}
-                  onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, observacoesClinicas: e.target.value })}
-                  placeholder="Anote detalhes de cirurgias, calosidades recorrentes, tratamentos em andamento ou orientações passadas..."
-                  rows={6}
-                  style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.95rem', resize: 'vertical', fontFamily: 'inherit' }}
-                />
-              </div>
-
-              <button 
-                onClick={handleSaveClinicalInfo}
-                style={{ 
-                  backgroundColor: '#0f3d2e', 
-                  color: '#fff', 
-                  border: 'none', 
-                  padding: '12px 20px', 
-                  borderRadius: '8px', 
-                  fontWeight: '700', 
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 12px rgba(15,61,46,0.15)',
-                  marginTop: '10px'
-                }}
-              >
-                Salvar Prontuário Clínico
-              </button>
             </div>
+
+            {/* CARD 3: HISTÓRICO DE SAÚDE & PATOLOGIAS */}
+            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
+              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                3. Condições Clínicas e Patologias
+              </h4>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Diabetes</label>
+                  <select 
+                    value={editingClinicalInfo.diabetes}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, diabetes: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Não possui">Não possui</option>
+                    <option value="Diabetes Tipo 1">Diabetes Tipo 1</option>
+                    <option value="Diabetes Tipo 2">Diabetes Tipo 2</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Hipertensão</label>
+                  <select 
+                    value={editingClinicalInfo.hipertensao}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, hipertensao: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Circulação / Varizes</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.circulacao}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, circulacao: e.target.value })}
+                    placeholder="Ex: Varizes, Trombose..."
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Sensibilidade a Dor</label>
+                  <select 
+                    value={editingClinicalInfo.sensibilidadeDor}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, sensibilidadeDor: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Alta (Sensível)">Alta (Sensível)</option>
+                    <option value="Baixa (Pouco Sensível)">Baixa (Pouco Sensível)</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Alergias (Medicamentos, látex, etc.)</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.alergias}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, alergias: e.target.value })}
+                    placeholder="Ex: Alergia a iodo, esparadrapo, etc. ou 'Não'"
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Medicamentos de Uso Contínuo</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.medicamentos}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, medicamentos: e.target.value })}
+                    placeholder="Ex: Anticoagulante, Insulina, etc."
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Cirurgias Prévias (Especialmente membros inferiores)</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.cirurgias}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, cirurgias: e.target.value })}
+                    placeholder="Sim (quais?) / Não"
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Gestante / Lactante?</label>
+                  <select 
+                    value={editingClinicalInfo.gestante}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, gestante: e.target.value })}
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Não">Não</option>
+                    <option value="Sim">Sim</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Outras Patologias</label>
+                  <input 
+                    type="text" 
+                    value={editingClinicalInfo.doencas}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, doencas: e.target.value })}
+                    placeholder="Ex: HIV, Hepatite, Hanseníase, Renal..."
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 4: OBSERVAÇÕES CLÍNICAS */}
+            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
+              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                4. Observações Clínicas Gerais
+              </h4>
+              <textarea 
+                value={editingClinicalInfo.observacoesClinicas}
+                onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, observacoesClinicas: e.target.value })}
+                placeholder="Anotações livres sobre a evolução clínica do paciente, recomendações ou particularidades de atendimento..."
+                rows={4}
+                style={{ width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <button 
+              onClick={handleSaveClinicalInfo}
+              style={{ 
+                backgroundColor: '#0f3d2e', 
+                color: '#fff', 
+                border: 'none', 
+                padding: '12px 20px', 
+                borderRadius: '8px', 
+                fontWeight: '700', 
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                boxShadow: '0 4px 12px rgba(15,61,46,0.15)',
+                width: '100%',
+                display: 'block',
+                textAlign: 'center',
+                boxSizing: 'border-box',
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 10
+              }}
+            >
+              Salvar Ficha Clínica do Paciente
+            </button>
           </div>
 
           {/* PAINEL DIREITO: TIMELINE / HISTÓRICO DE ANAMNESE */}
