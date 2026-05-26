@@ -712,46 +712,18 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
                         });
                       }}
                     >
-                      {/* SVG outlines of left and right feet plantar view */}
-                      <svg width="220" height="240" viewBox="0 0 220 240" style={{ pointerEvents: 'none' }}>
-                        {/* Left Foot */}
-                        <path 
-                          d="M 60,220 C 45,220 38,205 38,180 C 38,155 35,130 35,100 C 35,75 22,70 22,58 C 22,50 35,46 55,48 C 70,50 95,52 95,70 C 95,100 80,125 80,155 C 80,185 75,220 60,220 Z" 
-                          fill="#f3f4f6" 
-                          stroke="#9ca3af" 
-                          strokeWidth="2" 
-                        />
-                        {/* Left Foot Creases */}
-                        <path d="M 30,85 Q 58,92 88,82" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
-                        <path d="M 42,182 Q 60,176 75,182" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
-
-                        {/* Left Toes */}
-                        <circle cx="83" cy="38" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="68" cy="36" r="9" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="53" cy="37" r="8" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="39" cy="42" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="27" cy="50" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <text x="25" y="235" fontSize="8" fontWeight="bold" fill="#9ca3af">PÉ ESQUERDO</text>
-
-                        {/* Right Foot */}
-                        <path 
-                          d="M 160,220 C 175,220 182,205 182,180 C 182,155 185,130 185,100 C 185,75 198,70 198,58 C 198,50 165,46 165,48 C 150,50 125,52 125,70 C 125,100 140,125 140,155 C 140,185 145,220 160,220 Z" 
-                          fill="#f3f4f6" 
-                          stroke="#9ca3af" 
-                          strokeWidth="2" 
-                        />
-                        {/* Right Foot Creases */}
-                        <path d="M 190,85 Q 162,92 132,82" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
-                        <path d="M 178,182 Q 160,176 145,182" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
-
-                        {/* Right Toes */}
-                        <circle cx="137" cy="38" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="152" cy="36" r="9" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="167" cy="37" r="8" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="181" cy="42" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="193" cy="50" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <text x="135" y="235" fontSize="8" fontWeight="bold" fill="#9ca3af">PÉ DIREITO</text>
-                      </svg>
+                      {/* Professional anatomical foot soles image from public folder */}
+                      <img 
+                        src="/pes_anamnese.png" 
+                        alt="Mapeamento Plantar dos Pés" 
+                        style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          objectFit: 'contain', 
+                          pointerEvents: 'none',
+                          userSelect: 'none'
+                        }} 
+                      />
 
                       {/* Display active foot markers */}
                       {(editingClinicalInfo.footMarkers || []).map(marker => (
