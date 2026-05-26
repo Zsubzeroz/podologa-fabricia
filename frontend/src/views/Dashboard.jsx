@@ -11,11 +11,13 @@ export default function Dashboard({ setCurrentView }) {
   });
 
   useEffect(() => {
-    const today = new Date().toDateString();
+    const todayObj = new Date();
+    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+    
     const todayAppointments = AppointmentManager.getAll().filter(a => {
       if (!a.date && !a.data) return false;
-      const apptDate = new Date(a.date || a.data).toDateString();
-      return apptDate === today;
+      const apptDateStr = a.date || a.data;
+      return apptDateStr === todayStr;
     });
 
     setStats({
