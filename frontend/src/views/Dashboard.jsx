@@ -11,21 +11,43 @@ export default function Dashboard({ setCurrentView }) {
   });
 
   useEffect(() => {
-    const todayObj = new Date();
-    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
-    
-    const todayAppointments = AppointmentManager.getAll().filter(a => {
-      if (!a.date && !a.data) return false;
-      const apptDateStr = a.date || a.data;
-      return apptDateStr === todayStr;
-    });
+    const loadStats = () => {
+      const todayObj = new Date();
+      const y = todayObj.getFullYear();
+      const m = String(todayObj.getMonth() + 1).padStart(2, '0');
+      const d = String(todayObj.getDate()).padStart(2, '0');
+      const todayStrYMD = `${y}-${m}-${d}`;
+      const todayStrDMY = `${d}/${m}/${y}`;
+      
+      const todayAppointments = AppointmentManager.getAll().filter(a => {
+        if (!a.date && !a.data) return false;
+        const apptDateStr = (a.date || a.data).toString().trim();
+        const norm = apptDateStr.split('T')[0].split(' ')[0];
+        return norm === todayStrYMD || norm === todayStrDMY || apptDateStr.includes(todayStrYMD) || apptDateStr.includes(todayStrDMY);
+      });
 
-    setStats({
-      appointments: todayAppointments.length,
-      services: ServiceManager.getAll().length,
-      clients: ClientManager.getAll().length,
-      sales: SaleManager.getAll().filter(s => s && (s.status || 'PAGO') === 'PAGO').reduce((acc, s) => acc + Number(s.total || s.valor || 0), 0)
-    });
+      setStats({
+        appointments: todayAppointments.length,
+        services: ServiceManager.getAll().length,
+        clients: ClientManager.getAll().length,
+        sales: SaleManager.getAll().filter(s => s && (s.status || 'PAGO') === 'PAGO').reduce((acc, s) => acc + Number(s.total || s.valor || 0), 0)
+      });
+    };
+
+    loadStats();
+
+    // Listen to sync and storage events for real-time updates
+    window.addEventListener('dataSync', loadStats);
+    window.addEventListener('storage', loadStats);
+
+    // Periodic refresh every 3 seconds to keep it fully in sync
+    const interval = setInterval(loadStats, 3000);
+
+    return () => {
+      window.removeEventListener('dataSync', loadStats);
+      window.removeEventListener('storage', loadStats);
+      clearInterval(interval);
+    };
   }, []);
 
   const quickActions = [

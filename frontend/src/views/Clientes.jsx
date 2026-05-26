@@ -33,6 +33,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
     data: '',
     contato: '',
     email: '',
+    endereco: '',
     status: 'ATIVO'
   });
 
@@ -54,6 +55,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
       data: formData.data || today,
       contato: formData.contato,
       email: formData.email,
+      endereco: formData.endereco || '',
       status: formData.status || 'ATIVO'
     };
 
@@ -64,7 +66,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
     }
     
     setClientes(ClientManager.getAll());
-    setFormData({ nome: '', data: '', contato: '', email: '', status: 'ATIVO' });
+    setFormData({ nome: '', data: '', contato: '', email: '', endereco: '', status: 'ATIVO' });
     setIsEditing(false);
     setEditId(null);
     setShowNewModal(false);
@@ -76,6 +78,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
       data: cliente.data,
       contato: cliente.contato,
       email: cliente.email || '',
+      endereco: cliente.endereco || '',
       status: cliente.status || 'ATIVO'
     });
     setEditId(cliente.id);
@@ -283,6 +286,17 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes 
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 placeholder="cliente@email.com"
+                style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '13px', fontWeight: '600' }}>Endereço</label>
+              <input 
+                type="text" 
+                value={formData.endereco || ''}
+                onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+                placeholder="Rua, Número, Bairro, Cidade - UF"
                 style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px' }}
               />
             </div>

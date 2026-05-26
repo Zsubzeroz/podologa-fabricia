@@ -111,6 +111,152 @@ export default function Anamnese() {
   const [editId, setEditId] = useState(null);
   const [printItem, setPrintItem] = useState(null);
 
+  // States for editing patient forms and photos
+  const [isEditingPatientForm, setIsEditingPatientForm] = useState(false);
+  const [editPatientFormId, setEditPatientFormId] = useState(null);
+  const [photoAntes, setPhotoAntes] = useState(null);
+  const [photoDepois, setPhotoDepois] = useState(null);
+
+  const handlePhotoUpload = (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 600;
+        const MAX_HEIGHT = 450;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Compress to 60% quality jpeg
+        if (type === 'antes') {
+          setPhotoAntes(dataUrl);
+        } else {
+          setPhotoDepois(dataUrl);
+        }
+      };
+    };
+  };
+
+  const handleEditPatientForm = (form) => {
+    setIsEditingPatientForm(true);
+    setEditPatientFormId(form.id);
+    setFillData({
+      clientId: form.clientId,
+      templateId: form.templateId,
+      conteudo: form.conteudo
+    });
+    if (form.rawStructuredData) {
+      setStructuredData(form.rawStructuredData);
+    } else {
+      setStructuredData({
+        calcado: 'Fechado',
+        calcadoNum: '',
+        meia: 'Algodão',
+        cirurgia: 'NÃO',
+        cirurgiaDesc: '',
+        esportes: 'NÃO',
+        esportesDesc: '',
+        medicamento: 'NÃO',
+        medicamentoDesc: '',
+        gestante: 'NÃO',
+        gestanteSemanas: '',
+        sensibilidade: 'NÃO',
+        sensibilidadeDesc: '',
+        patologias: {
+          fissuras: false,
+          hiperidrose: false,
+          desidrose: false,
+          bromidose: false,
+          hiperqueratose: false,
+          psoriase: false,
+          tineaPedis: false,
+          tineaInterdigital: false,
+          onicomicose: false,
+          onicocriptose: false,
+          onicofose: false,
+          exostose: false,
+          granuloma: false,
+          verruga: false,
+          calo: false,
+          calosidade: false
+        },
+        formatoUngueal: 'Normal',
+        obsPD: '',
+        obsPE: '',
+        procedimento: '',
+        testes: {
+          perfusao: 'Normal', perfusaoPD: '', perfusaoPE: '',
+          digitoPressao: 'Normal', digitoPressaoPD: '', digitoPressaoPE: '',
+          monofilamento: 'Normal', monofilamentoPD: '', monofilamentoPE: '',
+          pulso: 'Presente', pulsoPD: '', pulsoPE: '',
+          tibial: 'Presente', tibialPD: '', tibialPE: ''
+        },
+        assinatura: form.signature || null
+      });
+    }
+    setPhotoAntes(form.photoAntes || null);
+    setPhotoDepois(form.photoDepois || null);
+    setShowFillModal(true);
+  };
+
+  const renderPhotoUploadSection = () => (
+    <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+      <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>FOTOS DO CASO / PATOLOGIA (Antes e Depois)</h5>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', border: '1px dashed #ccc', padding: '12px', borderRadius: '8px', background: '#fcfcfc', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151' }}>FOTO ANTES (Início do Tratamento)</span>
+          {photoAntes ? (
+            <div style={{ position: 'relative', width: '100%', textAlign: 'center' }}>
+              <img src={photoAntes} alt="Antes" style={{ maxWidth: '100%', maxHeight: '120px', borderRadius: '4px', objectFit: 'contain' }} />
+              <button type="button" onClick={() => setPhotoAntes(null)} style={{ marginTop: '5px', display: 'block', margin: '5px auto 0', padding: '2px 8px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Remover</button>
+            </div>
+          ) : (
+            <div style={{ width: '100%', textAlign: 'center' }}>
+              <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e, 'antes')} style={{ display: 'none' }} id="upload-antes" />
+              <label htmlFor="upload-antes" style={{ display: 'inline-block', padding: '6px 12px', background: '#0f3d2e', color: 'white', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>Selecionar Foto</label>
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', border: '1px dashed #ccc', padding: '12px', borderRadius: '8px', background: '#fcfcfc', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151' }}>FOTO DEPOIS (Resultado)</span>
+          {photoDepois ? (
+            <div style={{ position: 'relative', width: '100%', textAlign: 'center' }}>
+              <img src={photoDepois} alt="Depois" style={{ maxWidth: '100%', maxHeight: '120px', borderRadius: '4px', objectFit: 'contain' }} />
+              <button type="button" onClick={() => setPhotoDepois(null)} style={{ marginTop: '5px', display: 'block', margin: '5px auto 0', padding: '2px 8px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Remover</button>
+            </div>
+          ) : (
+            <div style={{ width: '100%', textAlign: 'center' }}>
+              <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e, 'depois')} style={{ display: 'none' }} id="upload-depois" />
+              <label htmlFor="upload-depois" style={{ display: 'inline-block', padding: '6px 12px', background: '#0f3d2e', color: 'white', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>Selecionar Foto</label>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+
   // Template Form State
   const [formData, setFormData] = useState({
     nome: '',
@@ -234,10 +380,59 @@ export default function Anamnese() {
   };
 
   const handleOpenFillModal = (templateId = '') => {
+    setIsEditingPatientForm(false);
+    setEditPatientFormId(null);
+    setPhotoAntes(null);
+    setPhotoDepois(null);
     setFillData({
       clientId: '',
       templateId: templateId,
       conteudo: templateId ? fichas.find(f => f.id.toString() === templateId.toString())?.conteudo || '' : ''
+    });
+    setStructuredData({
+      calcado: 'Fechado',
+      calcadoNum: '',
+      meia: 'Algodão',
+      cirurgia: 'NÃO',
+      cirurgiaDesc: '',
+      esportes: 'NÃO',
+      esportesDesc: '',
+      medicamento: 'NÃO',
+      medicamentoDesc: '',
+      gestante: 'NÃO',
+      gestanteSemanas: '',
+      sensibilidade: 'NÃO',
+      sensibilidadeDesc: '',
+      patologias: {
+        fissuras: false,
+        hiperidrose: false,
+        desidrose: false,
+        bromidose: false,
+        hiperqueratose: false,
+        psoriase: false,
+        tineaPedis: false,
+        tineaInterdigital: false,
+        onicomicose: false,
+        onicocriptose: false,
+        onicofose: false,
+        exostose: false,
+        granuloma: false,
+        verruga: false,
+        calo: false,
+        calosidade: false
+      },
+      formatoUngueal: 'Normal',
+      obsPD: '',
+      obsPE: '',
+      procedimento: '',
+      testes: {
+        perfusao: 'Normal', perfusaoPD: '', perfusaoPE: '',
+        digitoPressao: 'Normal', digitoPressaoPD: '', digitoPressaoPE: '',
+        monofilamento: 'Normal', monofilamentoPD: '', monofilamentoPE: '',
+        pulso: 'Presente', pulsoPD: '', pulsoPE: '',
+        tibial: 'Presente', tibialPD: '', tibialPE: ''
+      },
+      assinatura: null
     });
     setShowFillModal(true);
   };
@@ -336,6 +531,8 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
       ? compileStructuredToText() 
       : fillData.conteudo;
 
+    const existingForm = isEditingPatientForm ? patientForms.find(f => f.id === editPatientFormId) : null;
+
     const newForm = {
       clientId: fillData.clientId,
       clientName: client ? client.nome : 'Desconhecido',
@@ -343,13 +540,24 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
       templateName: template ? template.nome : 'Desconhecido',
       conteudo: finalConteudo,
       signature: structuredData.assinatura || null,
-      date: new Date().toISOString()
+      photoAntes: photoAntes || null,
+      photoDepois: photoDepois || null,
+      rawStructuredData: isAnamnesis ? structuredData : null,
+      date: existingForm ? existingForm.date : new Date().toISOString()
     };
 
-    PatientFormManager.add(newForm);
+    if (isEditingPatientForm) {
+      PatientFormManager.update(editPatientFormId, newForm);
+      SecurityManager.log('Ficha de Paciente Alterada', newForm.clientName, `Documento: ${newForm.templateName}`);
+    } else {
+      PatientFormManager.add(newForm);
+      SecurityManager.log('Nova Ficha de Paciente', newForm.clientName, `Documento: ${newForm.templateName}`);
+    }
+
     setPatientForms(PatientFormManager.getAll());
-    SecurityManager.log('Nova Ficha de Paciente', newForm.clientName, `Documento: ${newForm.templateName}`);
     setShowFillModal(false);
+    setIsEditingPatientForm(false);
+    setEditPatientFormId(null);
   };
 
   const handleOpenPrintModal = (item, isPatientForm = false) => {
@@ -511,6 +719,7 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                       <td style={{ padding: '14px', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                           <button onClick={() => handleOpenPrintModal(form, true)} title="Ver e Imprimir" style={{ padding: '6px', cursor: 'pointer', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px' }}><Printer size={14} /></button>
+                          <button onClick={() => handleEditPatientForm(form)} title="Editar Ficha" style={{ padding: '6px', cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px' }}><Edit size={14} /></button>
                           <button onClick={() => handleDeletePatientForm(form.id)} title="Excluir Ficha" style={{ padding: '6px', cursor: 'pointer', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px' }}><Trash2 size={14} /></button>
                         </div>
                       </td>
@@ -764,6 +973,8 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                     </div>
                   </div>
 
+                  {renderPhotoUploadSection()}
+
                   {/* Signature Section */}
                   <div>
                     <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>ASSINATURA DO PACIENTE (Tablet)</h5>
@@ -786,6 +997,8 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                     onChange={(e) => setFillData({...fillData, conteudo: e.target.value})} 
                     style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', minHeight: '300px', fontFamily: 'monospace' }} 
                   />
+                  {renderPhotoUploadSection()}
+
                   <div>
                     <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>ASSINATURA DO PACIENTE (Tablet)</h5>
                     <SignaturePad 
@@ -830,12 +1043,19 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                 {printItem.isPatientForm ? printItem.templateName : printItem.nome}
               </h2>
 
-              {printItem.isPatientForm && (
-                <div style={{ marginBottom: '20px', padding: '10px', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                  <p style={{ margin: '0 0 4px 0' }}><strong>Paciente:</strong> {printItem.clientName}</p>
-                  <p style={{ margin: 0 }}><strong>Data do Registro:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
-                </div>
-              )}
+              {(() => {
+                const pClient = printItem.isPatientForm 
+                  ? clients.find(c => c.id.toString() === printItem.clientId.toString())
+                  : null;
+                return printItem.isPatientForm && (
+                  <div style={{ marginBottom: '20px', padding: '10px', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>Paciente:</strong> {printItem.clientName}</p>
+                    {pClient && pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
+                    {pClient && pClient.endereco && <p style={{ margin: '0 0 4px 0' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
+                    <p style={{ margin: 0 }}><strong>Data do Registro:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                );
+              })()}
 
               <div style={{ lineHeight: '1.6' }}>
                 {printItem.conteudo || 'Este documento não possui conteúdo.'}
@@ -856,6 +1076,23 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                   <div style={{ borderTop: '1px solid #000', width: '200px', textAlign: 'center', fontSize: '11px', paddingTop: '5px' }}>
                     ASSINATURA DO PROFISSIONAL
                   </div>
+                </div>
+              )}
+
+              {(printItem.photoAntes || printItem.photoDepois) && (
+                <div style={{ marginTop: '30px', display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
+                  {printItem.photoAntes && (
+                    <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '11px', fontWeight: 'bold' }}>ANTES</p>
+                      <img src={printItem.photoAntes} alt="Antes" style={{ maxWidth: '280px', maxHeight: '200px', objectFit: 'contain' }} />
+                    </div>
+                  )}
+                  {printItem.photoDepois && (
+                    <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '11px', fontWeight: 'bold' }}>DEPOIS</p>
+                      <img src={printItem.photoDepois} alt="Depois" style={{ maxWidth: '280px', maxHeight: '200px', objectFit: 'contain' }} />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -918,16 +1155,40 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
               {printItem.isPatientForm ? printItem.templateName : printItem.nome}
             </h2>
 
-            {printItem.isPatientForm && (
-              <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #000' }}>
-                <p style={{ margin: '0 0 5px 0' }}><strong>Paciente:</strong> {printItem.clientName}</p>
-                <p style={{ margin: 0 }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
-              </div>
-            )}
+            {(() => {
+              const pClient = printItem.isPatientForm 
+                ? clients.find(c => c.id.toString() === printItem.clientId.toString())
+                : null;
+              return printItem.isPatientForm && (
+                <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #000' }}>
+                  <p style={{ margin: '0 0 5px 0' }}><strong>Paciente:</strong> {printItem.clientName}</p>
+                  {pClient && pClient.contato && <p style={{ margin: '0 0 5px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
+                  {pClient && pClient.endereco && <p style={{ margin: '0 0 5px 0' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
+                  <p style={{ margin: 0 }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                </div>
+              );
+            })()}
 
             <div style={{ minHeight: '300px' }}>
               {printItem.conteudo}
             </div>
+
+            {(printItem.photoAntes || printItem.photoDepois) && (
+              <div style={{ marginTop: '30px', display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '30px' }}>
+                {printItem.photoAntes && (
+                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 5px 0', fontSize: '11px', fontWeight: 'bold' }}>ANTES</p>
+                    <img src={printItem.photoAntes} alt="Antes" style={{ maxWidth: '280px', maxHeight: '200px', objectFit: 'contain' }} />
+                  </div>
+                )}
+                {printItem.photoDepois && (
+                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 5px 0', fontSize: '11px', fontWeight: 'bold' }}>DEPOIS</p>
+                    <img src={printItem.photoDepois} alt="Depois" style={{ maxWidth: '280px', maxHeight: '200px', objectFit: 'contain' }} />
+                  </div>
+                )}
+              </div>
+            )}
 
             {printItem.nome === 'FICHA DE ANAMNESE E AVALIAÇÃO FÍSICA' && (
               <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', gap: '40px' }}>

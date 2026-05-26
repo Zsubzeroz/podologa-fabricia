@@ -219,6 +219,25 @@ export default function ConfiguracoesGeral() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151' }}>EMAILJS SERVICE ID</label>
+                <input type="text" value={config.emailServiceId || ''} onChange={(e) => handleChange('emailServiceId', e.target.value)} placeholder="ex: service_xxxx" style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151' }}>EMAILJS TEMPLATE ID</label>
+                <input type="text" value={config.emailTemplateId || ''} onChange={(e) => handleChange('emailTemplateId', e.target.value)} placeholder="ex: template_xxxx" style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151' }}>EMAILJS PUBLIC KEY</label>
+                <input type="text" value={config.emailPublicKey || ''} onChange={(e) => handleChange('emailPublicKey', e.target.value)} placeholder="ex: xxxxxxx-xxxxxxxx" style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#374151' }}>SEU E-MAIL (NOTIFICAÇÃO CLINICA)</label>
+                <input type="email" value={config.emailNotificacaoAdmin || ''} onChange={(e) => handleChange('emailNotificacaoAdmin', e.target.value)} placeholder="ex: fabriciapodologa@gmail.com" style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px' }} />
+              </div>
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#374151', marginBottom: '12px', textTransform: 'uppercase' }}>

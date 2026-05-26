@@ -175,7 +175,7 @@ export default function ConsultaVendas() {
                 <tr key={v.id}>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#6b7280' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Calendar size={14} /> {v.data}
+                      <FileText size={14} /> {v.data}
                     </div>
                   </td>
                   <td style={{ padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#111827', fontWeight: '600' }}>{v.cliente}</td>
@@ -205,7 +205,6 @@ export default function ConsultaVendas() {
                   </td>
                 </tr>
               ))}
- ))}
               {filteredVendas.length === 0 && (
                 <tr>
                   <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>Nenhuma venda encontrada.</td>
