@@ -11,6 +11,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
   const [showPrintModal, setShowPrintModal] = useState(false);
 
   const [activeClient, setActiveClient] = useState(null);
+  const [prontuarioActiveTab, setProntuarioActiveTab] = useState('identificacao');
   const [search, setSearch] = useState('');
   const [patientForms, setPatientForms] = useState(() => PatientFormManager.getAll());
 
@@ -19,43 +20,74 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
     dataNascimento: '',
     genero: '',
     cpf: '',
+    nome: '',
+    contato: '',
+    email: '',
+    endereco: '',
+    contatoEmergenciaNome: '',
+    contatoEmergenciaTelefone: '',
+    diabetes: '',
+    hipertensao: '',
+    circulacao: '',
+    marcaPasso: '',
+    cardiopatia: '',
+    gestante: '',
+    alergias: '',
+    medicamentos: '',
     tamanhoPe: '',
     calcadoPredominante: '',
     tipoMeia: '',
     praticaEsportes: '',
     tabagista: '',
-    diabetes: '',
-    hipertensao: '',
-    circulacao: '',
-    alergias: '',
-    medicamentos: '',
-    cirurgias: '',
-    gestante: '',
-    sensibilidadeDor: '',
+    unhasOnicocriptose: false,
+    unhasOnicomicose: false,
+    unhasOnicogrifose: false,
+    peleCalos: false,
+    peleCalosidades: false,
+    peleFissuras: false,
+    peleVerrugaPlantar: false,
+    peleTineaPedis: false,
+    footMarkers: [],
     observacoesClinicas: '',
     doencas: ''
   });
 
   const handleOpenProntuario = (client) => {
     setActiveClient(client);
+    setProntuarioActiveTab('identificacao');
     setEditingClinicalInfo({
       profissao: client.profissao || '',
       dataNascimento: client.dataNascimento || '',
       genero: client.genero || '',
       cpf: client.cpf || '',
+      nome: client.nome || '',
+      contato: client.contato || '',
+      email: client.email || '',
+      endereco: client.endereco || '',
+      contatoEmergenciaNome: client.contatoEmergenciaNome || '',
+      contatoEmergenciaTelefone: client.contatoEmergenciaTelefone || '',
+      diabetes: client.diabetes || '',
+      hipertensao: client.hipertensao || '',
+      circulacao: client.circulacao || '',
+      marcaPasso: client.marcaPasso || '',
+      cardiopatia: client.cardiopatia || '',
+      gestante: client.gestante || '',
+      alergias: client.alergias || '',
+      medicamentos: client.medicamentos || '',
       tamanhoPe: client.tamanhoPe || '',
       calcadoPredominante: client.calcadoPredominante || '',
       tipoMeia: client.tipoMeia || '',
       praticaEsportes: client.praticaEsportes || '',
       tabagista: client.tabagista || '',
-      diabetes: client.diabetes || '',
-      hipertensao: client.hipertensao || '',
-      circulacao: client.circulacao || '',
-      alergias: client.alergias || '',
-      medicamentos: client.medicamentos || '',
-      cirurgias: client.cirurgias || '',
-      gestante: client.gestante || '',
-      sensibilidadeDor: client.sensibilidadeDor || '',
+      unhasOnicocriptose: client.unhasOnicocriptose || false,
+      unhasOnicomicose: client.unhasOnicomicose || false,
+      unhasOnicogrifose: client.unhasOnicogrifose || false,
+      peleCalos: client.peleCalos || false,
+      peleCalosidades: client.peleCalosidades || false,
+      peleFissuras: client.peleFissuras || false,
+      peleVerrugaPlantar: client.peleVerrugaPlantar || false,
+      peleTineaPedis: client.peleTineaPedis || false,
+      footMarkers: client.footMarkers || [],
       observacoesClinicas: client.observacoesClinicas || '',
       doencas: client.doencas || ''
     });
@@ -64,30 +96,45 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
   const handleSaveClinicalInfo = () => {
     const updatedClient = {
       ...activeClient,
+      nome: editingClinicalInfo.nome,
+      contato: editingClinicalInfo.contato,
+      email: editingClinicalInfo.email,
+      endereco: editingClinicalInfo.endereco,
       profissao: editingClinicalInfo.profissao,
       dataNascimento: editingClinicalInfo.dataNascimento,
       genero: editingClinicalInfo.genero,
       cpf: editingClinicalInfo.cpf,
+      contatoEmergenciaNome: editingClinicalInfo.contatoEmergenciaNome,
+      contatoEmergenciaTelefone: editingClinicalInfo.contatoEmergenciaTelefone,
+      diabetes: editingClinicalInfo.diabetes,
+      hipertensao: editingClinicalInfo.hipertensao,
+      circulacao: editingClinicalInfo.circulacao,
+      marcaPasso: editingClinicalInfo.marcaPasso,
+      cardiopatia: editingClinicalInfo.cardiopatia,
+      gestante: editingClinicalInfo.gestante,
+      alergias: editingClinicalInfo.alergias,
+      medicamentos: editingClinicalInfo.medicamentos,
       tamanhoPe: editingClinicalInfo.tamanhoPe,
       calcadoPredominante: editingClinicalInfo.calcadoPredominante,
       tipoMeia: editingClinicalInfo.tipoMeia,
       praticaEsportes: editingClinicalInfo.praticaEsportes,
       tabagista: editingClinicalInfo.tabagista,
-      diabetes: editingClinicalInfo.diabetes,
-      hipertensao: editingClinicalInfo.hipertensao,
-      circulacao: editingClinicalInfo.circulacao,
-      alergias: editingClinicalInfo.alergias,
-      medicamentos: editingClinicalInfo.medicamentos,
-      cirurgias: editingClinicalInfo.cirurgias,
-      gestante: editingClinicalInfo.gestante,
-      sensibilidadeDor: editingClinicalInfo.sensibilidadeDor,
+      unhasOnicocriptose: editingClinicalInfo.unhasOnicocriptose,
+      unhasOnicomicose: editingClinicalInfo.unhasOnicomicose,
+      unhasOnicogrifose: editingClinicalInfo.unhasOnicogrifose,
+      peleCalos: editingClinicalInfo.peleCalos,
+      peleCalosidades: editingClinicalInfo.peleCalosidades,
+      peleFissuras: editingClinicalInfo.peleFissuras,
+      peleVerrugaPlantar: editingClinicalInfo.peleVerrugaPlantar,
+      peleTineaPedis: editingClinicalInfo.peleTineaPedis,
+      footMarkers: editingClinicalInfo.footMarkers,
       observacoesClinicas: editingClinicalInfo.observacoesClinicas,
       doencas: editingClinicalInfo.doencas
     };
     ClientManager.update(activeClient.id, updatedClient);
     setActiveClient(updatedClient);
     setClientes(ClientManager.getAll());
-    alert('Ficha clínica salva com sucesso!');
+    alert('Ficha clínica e prontuário do paciente salvos com sucesso!');
   };
   
   useEffect(() => {
@@ -211,280 +258,583 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
               Ficha Clínica do Paciente
             </h3>
 
-            {/* CARD 1: DADOS CADASTRAIS & PESSOAIS */}
-            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                1. Identificação e Contato
-              </h4>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Profissão</label>
-                  <input 
-                    type="text" 
-                    value={editingClinicalInfo.profissao}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, profissao: e.target.value })}
-                    placeholder="Ex: Vendedora, Professor..."
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Data de Nascimento</label>
-                  <input 
-                    type="date" 
-                    value={editingClinicalInfo.dataNascimento}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, dataNascimento: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Gênero</label>
-                  <select 
-                    value={editingClinicalInfo.genero}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, genero: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Feminino">Feminino</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Outro">Outro</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>CPF</label>
-                  <input 
-                    type="text" 
-                    value={editingClinicalInfo.cpf}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, cpf: e.target.value })}
-                    placeholder="000.000.000-00"
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>WhatsApp / Contato</label>
-                  <input 
-                    type="text" 
-                    value={activeClient.contato}
-                    disabled
-                    style={{ padding: '8px 10px', border: '1px solid #e5e7eb', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.85rem', color: '#9ca3af' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>E-mail</label>
-                  <input 
-                    type="text" 
-                    value={activeClient.email || 'Não informado'}
-                    disabled
-                    style={{ padding: '8px 10px', border: '1px solid #e5e7eb', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.85rem', color: '#9ca3af' }}
-                  />
-                </div>
-                <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Endereço</label>
-                  <input 
-                    type="text" 
-                    value={activeClient.endereco || 'Não informado'}
-                    disabled
-                    style={{ padding: '8px 10px', border: '1px solid #e5e7eb', background: '#f3f4f6', borderRadius: '6px', fontSize: '0.85rem', color: '#9ca3af' }}
-                  />
-                </div>
-              </div>
+            {/* Abas do Prontuário */}
+            <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: '20px', gap: '5px', overflowX: 'auto', paddingBottom: '5px', position: 'sticky', top: '35px', background: '#fff', zIndex: 9 }}>
+              {[
+                { id: 'identificacao', label: '👤 Identificação' },
+                { id: 'anamnese', label: '🩺 Anamnese' },
+                { id: 'exame_fisico', label: '👣 Exame Físico' },
+                { id: 'observacoes', label: '📝 Observações' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setProntuarioActiveTab(tab.id)}
+                  style={{
+                    padding: '8px 12px',
+                    border: 'none',
+                    borderBottom: prontuarioActiveTab === tab.id ? '3px solid #0f3d2e' : '3px solid transparent',
+                    background: 'none',
+                    fontWeight: '700',
+                    color: prontuarioActiveTab === tab.id ? '#0f3d2e' : '#6b7280',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
-            {/* CARD 2: HÁBITOS E ESTILO DE VIDA */}
-            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                2. Calçados, Meias e Hábitos
-              </h4>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tamanho do Pé</label>
+            {/* ABA 1: IDENTIFICAÇÃO E CONTATO */}
+            {prontuarioActiveTab === 'identificacao' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Informações Pessoais
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Nome Completo</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.nome}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, nome: e.target.value })}
+                        placeholder="Nome completo do paciente"
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Data de Nascimento</label>
+                      <input 
+                        type="date" 
+                        value={editingClinicalInfo.dataNascimento}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, dataNascimento: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>CPF</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.cpf}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, cpf: e.target.value })}
+                        placeholder="000.000.000-00"
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Profissão</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.profissao}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, profissao: e.target.value })}
+                        placeholder="Ex: Vendedora, Professor..."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Gênero</label>
+                      <select 
+                        value={editingClinicalInfo.genero}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, genero: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Feminino">Feminino</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Outro">Outro</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Dados de Contato
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Telefone / WhatsApp</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.contato}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, contato: e.target.value })}
+                        placeholder="(00) 00000-0000"
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>E-mail</label>
+                      <input 
+                        type="email" 
+                        value={editingClinicalInfo.email}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, email: e.target.value })}
+                        placeholder="email@exemplo.com"
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Endereço Residencial</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.endereco}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, endereco: e.target.value })}
+                        placeholder="Rua, Número, Bairro, Cidade..."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Contato de Emergência
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Nome do Responsável</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.contatoEmergenciaNome}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, contatoEmergenciaNome: e.target.value })}
+                        placeholder="Ex: Esposo, Mãe, Filho..."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Telefone de Emergência</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.contatoEmergenciaTelefone}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, contatoEmergenciaTelefone: e.target.value })}
+                        placeholder="(00) 00000-0000"
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ABA 2: ANAMNESE E HISTÓRICO CLÍNICO */}
+            {prontuarioActiveTab === 'anamnese' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Condições de Saúde & Sistêmicas
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Diabetes</label>
+                      <select 
+                        value={editingClinicalInfo.diabetes}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, diabetes: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Não possui">Não possui</option>
+                        <option value="Diabetes Tipo 1">Diabetes Tipo 1</option>
+                        <option value="Diabetes Tipo 2">Diabetes Tipo 2</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Hipertensão</label>
+                      <select 
+                        value={editingClinicalInfo.hipertensao}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, hipertensao: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                      </select>
+                    </div>
+                    <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Problemas Circulatórios / Varizes</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.circulacao}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, circulacao: e.target.value })}
+                        placeholder="Ex: Varizes calibrosas, Trombose Venosa Profunda (TVP), etc."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Riscos & Restrições
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Uso de Marca-passo?</label>
+                      <select 
+                        value={editingClinicalInfo.marcaPasso}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, marcaPasso: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Gestante?</label>
+                      <select 
+                        value={editingClinicalInfo.gestante}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, gestante: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                      </select>
+                    </div>
+                    <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Histórico de Cardiopatias</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.cardiopatia}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, cardiopatia: e.target.value })}
+                        placeholder="Ex: Arritmia, Infarto prévio, Angina..."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Alergias & Medicamentos
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Sensibilidade / Alergias a substâncias</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.alergias}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, allergies: e.target.value })}
+                        placeholder="Ex: Iodo, esparadrapo, látex, etc."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Medicamentos de Uso Contínuo</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.medicamentos}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, medicamentos: e.target.value })}
+                        placeholder="Ex: Anticoagulantes (AAS, Marevan), Insulina..."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Hábitos & Estilo de Vida
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Calçado Predominante</label>
+                      <select 
+                        value={editingClinicalInfo.calcadoPredominante}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, calcadoPredominante: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Fechado">Fechado (Sapato/Tênis)</option>
+                        <option value="Aberto">Aberto (Sandália/Chinelo)</option>
+                        <option value="Salto Alto">Salto Alto</option>
+                        <option value="Bota de Segurança">Bota de Segurança (EPI)</option>
+                        <option value="Esportivo">Esportivo</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tipo de Meia</label>
+                      <select 
+                        value={editingClinicalInfo.tipoMeia}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tipoMeia: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Algodão">Algodão</option>
+                        <option value="Sintética">Sintética</option>
+                        <option value="Sem Meia">Sem Meia</option>
+                        <option value="Lã / Outro">Lã / Outro</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Prática de Esportes</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.praticaEsportes}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, praticaEsportes: e.target.value })}
+                        placeholder="Ex: Corrida, musculação, não..."
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tabagismo (Fumante)?</label>
+                      <select 
+                        value={editingClinicalInfo.tabagista}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tabagista: e.target.value })}
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ABA 3: EXAME FÍSICO E PODOPATOLOGIAS */}
+            {prontuarioActiveTab === 'exame_fisico' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Alterações nas Unhas
+                  </h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.unhasOnicocriptose}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, unhasOnicocriptose: e.target.checked })}
+                      />
+                      Onicocriptose (Unha Encravada)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.unhasOnicomicose}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, unhasOnicomicose: e.target.checked })}
+                      />
+                      Onicomicose (Micose de Unha)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.unhasOnicogrifose}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, unhasOnicogrifose: e.target.checked })}
+                      />
+                      Onicogrifose (Unha Grossa)
+                    </label>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Alterações na Pele
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.peleCalos}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, peleCalos: e.target.checked })}
+                      />
+                      Calos
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.peleCalosidades}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, peleCalosidades: e.target.checked })}
+                      />
+                      Calosidades
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.peleFissuras}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, peleFissuras: e.target.checked })}
+                      />
+                      Fissuras (Rachaduras)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.peleVerrugaPlantar}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, peleVerrugaPlantar: e.target.checked })}
+                      />
+                      Verruga Plantar (Olho de Peixe)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600', gridColumn: 'span 2' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={editingClinicalInfo.peleTineaPedis}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, peleTineaPedis: e.target.checked })}
+                      />
+                      Tinea Pedis (Frieira / Pé de Atleta)
+                    </label>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Mapeamento Gráfico da Dor / Lesão
+                  </h4>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '11px', color: '#6b7280' }}>
+                    Clique na área exata do pé abaixo para marcar dores, calos, micoses, etc.
+                  </p>
+                  
+                  <div style={{ position: 'relative', border: '1px solid #e5e7eb', borderRadius: '8px', background: '#fff', padding: '15px', display: 'flex', justifyContent: 'center' }}>
+                    <div 
+                      style={{ position: 'relative', width: '220px', height: '240px', cursor: 'crosshair' }} 
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = ((e.clientX - rect.left) / rect.width) * 100;
+                        const y = ((e.clientY - rect.top) / rect.height) * 100;
+                        
+                        const type = prompt("Tipo de ponto (ex: Dor, Calo, Fissura, Unha Encravada, Ferida):");
+                        if (!type) return;
+                        const desc = prompt("Descrição / Observação deste ponto:");
+                        
+                        const newMarker = {
+                          id: Date.now(),
+                          x,
+                          y,
+                          type,
+                          description: desc || ''
+                        };
+                        const currentMarkers = editingClinicalInfo.footMarkers || [];
+                        setEditingClinicalInfo({
+                          ...editingClinicalInfo,
+                          footMarkers: [...currentMarkers, newMarker]
+                        });
+                      }}
+                    >
+                      {/* SVG outlines of left and right feet plantar view */}
+                      <svg width="220" height="240" viewBox="0 0 220 240" style={{ pointerEvents: 'none' }}>
+                        {/* Left Foot */}
+                        <path 
+                          d="M 60,220 C 45,220 35,200 35,175 C 35,150 40,120 40,100 C 40,80 25,70 25,50 C 25,38 40,36 60,38 C 75,40 95,45 95,65 C 95,95 72,120 72,150 C 72,185 75,220 60,220 Z" 
+                          fill="#f3f4f6" 
+                          stroke="#9ca3af" 
+                          strokeWidth="2" 
+                        />
+                        {/* Left Toes */}
+                        <circle cx="85" cy="22" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="68" cy="18" r="8.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="53" cy="20" r="7.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="40" cy="28" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="29" cy="38" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <text x="25" y="235" fontSize="8" fontWeight="bold" fill="#9ca3af">PÉ ESQUERDO</text>
+
+                        {/* Right Foot */}
+                        <path 
+                          d="M 160,220 C 175,220 185,200 185,175 C 185,150 180,120 180,100 C 180,80 195,70 195,50 C 195,38 180,36 160,38 C 145,40 125,45 125,65 C 125,95 148,120 148,150 C 148,185 145,220 160,220 Z" 
+                          fill="#f3f4f6" 
+                          stroke="#9ca3af" 
+                          strokeWidth="2" 
+                        />
+                        {/* Right Toes */}
+                        <circle cx="135" cy="22" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="152" cy="18" r="8.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="167" cy="20" r="7.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="180" cy="28" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="191" cy="38" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <text x="135" y="235" fontSize="8" fontWeight="bold" fill="#9ca3af">PÉ DIREITO</text>
+                      </svg>
+
+                      {/* Display active foot markers */}
+                      {(editingClinicalInfo.footMarkers || []).map(marker => (
+                        <div
+                          key={marker.id}
+                          title={`${marker.type}: ${marker.description}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Deseja remover o ponto "${marker.type}"?`)) {
+                              const updated = editingClinicalInfo.footMarkers.filter(m => m.id !== marker.id);
+                              setEditingClinicalInfo({ ...editingClinicalInfo, footMarkers: updated });
+                            }
+                          }}
+                          style={{
+                            position: 'absolute',
+                            left: `${marker.x}%`,
+                            top: `${marker.y}%`,
+                            width: '12px',
+                            height: '12px',
+                            borderRadius: '50%',
+                            backgroundColor: marker.type.toLowerCase().includes('dor') ? '#dc2626' : marker.type.toLowerCase().includes('calo') ? '#d97706' : marker.type.toLowerCase().includes('fissura') ? '#2563eb' : '#059669',
+                            border: '1px solid #fff',
+                            cursor: 'pointer',
+                            transform: 'translate(-50%, -50%)',
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontSize: '7px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {marker.type.charAt(0).toUpperCase()}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '8px', fontSize: '10px', color: '#6b7280', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                    <span>🔴 Dor</span>
+                    <span>🟡 Calo</span>
+                    <span>🔵 Fissura</span>
+                    <span>🟢 Outros</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ABA 4: OBSERVAÇÕES E EVOLUÇÕES TEXTUAIS */}
+            {prontuarioActiveTab === 'observacoes' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Tamanho do Pé
+                  </h4>
                   <input 
                     type="text" 
                     value={editingClinicalInfo.tamanhoPe}
                     onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tamanhoPe: e.target.value })}
-                    placeholder="Ex: 37"
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                    placeholder="Ex: 38"
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' }}
                   />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tipo de Calçado mais usado</label>
-                  <select 
-                    value={editingClinicalInfo.calcadoPredominante}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, calcadoPredominante: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Fechado">Fechado (Sapato/Tênis)</option>
-                    <option value="Aberto">Aberto (Sandália/Chinelo)</option>
-                    <option value="Salto Alto">Salto Alto</option>
-                    <option value="Bota de Segurança">Bota de Segurança (EPI)</option>
-                    <option value="Esportivo">Esportivo</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Tipo de Meia mais usada</label>
-                  <select 
-                    value={editingClinicalInfo.tipoMeia}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tipoMeia: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Algodão">Algodão</option>
-                    <option value="Sintética">Sintética</option>
-                    <option value="Sem Meia">Sem Meia</option>
-                    <option value="Lã / Outro">Lã / Outro</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Pratica Esportes?</label>
-                  <input 
-                    type="text" 
-                    value={editingClinicalInfo.praticaEsportes}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, praticaEsportes: e.target.value })}
-                    placeholder="Não / Sim (qual?)"
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Fumante (Tabagista)?</label>
-                  <select 
-                    value={editingClinicalInfo.tabagista}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, tabagista: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Não">Não</option>
-                    <option value="Sim">Sim</option>
-                  </select>
-                </div>
-              </div>
-            </div>
 
-            {/* CARD 3: HISTÓRICO DE SAÚDE & PATOLOGIAS */}
-            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                3. Condições Clínicas e Patologias
-              </h4>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Diabetes</label>
-                  <select 
-                    value={editingClinicalInfo.diabetes}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, diabetes: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Não possui">Não possui</option>
-                    <option value="Diabetes Tipo 1">Diabetes Tipo 1</option>
-                    <option value="Diabetes Tipo 2">Diabetes Tipo 2</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Hipertensão</label>
-                  <select 
-                    value={editingClinicalInfo.hipertensao}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, hipertensao: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Não">Não</option>
-                    <option value="Sim">Sim</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Circulação / Varizes</label>
-                  <input 
-                    type="text" 
-                    value={editingClinicalInfo.circulacao}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, circulacao: e.target.value })}
-                    placeholder="Ex: Varizes, Trombose..."
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Sensibilidade a Dor</label>
-                  <select 
-                    value={editingClinicalInfo.sensibilidadeDor}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, sensibilidadeDor: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Normal">Normal</option>
-                    <option value="Alta (Sensível)">Alta (Sensível)</option>
-                    <option value="Baixa (Pouco Sensível)">Baixa (Pouco Sensível)</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Alergias (Medicamentos, látex, etc.)</label>
-                  <input 
-                    type="text" 
-                    value={editingClinicalInfo.alergias}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, alergias: e.target.value })}
-                    placeholder="Ex: Alergia a iodo, esparadrapo, etc. ou 'Não'"
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Medicamentos de Uso Contínuo</label>
-                  <input 
-                    type="text" 
-                    value={editingClinicalInfo.medicamentos}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, medicamentos: e.target.value })}
-                    placeholder="Ex: Anticoagulante, Insulina, etc."
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: 'span 2' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Cirurgias Prévias (Especialmente membros inferiores)</label>
-                  <input 
-                    type="text" 
-                    value={editingClinicalInfo.cirurgias}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, cirurgias: e.target.value })}
-                    placeholder="Sim (quais?) / Não"
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Gestante / Lactante?</label>
-                  <select 
-                    value={editingClinicalInfo.gestante}
-                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, gestante: e.target.value })}
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Não">Não</option>
-                    <option value="Sim">Sim</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>Outras Patologias</label>
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Outras Comorbidades / Doenças
+                  </h4>
                   <input 
                     type="text" 
                     value={editingClinicalInfo.doencas}
                     onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, doencas: e.target.value })}
-                    placeholder="Ex: HIV, Hepatite, Hanseníase, Renal..."
-                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                    placeholder="Ex: Hanseníase, Renal crônico, Hepático..."
+                    style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem', width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                  <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Observações e Recomendações
+                  </h4>
+                  <textarea 
+                    value={editingClinicalInfo.observacoesClinicas}
+                    onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, observacoesClinicas: e.target.value })}
+                    placeholder="Anote aqui as observações de tratamentos anteriores e recomendações para o paciente fazer em casa..."
+                    rows={6}
+                    style={{ width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
-            </div>
-
-            {/* CARD 4: OBSERVAÇÕES CLÍNICAS */}
-            <div style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', marginBottom: '15px', border: '1px solid #f3f4f6' }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#0f3d2e', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                4. Observações Clínicas Gerais
-              </h4>
-              <textarea 
-                value={editingClinicalInfo.observacoesClinicas}
-                onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, observacoesClinicas: e.target.value })}
-                placeholder="Anotações livres sobre a evolução clínica do paciente, recomendações ou particularidades de atendimento..."
-                rows={4}
-                style={{ width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
-            </div>
+            )}
 
             <button 
               onClick={handleSaveClinicalInfo}
@@ -504,6 +854,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
                 boxSizing: 'border-box',
                 position: 'sticky',
                 bottom: 0,
+                marginTop: '15px',
                 zIndex: 10
               }}
             >
