@@ -13,6 +13,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
   const [activeClient, setActiveClient] = useState(null);
   const [prontuarioActiveTab, setProntuarioActiveTab] = useState('identificacao');
   const [search, setSearch] = useState('');
+  const [pendingMarker, setPendingMarker] = useState(null);
   const [patientForms, setPatientForms] = useState(() => PatientFormManager.getAll());
 
   const [editingClinicalInfo, setEditingClinicalInfo] = useState({
@@ -694,22 +695,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
                         const x = ((e.clientX - rect.left) / rect.width) * 100;
                         const y = ((e.clientY - rect.top) / rect.height) * 100;
                         
-                        const type = prompt("Tipo de ponto (ex: Dor, Calo, Fissura, Unha Encravada, Ferida):");
-                        if (!type) return;
-                        const desc = prompt("Descrição / Observação deste ponto:");
-                        
-                        const newMarker = {
-                          id: Date.now(),
-                          x,
-                          y,
-                          type,
-                          description: desc || ''
-                        };
-                        const currentMarkers = editingClinicalInfo.footMarkers || [];
-                        setEditingClinicalInfo({
-                          ...editingClinicalInfo,
-                          footMarkers: [...currentMarkers, newMarker]
-                        });
+                        setPendingMarker({ x, y, type: 'Dor', description: '' });
                       }}
                     >
                       {/* Professional anatomical foot soles image from public folder */}
@@ -724,6 +710,114 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
                           userSelect: 'none'
                         }} 
                       />
+
+                      {/* Custom Inline Form Popover for placing markers */}
+                      {pendingMarker && (
+                        <div 
+                          style={{
+                            position: 'absolute',
+                            left: pendingMarker.x > 50 ? 'auto' : `${pendingMarker.x}%`,
+                            right: pendingMarker.x > 50 ? `${100 - pendingMarker.x}%` : 'auto',
+                            top: pendingMarker.y > 60 ? 'auto' : `${pendingMarker.y}%`,
+                            bottom: pendingMarker.y > 60 ? `${100 - pendingMarker.y}%` : 'auto',
+                            width: '180px',
+                            background: '#fff',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '8px',
+                            padding: '10px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                            zIndex: 999,
+                            pointerEvents: 'auto'
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937', textAlign: 'left' }}>
+                            Novo Ponto:
+                          </div>
+                          
+                          <select 
+                            value={pendingMarker.type}
+                            onChange={(e) => setPendingMarker({ ...pendingMarker, type: e.target.value })}
+                            style={{
+                              width: '100%',
+                              padding: '4px',
+                              fontSize: '0.8rem',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '4px',
+                              marginBottom: '8px',
+                              outline: 'none',
+                              color: '#1f2937'
+                            }}
+                          >
+                            <option value="Dor">🔴 Dor</option>
+                            <option value="Calo">🟡 Calo</option>
+                            <option value="Fissura">🔵 Fissura</option>
+                            <option value="Outros">🟢 Outros</option>
+                          </select>
+
+                          <input 
+                            type="text"
+                            placeholder="Descreva a observação..."
+                            value={pendingMarker.description}
+                            onChange={(e) => setPendingMarker({ ...pendingMarker, description: e.target.value })}
+                            style={{
+                              width: '100%',
+                              padding: '4px',
+                              fontSize: '0.8rem',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '4px',
+                              marginBottom: '8px',
+                              outline: 'none',
+                              color: '#1f2937'
+                            }}
+                          />
+
+                          <div style={{ display: 'flex', gap: '5px', justifyContent: 'flex-end' }}>
+                            <button 
+                              onClick={() => setPendingMarker(null)}
+                              style={{
+                                padding: '3px 8px',
+                                fontSize: '0.75rem',
+                                border: 'none',
+                                background: '#e5e7eb',
+                                color: '#4b5563',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Cancelar
+                            </button>
+                            <button 
+                              onClick={() => {
+                                const newMarker = {
+                                  id: Date.now(),
+                                  x: pendingMarker.x,
+                                  y: pendingMarker.y,
+                                  type: pendingMarker.type,
+                                  description: pendingMarker.description
+                                };
+                                const currentMarkers = editingClinicalInfo.footMarkers || [];
+                                setEditingClinicalInfo({
+                                  ...editingClinicalInfo,
+                                  footMarkers: [...currentMarkers, newMarker]
+                                });
+                                setPendingMarker(null);
+                              }}
+                              style={{
+                                padding: '3px 8px',
+                                fontSize: '0.75rem',
+                                border: 'none',
+                                background: '#0f3d2e',
+                                color: '#fff',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Adicionar
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Display active foot markers */}
                       {(editingClinicalInfo.footMarkers || []).map(marker => (
