@@ -716,32 +716,40 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
                       <svg width="220" height="240" viewBox="0 0 220 240" style={{ pointerEvents: 'none' }}>
                         {/* Left Foot */}
                         <path 
-                          d="M 60,220 C 45,220 35,200 35,175 C 35,150 40,120 40,100 C 40,80 25,70 25,50 C 25,38 40,36 60,38 C 75,40 95,45 95,65 C 95,95 72,120 72,150 C 72,185 75,220 60,220 Z" 
+                          d="M 60,220 C 45,220 38,205 38,180 C 38,155 35,130 35,100 C 35,75 22,70 22,58 C 22,50 35,46 55,48 C 70,50 95,52 95,70 C 95,100 80,125 80,155 C 80,185 75,220 60,220 Z" 
                           fill="#f3f4f6" 
                           stroke="#9ca3af" 
                           strokeWidth="2" 
                         />
+                        {/* Left Foot Creases */}
+                        <path d="M 30,85 Q 58,92 88,82" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
+                        <path d="M 42,182 Q 60,176 75,182" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
+
                         {/* Left Toes */}
-                        <circle cx="85" cy="22" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="68" cy="18" r="8.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="53" cy="20" r="7.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="40" cy="28" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="29" cy="38" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="83" cy="38" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="68" cy="36" r="9" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="53" cy="37" r="8" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="39" cy="42" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="27" cy="50" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
                         <text x="25" y="235" fontSize="8" fontWeight="bold" fill="#9ca3af">PÉ ESQUERDO</text>
 
                         {/* Right Foot */}
                         <path 
-                          d="M 160,220 C 175,220 185,200 185,175 C 185,150 180,120 180,100 C 180,80 195,70 195,50 C 195,38 180,36 160,38 C 145,40 125,45 125,65 C 125,95 148,120 148,150 C 148,185 145,220 160,220 Z" 
+                          d="M 160,220 C 175,220 182,205 182,180 C 182,155 185,130 185,100 C 185,75 198,70 198,58 C 198,50 165,46 165,48 C 150,50 125,52 125,70 C 125,100 140,125 140,155 C 140,185 145,220 160,220 Z" 
                           fill="#f3f4f6" 
                           stroke="#9ca3af" 
                           strokeWidth="2" 
                         />
+                        {/* Right Foot Creases */}
+                        <path d="M 190,85 Q 162,92 132,82" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
+                        <path d="M 178,182 Q 160,176 145,182" fill="none" stroke="#d1d5db" strokeWidth="1.5" />
+
                         {/* Right Toes */}
-                        <circle cx="135" cy="22" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="152" cy="18" r="8.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="167" cy="20" r="7.5" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="180" cy="28" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
-                        <circle cx="191" cy="38" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="137" cy="38" r="11" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="152" cy="36" r="9" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="167" cy="37" r="8" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="181" cy="42" r="7" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
+                        <circle cx="193" cy="50" r="6" fill="#f3f4f6" stroke="#9ca3af" strokeWidth="1.5" />
                         <text x="135" y="235" fontSize="8" fontWeight="bold" fill="#9ca3af">PÉ DIREITO</text>
                       </svg>
 
