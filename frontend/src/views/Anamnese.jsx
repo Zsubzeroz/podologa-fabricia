@@ -11,16 +11,41 @@ const SignaturePad = ({ onSave, onClear }) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
   }, []);
 
-  const startDrawing = (e) => {
+  const getCoordinates = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX || e.touches[0].clientX) - rect.left;
-    const y = (e.clientY || e.touches[0].clientY) - rect.top;
     
+    // Suporte para touch e mouse
+    let clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    
+    // Calcular escala devido ao CSS width: 100% que distorce as coordenadas do canvas
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  };
+
+  const startDrawing = (e) => {
+    if (e.touches) {
+      e.preventDefault(); // Evita scroll/pinch indesejado no tablet
+    }
+    const { x, y } = getCoordinates(e);
+    const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -29,21 +54,22 @@ const SignaturePad = ({ onSave, onClear }) => {
 
   const draw = (e) => {
     if (!isDrawing) return;
+    if (e.touches) {
+      e.preventDefault(); // Evita scroll/pinch indesejado no tablet
+    }
+    const { x, y } = getCoordinates(e);
     const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX || e.touches[0].clientX) - rect.left;
-    const y = (e.clientY || e.touches[0].clientY) - rect.top;
-    
     const ctx = canvas.getContext('2d');
     ctx.lineTo(x, y);
     ctx.stroke();
-    e.preventDefault();
   };
 
   const endDrawing = () => {
-    setIsDrawing(false);
-    const canvas = canvasRef.current;
-    onSave(canvas.toDataURL());
+    if (isDrawing) {
+      setIsDrawing(false);
+      const canvas = canvasRef.current;
+      onSave(canvas.toDataURL());
+    }
   };
 
   const clear = () => {
@@ -62,10 +88,11 @@ const SignaturePad = ({ onSave, onClear }) => {
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={endDrawing}
+        onMouseLeave={endDrawing}
         onTouchStart={startDrawing}
         onTouchMove={draw}
         onTouchEnd={endDrawing}
-        style={{ cursor: 'crosshair', width: '100%', display: 'block' }}
+        style={{ cursor: 'crosshair', width: '100%', display: 'block', touchAction: 'none' }}
       />
       <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px' }}>
         <button type="button" onClick={clear} style={{ background: '#f3f4f6', border: '1px solid #ddd', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
