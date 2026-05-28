@@ -1024,7 +1024,7 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                   {renderPhotoUploadSection()}
 
                   {/* Signature Section */}
-                  <div>
+                  <div style={{ paddingBottom: '30px' }}>
                     <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>ASSINATURA DO PACIENTE (Tablet)</h5>
                     <SignaturePad 
                       onSave={(data) => handleStructuredChange('assinatura', data)} 
@@ -1039,15 +1039,15 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
 
                 </div>
               ) : (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto', padding: '15px', border: '1px solid #d1d5db', borderRadius: '6px', background: '#f9fafb' }}>
                   <textarea 
                     value={fillData.conteudo} 
                     onChange={(e) => setFillData({...fillData, conteudo: e.target.value})} 
-                    style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', minHeight: '300px', fontFamily: 'monospace' }} 
+                    style={{ padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', minHeight: '180px', fontFamily: 'monospace' }} 
                   />
                   {renderPhotoUploadSection()}
 
-                  <div>
+                  <div style={{ paddingBottom: '30px' }}>
                     <h5 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0f3d2e', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>ASSINATURA DO PACIENTE (Tablet)</h5>
                     <SignaturePad 
                       onSave={(data) => handleStructuredChange('assinatura', data)} 
