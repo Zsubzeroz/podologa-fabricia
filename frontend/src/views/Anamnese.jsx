@@ -858,6 +858,20 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
               </div>
             </div>
 
+            {fillData.clientId && (() => {
+              const selectedClient = clients.find(c => c.id.toString() === fillData.clientId.toString());
+              if (!selectedClient) return null;
+              return (
+                <div style={{ padding: '12px', background: '#f3f4f6', borderRadius: '8px', fontSize: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px 15px', border: '1px solid #e5e7eb' }}>
+                  <div><strong>WhatsApp/Contato:</strong> {selectedClient.contato || 'Não informado'}</div>
+                  <div><strong>CPF:</strong> {selectedClient.cpf || 'Não informado'}</div>
+                  <div><strong>Data Nasc.:</strong> {selectedClient.dataNascimento ? new Date(selectedClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não informado'}</div>
+                  <div><strong>Profissão:</strong> {selectedClient.profissao || 'Não informado'}</div>
+                  <div style={{ gridColumn: 'span 2' }}><strong>Endereço:</strong> {selectedClient.endereco || 'Não informado'}</div>
+                </div>
+              );
+            })()}
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, overflow: 'hidden' }}>
               <label style={{ fontSize: '13px', fontWeight: '600' }}>
                 {fillData.templateId.toString() === '1' ? 'Avaliação Clínica Estruturada' : 'Conteúdo da Ficha'}
@@ -1096,11 +1110,14 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                   ? clients.find(c => c.id.toString() === printItem.clientId.toString())
                   : null;
                 return printItem.isPatientForm && (
-                  <div style={{ marginBottom: '20px', padding: '10px', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>Paciente:</strong> {printItem.clientName}</p>
-                    {pClient && pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
-                    {pClient && pClient.endereco && <p style={{ margin: '0 0 4px 0' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
-                    <p style={{ margin: 0 }}><strong>Data do Registro:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                  <div style={{ marginBottom: '20px', padding: '12px', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '13px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 15px' }}>
+                    <div style={{ gridColumn: 'span 2' }}><strong>Paciente:</strong> {printItem.clientName}</div>
+                    {pClient && pClient.cpf && <div><strong>CPF:</strong> {pClient.cpf}</div>}
+                    {pClient && pClient.dataNascimento && <div><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
+                    {pClient && pClient.contato && <div><strong>Contato:</strong> {pClient.contato}</div>}
+                    {pClient && pClient.profissao && <div><strong>Profissão:</strong> {pClient.profissao}</div>}
+                    {pClient && pClient.endereco && <div style={{ gridColumn: 'span 2' }}><strong>Endereço:</strong> {pClient.endereco}</div>}
+                    <div style={{ gridColumn: 'span 2' }}><strong>Data do Registro:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</div>
                   </div>
                 );
               })()}
@@ -1208,11 +1225,14 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                 ? clients.find(c => c.id.toString() === printItem.clientId.toString())
                 : null;
               return printItem.isPatientForm && (
-                <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #000' }}>
-                  <p style={{ margin: '0 0 5px 0' }}><strong>Paciente:</strong> {printItem.clientName}</p>
-                  {pClient && pClient.contato && <p style={{ margin: '0 0 5px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
-                  {pClient && pClient.endereco && <p style={{ margin: '0 0 5px 0' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
-                  <p style={{ margin: 0 }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #000', fontSize: '13px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 15px' }}>
+                  <div style={{ gridColumn: 'span 2' }}><strong>Paciente:</strong> {printItem.clientName}</div>
+                  {pClient && pClient.cpf && <div><strong>CPF:</strong> {pClient.cpf}</div>}
+                  {pClient && pClient.dataNascimento && <div><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
+                  {pClient && pClient.contato && <div><strong>Contato:</strong> {pClient.contato}</div>}
+                  {pClient && pClient.profissao && <div><strong>Profissão:</strong> {pClient.profissao}</div>}
+                  {pClient && pClient.endereco && <div style={{ gridColumn: 'span 2' }}><strong>Endereço:</strong> {pClient.endereco}</div>}
+                  <div style={{ gridColumn: 'span 2' }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</div>
                 </div>
               );
             })()}
