@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit, Check } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Trash2, CheckCircle, Smartphone, Plus, FileText, CheckCircle2, MoreHorizontal, AlertCircle, LayoutGrid, List, Share2, Copy, Download, X, Edit, Check, MessageCircle } from 'lucide-react';
 import { AppointmentManager, BlockedDaysManager, GeneralSettings, CompanySettings, ServiceManager, ProfessionalManager, WorkingHours } from '../utils/EntityManager';
 
 export default function Agenda({ appointments, onCancelAppointment, onUpdateAppointment, currentDate, setCurrentDate, onAddAppointment, onGenerateReceipt }) {
@@ -13,6 +13,7 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
   const [patientForms, setPatientForms] = useState([]);
   const [professionals, setProfessionals] = useState(() => ProfessionalManager.getAll());
   const [workingHours, setWorkingHours] = useState(() => WorkingHours.get());
+  const [horizonDays, setHorizonDays] = useState(7);
   const shareRef = useRef(null);
   
   useEffect(() => {
@@ -149,17 +150,52 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
     }
   };
 
-  const handleWhatsAppReminder = (appt) => {
+  const getDayOfWeekPT = (dateStr) => {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    const days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    return days[dateObj.getDay()];
+  };
+
+  const getFormattedDatePT = (dateStr) => {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}`;
+  };
+
+  const handleSendDetailsWhatsApp = (appt) => {
+    const clientName = appt.clientName || 'Cliente';
+    const dateStr = getFormattedDatePT(appt.date);
+    const dayOfWeek = getDayOfWeekPT(appt.date);
+    const startTime = appt.startTime || '';
+    const serviceName = appt.service || '';
+    
+    const msg = `🌿 Olá *${clientName}*!\n\nVocê tem um compromisso na *Clínica Fabrícia Rodrigues*:\n\n📆 Data: *${dateStr}*. ${dayOfWeek} \n🕓 Horário: *${startTime}*.\n🦶🏼 Serviço: *${serviceName}*.\n\n📍Rua: Papa João Paulo ll, 256.\nBairro: Orlando Correia Barbosa.\nArtur Nogueira.\n\n📌 Só lembrando de vir com (calçado confortável/sem esmalte, se for o caso).\n📌 Qualquer imprevisto, por favor me avise com antecedência.`;
+
+    const phone = (appt.phone || appt.clientPhone || '').replace(/\D/g, '');
+    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleSendConfirmationWhatsApp = (appt) => {
     const config = GeneralSettings.get();
     const company = CompanySettings.get();
-    let msg = config.mensagemLembrete;
     
-    msg = msg.replace(/@CLIENTE/g, appt.clientName);
-    msg = msg.replace(/@NOMEEMPRESA/g, company.nome);
-    msg = msg.replace(/@NOMESERVICO/g, appt.service);
-    msg = msg.replace(/@DIA/g, appt.date.split('-').reverse().join('/'));
-    msg = msg.replace(/@HORA/g, appt.startTime);
-    
+    let msg = config.mensagemLembrete || `📌 Olá *@CLIENTE*!\n\nVocê tem um compromisso na *Clínica Fabrícia Rodrigues*:\n\nData: *@DIA* @DIASEMANA\nHora: *@HORA*.\nServiço: *@NOMESERVICO*.\n\nRua: Papa João Paulo ll, 256.\nBairro: Orlando Correia Barbosa.\nArtur Nogueira.\n\nDigite *CONFIRMAR* ou *CANCELAR*`;
+
+    const clientName = appt.clientName || 'Cliente';
+    const dateStr = getFormattedDatePT(appt.date);
+    const dayOfWeek = getDayOfWeekPT(appt.date);
+    const startTime = appt.startTime || '';
+    const serviceName = appt.service || '';
+
+    msg = msg.replace(/@CLIENTE/g, clientName);
+    msg = msg.replace(/@DIASEMANA/g, dayOfWeek);
+    msg = msg.replace(/@DIA/g, dateStr);
+    msg = msg.replace(/@HORA/g, startTime);
+    msg = msg.replace(/@NOMESERVICO/g, serviceName);
+    msg = msg.replace(/@NOMEEMPRESA/g, company.nome || 'Clínica Fabrícia Rodrigues');
+
     const phone = (appt.phone || appt.clientPhone || '').replace(/\D/g, '');
     window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
@@ -460,7 +496,26 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
                                         <Check size={14} /> Marcar Atendido
                                       </button>
                                     )}
-                                    
+                                    <button 
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        handleSendConfirmationWhatsApp(appt); 
+                                      }} 
+                                      style={{ background: '#25d366', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}
+                                    >
+                                      <MessageCircle size={14} /> WhatsApp Confirmar
+                                    </button>
+
+                                    <button 
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        handleSendDetailsWhatsApp(appt); 
+                                      }} 
+                                      style={{ background: '#128c7e', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}
+                                    >
+                                      <MessageCircle size={14} /> WhatsApp Detalhes
+                                    </button>
+
                                     <button 
                                       onClick={(e) => { e.stopPropagation(); setEditingAppt(appt); }} 
                                       style={{ background: '#f3f4f6', border: '1px solid #d1d5db', color: '#374151', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}
@@ -531,19 +586,47 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
               <X size={24} color="#6b7280" style={{ cursor: 'pointer' }} onClick={() => setShowShareModal(false)} />
             </div>
 
-            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '20px' }}>
+            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '15px' }}>
               Abaixo estão os horários livres para os próximos dias. Copie o texto abaixo e envie para o WhatsApp do cliente.
             </p>
 
+            {/* Período de Visualização */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563' }}>Período de Visualização:</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[7, 15, 30].map(days => (
+                  <button
+                    key={days}
+                    onClick={() => setHorizonDays(days)}
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
+                      background: horizonDays === days ? '#0f3d2e' : '#fff',
+                      color: horizonDays === days ? '#fff' : '#374151',
+                      fontWeight: 'bold',
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: horizonDays === days ? '0 4px 6px rgba(15,61,46,0.2)' : 'none'
+                    }}
+                  >
+                    {days === 7 ? '1 Semana' : `${days} Dias`}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Preview Section */}
-            <div ref={shareRef} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '25px' }}>
+            <div ref={shareRef} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '25px', maxHeight: '300px', overflowY: 'auto' }}>
               <div style={{ textAlign: 'center', marginBottom: '15px' }}>
                 <div style={{ color: '#0f3d2e', fontWeight: '800', fontSize: '1.1rem' }}>🕒 VAGAS DISPONÍVEIS</div>
                 <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Fabrícia Rodrigues - Podologia</div>
               </div>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {Array.from({ length: 7 }).map((_, i) => {
+                {Array.from({ length: horizonDays }).map((_, i) => {
                   const d = new Date();
                   d.setDate(d.getDate() + i);
                   if (d.getDay() === 0) return null; // Pula domingo
@@ -587,9 +670,9 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <button 
                 onClick={() => {
-                  let text = `🕒 *HORÁRIOS DISPONÍVEIS - Fabrícia Rodrigues Podologia*\n\nOlá! Seguem os horários que tenho livre para atendimento:\n\n`;
+                  let text = `🕒 *HORÁRIOS DISPONÍVEIS - Fabrícia Rodrigues Podologia*\n\nOlá! Seguem os horários que tenho livre para atendimento nos próximos ${horizonDays === 7 ? '7' : horizonDays} dias:\n\n`;
                   
-                  Array.from({ length: 7 }).forEach((_, i) => {
+                  Array.from({ length: horizonDays }).forEach((_, i) => {
                     const d = new Date();
                     d.setDate(d.getDate() + i);
                     if (d.getDay() === 0) return;

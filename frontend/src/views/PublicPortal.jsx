@@ -59,17 +59,36 @@ export default function PublicPortal() {
       const publicKey = config.emailPublicKey || EMAIL_CONFIG.PUBLIC_KEY;
 
       let body = config.mensagemEmail || 'Olá @CLIENTE, seu agendamento foi confirmado!';
+      
+      // Formatar data para DD/MM e achar dia da semana
+      let formattedDate = '';
+      let dayOfWeek = '';
+      if (appointmentData.date) {
+        const parts = appointmentData.date.split('-');
+        if (parts.length === 3) {
+          const [y, m, d] = parts;
+          formattedDate = `${d}/${m}`;
+          
+          const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
+          const days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+          dayOfWeek = days[dateObj.getDay()];
+        } else {
+          formattedDate = appointmentData.date;
+        }
+      }
+
       body = body.replace(/@CLIENTE/g, appointmentData.clientName);
-      body = body.replace(/@NOMEEMPRESA/g, company.nome);
+      body = body.replace(/@NOMEEMPRESA/g, company.nome || 'Clínica Fabrícia Rodrigues');
       body = body.replace(/@NOMESERVICO/g, appointmentData.service);
-      body = body.replace(/@DIA/g, appointmentData.date.split('-').reverse().join('/'));
+      body = body.replace(/@DIASEMANA/g, dayOfWeek);
+      body = body.replace(/@DIA/g, formattedDate);
       body = body.replace(/@HORA/g, appointmentData.startTime);
 
       const templateParams = {
         to_name: appointmentData.clientName,
         client_email: appointmentData.clientEmail || 'Não informado',
         service_name: appointmentData.service,
-        appointment_date: appointmentData.date.split('-').reverse().join('/'),
+        appointment_date: formattedDate,
         appointment_time: appointmentData.startTime,
         message: body
       };
@@ -86,9 +105,9 @@ export default function PublicPortal() {
         to_name: 'Dra. Fabrícia',
         client_email: adminEmail,
         service_name: appointmentData.service,
-        appointment_date: appointmentData.date.split('-').reverse().join('/'),
+        appointment_date: formattedDate,
         appointment_time: appointmentData.startTime,
-        message: `Olá Dra. Fabrícia, você tem um novo agendamento realizado pelo portal online!\n\nCliente: ${appointmentData.clientName}\nTelefone: ${appointmentData.clientPhone}\nServiço: ${appointmentData.service}\nData: ${appointmentData.date.split('-').reverse().join('/')}\nHora: ${appointmentData.startTime}\nE-mail do Cliente: ${appointmentData.clientEmail || 'Não informado'}`
+        message: `Olá Dra. Fabrícia, você tem um novo agendamento realizado pelo portal online!\n\nCliente: ${appointmentData.clientName}\nTelefone: ${appointmentData.clientPhone}\nServiço: ${appointmentData.service}\nData: ${formattedDate} (${dayOfWeek})\nHora: ${appointmentData.startTime}\nE-mail do Cliente: ${appointmentData.clientEmail || 'Não informado'}`
       };
       await emailjs.send(serviceId, templateId, adminTemplateParams, publicKey);
       console.log('E-mail de notificação enviado para a clínica!');

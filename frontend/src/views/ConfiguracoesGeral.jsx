@@ -47,8 +47,9 @@ export default function ConfiguracoesGeral() {
   const getPreview = () => {
     let msg = config.mensagemLembrete;
     msg = msg.replace(/@CLIENTE/g, 'Maria Silva');
-    msg = msg.replace(/@NOMEEMPRESA/g, 'Fabrícia Rodrigues Saúde Bem-Estar');
+    msg = msg.replace(/@NOMEEMPRESA/g, 'Fabrícia Rodrigues');
     msg = msg.replace(/@NOMESERVICO/g, 'Podoprofilaxia');
+    msg = msg.replace(/@DIASEMANA/g, 'Quinta-feira');
     msg = msg.replace(/@DIA/g, '15/05');
     msg = msg.replace(/@HORA/g, '14:30');
     return msg;
@@ -182,7 +183,7 @@ export default function ConfiguracoesGeral() {
                   placeholder="Escreva aqui a mensagem que o cliente receberá..."
                 />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@HORA'].map(tag => (
+                  {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@DIASEMANA', '@HORA'].map(tag => (
                     <button 
                       key={tag} 
                       type="button"
@@ -251,7 +252,7 @@ export default function ConfiguracoesGeral() {
                   placeholder="Escreva aqui o texto do e-mail de confirmação..."
                 />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@HORA'].map(tag => (
+                  {['@CLIENTE', '@NOMEEMPRESA', '@NOMESERVICO', '@DIA', '@DIASEMANA', '@HORA'].map(tag => (
                     <button 
                       key={tag} 
                       type="button"
@@ -282,6 +283,7 @@ export default function ConfiguracoesGeral() {
                       .replace(/@CLIENTE/g, 'Maria Silva')
                       .replace(/@NOMEEMPRESA/g, 'Fabrícia Rodrigues')
                       .replace(/@NOMESERVICO/g, 'Podoprofilaxia')
+                      .replace(/@DIASEMANA/g, 'Quinta-feira')
                       .replace(/@DIA/g, '15/05')
                       .replace(/@HORA/g, '14:30')}
                   </div>

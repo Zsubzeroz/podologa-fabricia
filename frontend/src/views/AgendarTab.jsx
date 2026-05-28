@@ -181,30 +181,64 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
       try {
         const config = GeneralSettings.get();
         const company = CompanySettings.get();
+        
+        const serviceId = config.emailServiceId || EMAIL_CONFIG.SERVICE_ID;
+        const templateId = config.emailTemplateId || EMAIL_CONFIG.TEMPLATE_ID;
+        const publicKey = config.emailPublicKey || EMAIL_CONFIG.PUBLIC_KEY;
+
         let body = config.mensagemEmail || 'Olá @CLIENTE, seu agendamento foi confirmado!';
         
+        // Formatar data para DD/MM e achar dia da semana
+        let formattedDate = '';
+        let dayOfWeek = '';
+        if (formData.date) {
+          const parts = formData.date.split('-');
+          if (parts.length === 3) {
+            const [y, m, d] = parts;
+            formattedDate = `${d}/${m}`;
+            
+            const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
+            const days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            dayOfWeek = days[dateObj.getDay()];
+          } else {
+            formattedDate = formData.date;
+          }
+        }
+
         body = body.replace(/@CLIENTE/g, formData.clientName);
-        body = body.replace(/@NOMEEMPRESA/g, company.nome);
+        body = body.replace(/@NOMEEMPRESA/g, company.nome || 'Clínica Fabrícia Rodrigues');
         body = body.replace(/@NOMESERVICO/g, formData.service);
-        body = body.replace(/@DIA/g, formData.date.split('-').reverse().join('/'));
+        body = body.replace(/@DIASEMANA/g, dayOfWeek);
+        body = body.replace(/@DIA/g, formattedDate);
         body = body.replace(/@HORA/g, formData.startTime);
 
         const templateParams = {
           to_name: formData.clientName,
           client_email: formData.clientEmail || 'Não informado',
           service_name: formData.service,
-          appointment_date: formData.date.split('-').reverse().join('/'),
+          appointment_date: formattedDate,
           appointment_time: formData.startTime,
           message: body
         };
 
-        await emailjs.send(
-          EMAIL_CONFIG.SERVICE_ID,
-          EMAIL_CONFIG.TEMPLATE_ID,
-          templateParams,
-          EMAIL_CONFIG.PUBLIC_KEY
-        );
-        console.log('E-mail automático enviado ao cliente!');
+        // Envia para o cliente
+        if (formData.clientEmail && formData.clientEmail.trim() !== '') {
+          await emailjs.send(serviceId, templateId, templateParams, publicKey);
+          console.log('E-mail automático enviado ao cliente!');
+        }
+
+        // Envia cópia para o admin
+        const adminEmail = config.emailNotificacaoAdmin || company.email || 'fabriciapodologa@gmail.com';
+        const adminTemplateParams = {
+          to_name: 'Dra. Fabrícia',
+          client_email: adminEmail,
+          service_name: formData.service,
+          appointment_date: formattedDate,
+          appointment_time: formData.startTime,
+          message: `Olá Dra. Fabrícia, novo agendamento realizado no painel!\n\nCliente: ${formData.clientName}\nTelefone: ${formData.clientPhone || 'Não informado'}\nServiço: ${formData.service}\nData: ${formattedDate} (${dayOfWeek})\nHora: ${formData.startTime}\nE-mail: ${formData.clientEmail || 'Não informado'}`
+        };
+        await emailjs.send(serviceId, templateId, adminTemplateParams, publicKey);
+        console.log('E-mail de notificação enviado para a clínica!');
       } catch (error) {
         console.error('Erro ao enviar e-mail:', error);
       }

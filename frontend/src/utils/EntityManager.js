@@ -212,7 +212,27 @@ class SettingsManager {
     try {
       const saved = window.localStorage.getItem(this.key);
       if (!saved) return this.defaultData;
-      const parsed = JSON.parse(saved);
+      let parsed = JSON.parse(saved);
+
+      // Auto-migrate old default messages to new premium formatted versions
+      if (this.key === 'configuracoes_gerais') {
+        const oldDefaultLembrete = 'Olá @CLIENTE, passando para confirmar seu atendimento de @NOMESERVICO no dia @DIA às @HORA. Por favor, responda "SIM" para confirmar ou nos avise se precisar desmarcar. Atenciosamente, @NOMEEMPRESA.';
+        const oldDefaultEmail = 'Olá @CLIENTE, seu agendamento de @NOMESERVICO na @NOMEEMPRESA foi confirmado com sucesso para o dia @DIA às @HORA. Solicitamos pontualidade de até 10 minutos. Agradecemos a preferência!';
+        
+        let changed = false;
+        if (!parsed.mensagemLembrete || parsed.mensagemLembrete === oldDefaultLembrete) {
+          parsed.mensagemLembrete = this.defaultData.mensagemLembrete;
+          changed = true;
+        }
+        if (!parsed.mensagemEmail || parsed.mensagemEmail === oldDefaultEmail) {
+          parsed.mensagemEmail = this.defaultData.mensagemEmail;
+          changed = true;
+        }
+        if (changed) {
+          this.save(parsed);
+        }
+      }
+
       return { ...this.defaultData, ...parsed }; // Merge to ensure new fields exist
     } catch (e) {
       return this.defaultData;
@@ -253,8 +273,8 @@ export const GeneralSettingsManager = new SettingsManager('configuracoes_gerais'
   obrigarSala: false,
   enviarLembrete: true,
   tempoLembrete: '24',
-  mensagemLembrete: 'Olá @CLIENTE, passando para confirmar seu atendimento de @NOMESERVICO no dia @DIA às @HORA. Por favor, responda "SIM" para confirmar ou nos avise se precisar desmarcar. Atenciosamente, @NOMEEMPRESA.',
-  mensagemEmail: 'Olá @CLIENTE, seu agendamento de @NOMESERVICO na @NOMEEMPRESA foi confirmado com sucesso para o dia @DIA às @HORA. Solicitamos pontualidade de até 10 minutos. Agradecemos a preferência!',
+  mensagemLembrete: `📌 Olá *@CLIENTE*!\n\nVocê tem um compromisso na *Clínica Fabrícia Rodrigues*:\n\nData: *@DIA* @DIASEMANA\nHora: *@HORA*.\nServiço: *@NOMESERVICO*.\n\nRua: Papa João Paulo ll, 256.\nBairro: Orlando Correia Barbosa.\nArtur Nogueira.\n\nDigite *CONFIRMAR* ou *CANCELAR*`,
+  mensagemEmail: `🌿 Olá *@CLIENTE*!\n\nVocê tem um compromisso na *Clínica Fabrícia Rodrigues*:\n\n📆 Data: *@DIA*. @DIASEMANA \n🕓 Horário: *@HORA*.\n🦶🏼 Serviço: *@NOMESERVICO*.\n\n📍Rua: Papa João Paulo ll, 256.\nBairro: Orlando Correia Barbosa.\nArtur Nogueira.\n\n📌 Só lembrando de vir com (calçado confortável/sem esmalte, se for o caso).\n📌 Qualquer imprevisto, por favor me avise com antecedência.`,
   whatsappConectado: true
 });
 
