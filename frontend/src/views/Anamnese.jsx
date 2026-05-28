@@ -1161,6 +1161,15 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                 {printItem.conteudo || 'Este documento não possui conteúdo.'}
               </div>
 
+              {printItem.isPatientForm && (
+                <div style={{ marginTop: '30px', borderTop: '2px solid #000', paddingTop: '15px', fontSize: '11px', lineHeight: '1.6', textAlign: 'justify', color: '#111827' }}>
+                  <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', textTransform: 'uppercase', color: '#000' }}>• DECLARAÇÃO DE CONSENTIMENTO E RESPONSABILIDADE JURÍDICA</p>
+                  <p style={{ margin: 0 }}>
+                    Declaro, sob as penas da lei, que todas as informações clínicas prestadas neste documento são verdadeiras, completas e de minha inteira responsabilidade, não omitindo nenhum fato relevante sobre meu estado de saúde. Fui devidamente esclarecido(a) quanto ao diagnóstico podológico e concordo com os procedimentos e tratamentos propostos pela clínica/profissional responsável, autorizando a sua execução. Estou ciente de que o sucesso do tratamento podológico depende também do cumprimento rigoroso das orientações pós-atendimento recomendadas. Adicionalmente, autorizo o registro fotográfico dos meus pés para fins exclusivos de acompanhamento clínico, evolução do prontuário e arquivo profissional, resguardando a privacidade da minha identidade nos termos da legislação vigente.
+                  </p>
+                </div>
+              )}
+
               {printItem.signature && (
                 <div style={{ marginTop: '40px', borderTop: '1px solid #000', paddingTop: '10px', maxWidth: '300px' }}>
                   <img src={printItem.signature} alt="Assinatura" style={{ width: '100%', maxHeight: '100px', objectFit: 'contain' }} />
@@ -1298,6 +1307,15 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
             <div style={{ minHeight: '300px' }}>
               {printItem.conteudo}
             </div>
+
+            {printItem.isPatientForm && (
+              <div style={{ marginTop: '35px', borderTop: '2px solid #000', paddingTop: '15px', fontSize: '11px', lineHeight: '1.6', textAlign: 'justify', color: '#000' }}>
+                <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', textTransform: 'uppercase' }}>• DECLARAÇÃO DE CONSENTIMENTO E RESPONSABILIDADE JURÍDICA</p>
+                <p style={{ margin: 0 }}>
+                  Declaro, sob as penas da lei, que todas as informações clínicas prestadas neste documento são verdadeiras, completas e de minha inteira responsabilidade, não omitindo nenhum fato relevante sobre meu estado de saúde. Fui devidamente esclarecido(a) quanto ao diagnóstico podológico e concordo com os procedimentos e tratamentos propostos pela clínica/profissional responsável, autorizando a sua execução. Estou ciente de que o sucesso do tratamento podológico depende também do cumprimento rigoroso das orientações pós-atendimento recomendadas. Adicionalmente, autorizo o registro fotográfico dos meus pés para fins exclusivos de acompanhamento clínico, evolução do prontuário e arquivo profissional, resguardando a privacidade da minha identidade nos termos da legislação vigente.
+                </p>
+              </div>
+            )}
 
             {(printItem.photoAntes || printItem.photoDepois) && (
               <div style={{ marginTop: '30px', display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '30px' }}>
