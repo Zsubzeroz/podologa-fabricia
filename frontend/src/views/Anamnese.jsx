@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ClipboardList, Plus, Search, Trash2, Edit, Printer, X, User, FileText, History, RotateCcw, Check } from 'lucide-react';
-import { SecurityManager, AnamnesisTemplateManager, PatientFormManager, ClientManager } from '../utils/EntityManager';
+import { SecurityManager, AnamnesisTemplateManager, PatientFormManager, ClientManager, CompanySettings } from '../utils/EntityManager';
 
 // Componente de Assinatura Digital
 const SignaturePad = ({ onSave, onClear }) => {
@@ -101,6 +101,18 @@ const SignaturePad = ({ onSave, onClear }) => {
       </div>
     </div>
   );
+};
+
+const calculateAge = (birthdateStr) => {
+  if (!birthdateStr) return '';
+  const birthDate = new Date(birthdateStr + 'T00:00:00');
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return `${age} anos`;
 };
 
 export default function Anamnese({ preSelectedClientName, setPreSelectedClientName, autoOpenFormId, setAutoOpenFormId }) {
@@ -1106,18 +1118,40 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
               </h2>
 
               {(() => {
+                const company = CompanySettings.get();
                 const pClient = printItem.isPatientForm 
                   ? clients.find(c => c.id.toString() === printItem.clientId.toString())
                   : null;
                 return printItem.isPatientForm && (
-                  <div style={{ marginBottom: '20px', padding: '12px', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '13px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 15px' }}>
-                    <div style={{ gridColumn: 'span 2' }}><strong>Paciente:</strong> {printItem.clientName}</div>
-                    {pClient && pClient.cpf && <div><strong>CPF:</strong> {pClient.cpf}</div>}
-                    {pClient && pClient.dataNascimento && <div><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
-                    {pClient && pClient.contato && <div><strong>Contato:</strong> {pClient.contato}</div>}
-                    {pClient && pClient.profissao && <div><strong>Profissão:</strong> {pClient.profissao}</div>}
-                    {pClient && pClient.endereco && <div style={{ gridColumn: 'span 2' }}><strong>Endereço:</strong> {pClient.endereco}</div>}
-                    <div style={{ gridColumn: 'span 2' }}><strong>Data do Registro:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px', border: '1px solid #000', padding: '12px', fontSize: '12px', background: '#f9fafb' }}>
+                    {/* Dados Profissionais */}
+                    <div style={{ borderRight: '1px solid #ccc', paddingRight: '15px' }}>
+                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>Dados Profissionais</h4>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>Clínica/Profissional:</strong> {company.nome}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>Responsável:</strong> {company.responsavel}</p>
+                      {company.coren && <p style={{ margin: '0 0 4px 0' }}><strong>COREN:</strong> {company.coren}</p>}
+                      {company.crefito && <p style={{ margin: '0 0 4px 0' }}><strong>CREFITO:</strong> {company.crefito}</p>}
+                      {company.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {company.cpf}</p>}
+                      <p style={{ margin: '0 0 4px 0' }}><strong>Telefone:</strong> {company.telefone}</p>
+                      {company.instagram && <p style={{ margin: 0 }}><strong>Instagram:</strong> {company.instagram}</p>}
+                    </div>
+
+                    {/* Identificação do Cliente */}
+                    <div>
+                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>Identificação do(a) Cliente</h4>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>Nome Completo:</strong> {printItem.clientName}</p>
+                      {pClient && pClient.dataNascimento && (
+                        <>
+                          <p style={{ margin: '0 0 4px 0' }}><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                          <p style={{ margin: '0 0 4px 0' }}><strong>Idade:</strong> {calculateAge(pClient.dataNascimento)}</p>
+                        </>
+                      )}
+                      {pClient && pClient.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {pClient.cpf}</p>}
+                      {pClient && pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
+                      {pClient && pClient.profissao && <p style={{ margin: '0 0 4px 0' }}><strong>Profissão:</strong> {pClient.profissao}</p>}
+                      {pClient && pClient.endereco && <p style={{ margin: '0 0 4px 0', wordBreak: 'break-word' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
+                      <p style={{ margin: 0 }}><strong>Data do Registro:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                    </div>
                   </div>
                 );
               })()}
@@ -1221,18 +1255,40 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
             </h2>
 
             {(() => {
+              const company = CompanySettings.get();
               const pClient = printItem.isPatientForm 
                 ? clients.find(c => c.id.toString() === printItem.clientId.toString())
                 : null;
               return printItem.isPatientForm && (
-                <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #000', fontSize: '13px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 15px' }}>
-                  <div style={{ gridColumn: 'span 2' }}><strong>Paciente:</strong> {printItem.clientName}</div>
-                  {pClient && pClient.cpf && <div><strong>CPF:</strong> {pClient.cpf}</div>}
-                  {pClient && pClient.dataNascimento && <div><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
-                  {pClient && pClient.contato && <div><strong>Contato:</strong> {pClient.contato}</div>}
-                  {pClient && pClient.profissao && <div><strong>Profissão:</strong> {pClient.profissao}</div>}
-                  {pClient && pClient.endereco && <div style={{ gridColumn: 'span 2' }}><strong>Endereço:</strong> {pClient.endereco}</div>}
-                  <div style={{ gridColumn: 'span 2' }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px', border: '1px solid #000', padding: '15px', fontSize: '12px', background: '#fff' }}>
+                  {/* Dados Profissionais */}
+                  <div style={{ borderRight: '1px solid #000', paddingRight: '15px' }}>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>Dados Profissionais</h4>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>Clínica/Profissional:</strong> {company.nome}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>Responsável:</strong> {company.responsavel}</p>
+                    {company.coren && <p style={{ margin: '0 0 4px 0' }}><strong>COREN:</strong> {company.coren}</p>}
+                    {company.crefito && <p style={{ margin: '0 0 4px 0' }}><strong>CREFITO:</strong> {company.crefito}</p>}
+                    {company.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {company.cpf}</p>}
+                    <p style={{ margin: '0 0 4px 0' }}><strong>Telefone:</strong> {company.telefone}</p>
+                    {company.instagram && <p style={{ margin: 0 }}><strong>Instagram:</strong> {company.instagram}</p>}
+                  </div>
+
+                  {/* Identificação do Cliente */}
+                  <div>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>Identificação do(a) Cliente</h4>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>Nome Completo:</strong> {printItem.clientName}</p>
+                    {pClient && pClient.dataNascimento && (
+                      <>
+                        <p style={{ margin: '0 0 4px 0' }}><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                        <p style={{ margin: '0 0 4px 0' }}><strong>Idade:</strong> {calculateAge(pClient.dataNascimento)}</p>
+                      </>
+                    )}
+                    {pClient && pClient.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {pClient.cpf}</p>}
+                    {pClient && pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
+                    {pClient && pClient.profissao && <p style={{ margin: '0 0 4px 0' }}><strong>Profissão:</strong> {pClient.profissao}</p>}
+                    {pClient && pClient.endereco && <p style={{ margin: '0 0 4px 0', wordBreak: 'break-word' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
+                    <p style={{ margin: 0 }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                  </div>
                 </div>
               );
             })()}

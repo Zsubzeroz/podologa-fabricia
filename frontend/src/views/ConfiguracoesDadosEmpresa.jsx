@@ -106,6 +106,37 @@ export default function ConfiguracoesDadosEmpresa() {
               </div>
             </div>
 
+            {/* Seção Dados do Profissional Responsável */}
+            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '20px', marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <h4 style={{ margin: 0, color: '#0f3d2e', fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dados do Profissional Responsável</h4>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>PROFISSIONAL RESPONSÁVEL</label>
+                  <input name="responsavel" value={empresa.responsavel || ''} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>CPF DO PROFISSIONAL</label>
+                  <input name="cpf" value={empresa.cpf || ''} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>COREN</label>
+                  <input name="coren" value={empresa.coren || ''} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>CREFITO</label>
+                  <input name="crefito" value={empresa.crefito || ''} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#374151' }}>INSTAGRAM</label>
+                  <input name="instagram" value={empresa.instagram || ''} onChange={handleChange} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                </div>
+              </div>
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '15px', marginTop: '20px' }}>
               {saved && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#16a34a', fontWeight: 'bold', fontSize: '0.9rem' }}>

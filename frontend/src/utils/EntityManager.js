@@ -260,7 +260,12 @@ export const CompanySettingsManager = new SettingsManager('dados_empresa', {
   cep: '13164-114',
   email: 'fabriciapodologa@gmail.com',
   telefone: '(19) 99722-2694',
-  logo: '/logo.png'
+  logo: '/logo.png',
+  responsavel: 'Fabricia Rodrigues Pereira',
+  coren: '',
+  crefito: '',
+  cpf: '330.301.948-76',
+  instagram: '@fabriciapodologa'
 });
 
 export class CompanySettings {
