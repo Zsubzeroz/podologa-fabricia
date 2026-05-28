@@ -21,6 +21,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
     dataNascimento: '',
     genero: '',
     cpf: '',
+    rg: '',
     nome: '',
     contato: '',
     email: '',
@@ -61,6 +62,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
       dataNascimento: client.dataNascimento || '',
       genero: client.genero || '',
       cpf: client.cpf || '',
+      rg: client.rg || '',
       nome: client.nome || '',
       contato: client.contato || '',
       email: client.email || '',
@@ -105,6 +107,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
       dataNascimento: editingClinicalInfo.dataNascimento,
       genero: editingClinicalInfo.genero,
       cpf: editingClinicalInfo.cpf,
+      rg: editingClinicalInfo.rg || '',
       contatoEmergenciaNome: editingClinicalInfo.contatoEmergenciaNome,
       contatoEmergenciaTelefone: editingClinicalInfo.contatoEmergenciaTelefone,
       diabetes: editingClinicalInfo.diabetes,
@@ -322,6 +325,16 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
                         value={editingClinicalInfo.cpf}
                         onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, cpf: e.target.value })}
                         placeholder="000.000.000-00"
+                        style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 'bold', color: '#4b5563' }}>RG</label>
+                      <input 
+                        type="text" 
+                        value={editingClinicalInfo.rg || ''}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, rg: e.target.value })}
+                        placeholder="00.000.000-0"
                         style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
                       />
                     </div>

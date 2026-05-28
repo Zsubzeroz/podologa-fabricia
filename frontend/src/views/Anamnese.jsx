@@ -1124,33 +1124,34 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                   : null;
                 return printItem.isPatientForm && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px', border: '1px solid #000', padding: '12px', fontSize: '12px', background: '#f9fafb' }}>
-                    {/* Dados Profissionais */}
+                    {/* DADOS DO PROFISSIONAIS */}
                     <div style={{ borderRight: '1px solid #ccc', paddingRight: '15px' }}>
-                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>Dados Profissionais</h4>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>Clínica/Profissional:</strong> {company.nome}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>Responsável:</strong> {company.responsavel}</p>
-                      {company.coren && <p style={{ margin: '0 0 4px 0' }}><strong>COREN:</strong> {company.coren}</p>}
-                      {company.crefito && <p style={{ margin: '0 0 4px 0' }}><strong>CREFITO:</strong> {company.crefito}</p>}
-                      {company.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {company.cpf}</p>}
-                      <p style={{ margin: '0 0 4px 0' }}><strong>Telefone:</strong> {company.telefone}</p>
-                      {company.instagram && <p style={{ margin: 0 }}><strong>Instagram:</strong> {company.instagram}</p>}
+                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>• DADOS DO PROFISSIONAIS:</h4>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>-Clínica/Profissional Responsável:</strong> {company.nome}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>-COREN:</strong> {company.coren || '_______________________'}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>-CREFITO:</strong> {company.crefito || '_______________________'}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>-CPF:</strong> {company.cpf || '_______________________'}</p>
+                      <p style={{ margin: 0 }}><strong>-Telefone:</strong> {company.telefone}</p>
                     </div>
 
-                    {/* Identificação do Cliente */}
+                    {/* DADOS DO PACIENTE */}
                     <div>
-                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>Identificação do(a) Cliente</h4>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>Nome Completo:</strong> {printItem.clientName}</p>
-                      {pClient && pClient.dataNascimento && (
-                        <>
-                          <p style={{ margin: '0 0 4px 0' }}><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                          <p style={{ margin: '0 0 4px 0' }}><strong>Idade:</strong> {calculateAge(pClient.dataNascimento)}</p>
-                        </>
-                      )}
-                      {pClient && pClient.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {pClient.cpf}</p>}
-                      {pClient && pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
-                      {pClient && pClient.profissao && <p style={{ margin: '0 0 4px 0' }}><strong>Profissão:</strong> {pClient.profissao}</p>}
-                      {pClient && pClient.endereco && <p style={{ margin: '0 0 4px 0', wordBreak: 'break-word' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
-                      <p style={{ margin: 0 }}><strong>Data do Registro:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                      <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>• DADOS DO PACIENTE:</h4>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>• Nome:</strong> {printItem.clientName}</p>
+                      <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
+                        <span><strong>• CPF:</strong> {pClient && pClient.cpf ? pClient.cpf : '___________________'}</span>
+                        <span><strong>• RG:</strong> {pClient && pClient.rg ? pClient.rg : '___________________'}</span>
+                      </div>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> {pClient && pClient.dataNascimento ? new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '____/____/________'}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> {pClient && pClient.dataNascimento ? calculateAge(pClient.dataNascimento) : '______'}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> {pClient && pClient.endereco ? pClient.endereco : '________________________________________________'}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> {pClient && pClient.email ? pClient.email : '_______________________'}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> {pClient && pClient.contato ? pClient.contato : '_______________________'}</p>
+                      <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                        <span><strong>• Tel para contato:</strong> {pClient && pClient.contatoEmergenciaTelefone ? pClient.contatoEmergenciaTelefone : '___________________'}</span>
+                        <span><strong>• Nome/Parentesco:</strong> {pClient && pClient.contatoEmergenciaNome ? pClient.contatoEmergenciaNome : '___________________'}</span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -1261,33 +1262,34 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                 : null;
               return printItem.isPatientForm && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px', border: '1px solid #000', padding: '15px', fontSize: '12px', background: '#fff' }}>
-                  {/* Dados Profissionais */}
+                  {/* DADOS DO PROFISSIONAIS */}
                   <div style={{ borderRight: '1px solid #000', paddingRight: '15px' }}>
-                    <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>Dados Profissionais</h4>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>Clínica/Profissional:</strong> {company.nome}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>Responsável:</strong> {company.responsavel}</p>
-                    {company.coren && <p style={{ margin: '0 0 4px 0' }}><strong>COREN:</strong> {company.coren}</p>}
-                    {company.crefito && <p style={{ margin: '0 0 4px 0' }}><strong>CREFITO:</strong> {company.crefito}</p>}
-                    {company.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {company.cpf}</p>}
-                    <p style={{ margin: '0 0 4px 0' }}><strong>Telefone:</strong> {company.telefone}</p>
-                    {company.instagram && <p style={{ margin: 0 }}><strong>Instagram:</strong> {company.instagram}</p>}
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>• DADOS DO PROFISSIONAIS:</h4>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>-Clínica/Profissional Responsável:</strong> {company.nome}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>-COREN:</strong> {company.coren || '_______________________'}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>-CREFITO:</strong> {company.crefito || '_______________________'}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>-CPF:</strong> {company.cpf || '_______________________'}</p>
+                    <p style={{ margin: 0 }}><strong>-Telefone:</strong> {company.telefone}</p>
                   </div>
 
-                  {/* Identificação do Cliente */}
+                  {/* DADOS DO PACIENTE */}
                   <div>
-                    <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>Identificação do(a) Cliente</h4>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>Nome Completo:</strong> {printItem.clientName}</p>
-                    {pClient && pClient.dataNascimento && (
-                      <>
-                        <p style={{ margin: '0 0 4px 0' }}><strong>Data de Nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                        <p style={{ margin: '0 0 4px 0' }}><strong>Idade:</strong> {calculateAge(pClient.dataNascimento)}</p>
-                      </>
-                    )}
-                    {pClient && pClient.cpf && <p style={{ margin: '0 0 4px 0' }}><strong>CPF:</strong> {pClient.cpf}</p>}
-                    {pClient && pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>Contato:</strong> {pClient.contato}</p>}
-                    {pClient && pClient.profissao && <p style={{ margin: '0 0 4px 0' }}><strong>Profissão:</strong> {pClient.profissao}</p>}
-                    {pClient && pClient.endereco && <p style={{ margin: '0 0 4px 0', wordBreak: 'break-word' }}><strong>Endereço:</strong> {pClient.endereco}</p>}
-                    <p style={{ margin: 0 }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>• DADOS DO PACIENTE:</h4>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>• Nome:</strong> {printItem.clientName}</p>
+                    <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
+                      <span><strong>• CPF:</strong> {pClient && pClient.cpf ? pClient.cpf : '___________________'}</span>
+                      <span><strong>• RG:</strong> {pClient && pClient.rg ? pClient.rg : '___________________'}</span>
+                    </div>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> {pClient && pClient.dataNascimento ? new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '____/____/________'}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> {pClient && pClient.dataNascimento ? calculateAge(pClient.dataNascimento) : '______'}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> {pClient && pClient.endereco ? pClient.endereco : '________________________________________________'}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> {pClient && pClient.email ? pClient.email : '_______________________'}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> {pClient && pClient.contato ? pClient.contato : '_______________________'}</p>
+                    <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                      <span><strong>• Tel para contato:</strong> {pClient && pClient.contatoEmergenciaTelefone ? pClient.contatoEmergenciaTelefone : '___________________'}</span>
+                      <span><strong>• Nome/Parentesco:</strong> {pClient && pClient.contatoEmergenciaNome ? pClient.contatoEmergenciaNome : '___________________'}</span>
+                    </div>
                   </div>
                 </div>
               );
