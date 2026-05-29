@@ -133,7 +133,16 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
 
       if (!b.startTime && !b.endTime) return true; 
       if (hourSt) {
-        return hourSt >= b.startTime && hourSt < b.endTime;
+        const getMin = (t, isEnd = false) => {
+          if (!t) return 0;
+          const [h, m] = t.split(':').map(Number);
+          if (h === 0 && m === 0 && isEnd) return 24 * 60;
+          return h * 60 + m;
+        };
+        const hMin = getMin(hourSt);
+        const bStart = getMin(b.startTime);
+        const bEnd = getMin(b.endTime, true);
+        return hMin >= bStart && hMin < bEnd;
       }
       return false;
     });

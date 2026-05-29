@@ -128,9 +128,12 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     const startTotal = sHour * 60 + sMin;
     const endTotal = startTotal + dHour * 60 + dMin;
 
-    const getMinutes = (timeStr) => {
+    const getMinutes = (timeStr, isEnd = false) => {
       if (!timeStr) return 0;
       const [h, m] = timeStr.split(':').map(Number);
+      if (h === 0 && m === 0 && isEnd) {
+        return 24 * 60;
+      }
       return h * 60 + m;
     };
 
@@ -155,7 +158,7 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
         return;
       } else {
         const bStart = getMinutes(matchingBlock.startTime);
-        const bEnd = getMinutes(matchingBlock.endTime);
+        const bEnd = getMinutes(matchingBlock.endTime, true);
         if (isOverlapping(startTotal, endTotal, bStart, bEnd)) {
           alert(`Este horário não está disponível. O profissional estará ausente das ${matchingBlock.startTime} às ${matchingBlock.endTime} por motivo de: ${matchingBlock.description}`);
           return;
@@ -168,7 +171,7 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
     const hasConflict = appointments.some(appt => {
       if (appt.date !== formData.date) return false;
       const aStart = getMinutes(appt.startTime);
-      const aEnd = getMinutes(appt.endTime);
+      const aEnd = getMinutes(appt.endTime, true);
       return isOverlapping(startTotal, endTotal, aStart, aEnd);
     });
 

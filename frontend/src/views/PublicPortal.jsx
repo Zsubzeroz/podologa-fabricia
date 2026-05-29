@@ -437,9 +437,12 @@ export default function PublicPortal() {
                   <div className="form-group">
                     <label>Horários Disponíveis para este dia</label>
                     {(() => {
-                      const getMinutes = (timeStr) => {
+                      const getMinutes = (timeStr, isEnd = false) => {
                         if (!timeStr) return 0;
                         const [h, m] = timeStr.split(':').map(Number);
+                        if (h === 0 && m === 0 && isEnd) {
+                          return 24 * 60;
+                        }
                         return h * 60 + m;
                       };
 
@@ -504,7 +507,7 @@ export default function PublicPortal() {
                         if (matchingBlock) {
                           if (!matchingBlock.startTime && !matchingBlock.endTime) return false;
                           const bStart = getMinutes(matchingBlock.startTime);
-                          const bEnd = getMinutes(matchingBlock.endTime);
+                          const bEnd = getMinutes(matchingBlock.endTime, true);
                           if (isOverlapping(startTotal, endTotal, bStart, bEnd)) return false;
                         }
 
@@ -512,7 +515,7 @@ export default function PublicPortal() {
                         const hasConflict = currentAppts.some(appt => {
                           if (appt.date !== selectedDate) return false;
                           const aStart = getMinutes(appt.startTime);
-                          const aEnd = getMinutes(appt.endTime);
+                          const aEnd = getMinutes(appt.endTime, true);
                           return isOverlapping(startTotal, endTotal, aStart, aEnd);
                         });
 
@@ -600,9 +603,12 @@ export default function PublicPortal() {
                     const endTime = `${eh.toString().padStart(2, '0')}:${em.toString().padStart(2, '0')}`;
 
                     // Helper to get total minutes from time string
-                    const getMinutes = (timeStr) => {
+                    const getMinutes = (timeStr, isEnd = false) => {
                       if (!timeStr) return 0;
                       const [h, m] = timeStr.split(':').map(Number);
+                      if (h === 0 && m === 0 && isEnd) {
+                        return 24 * 60;
+                      }
                       return h * 60 + m;
                     };
 
@@ -628,7 +634,7 @@ export default function PublicPortal() {
                         return;
                       } else {
                         const bStart = getMinutes(matchingBlock.startTime);
-                        const bEnd = getMinutes(matchingBlock.endTime);
+                        const bEnd = getMinutes(matchingBlock.endTime, true);
                         if (isOverlapping(startTotal, endTotal, bStart, bEnd)) {
                           alert(`Este horário não está disponível. O profissional estará ausente das ${matchingBlock.startTime} às ${matchingBlock.endTime} por motivo de: ${matchingBlock.description}`);
                           return;
@@ -641,7 +647,7 @@ export default function PublicPortal() {
                     const hasConflict = currentAppts.some(appt => {
                       if (appt.date !== selectedDate) return false;
                       const aStart = getMinutes(appt.startTime);
-                      const aEnd = getMinutes(appt.endTime);
+                      const aEnd = getMinutes(appt.endTime, true);
                       return isOverlapping(startTotal, endTotal, aStart, aEnd);
                     });
 
