@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, Package, Filter, Download, ChevronRight, User, Calendar, Plus, Trash2, Edit } from 'lucide-react';
 import { PacoteManager, ClientManager } from '../utils/EntityManager';
 
@@ -25,8 +25,91 @@ export default function ConsultaPacotes({ initialClient }) {
   const [registeringSessionNum, setRegisteringSessionNum] = useState(null);
   const [sessionFormData, setSessionFormData] = useState({
     data: new Date().toISOString().split('T')[0],
-    assinatura: 'Fabricia Rodrigues'
+    descricao: '',
+    fotoAntes: '',
+    fotoDepois: ''
   });
+
+  const sigCanvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  const startDrawing = (e) => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#0f3d2e';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = ((e.clientX || (e.touches && e.touches[0].clientX)) - rect.left) * scaleX;
+    const y = ((e.clientY || (e.touches && e.touches[0].clientY)) - rect.top) * scaleY;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = ((e.clientX || (e.touches && e.touches[0].clientX)) - rect.left) * scaleX;
+    const y = ((e.clientY || (e.touches && e.touches[0].clientY)) - rect.top) * scaleY;
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    
+    if (e.touches) {
+      e.preventDefault();
+    }
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearSigCanvas = () => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const compressImage = (file, callback) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const max_width = 300;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > max_width) {
+          height = Math.round((height * max_width) / width);
+          width = max_width;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        callback(compressedDataUrl);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     const handleSync = () => {
@@ -128,14 +211,23 @@ export default function ConsultaPacotes({ initialClient }) {
   };
 
   const handleRegisterSession = (pacote, num) => {
+    const canvas = sigCanvasRef.current;
+    let signatureDataUrl = '';
+    if (canvas) {
+      signatureDataUrl = canvas.toDataURL('image/png');
+    }
+
     const list = getSessoesList(pacote);
     const index = list.findIndex(s => s.num === num);
     if (index !== -1) {
       list[index] = {
         num,
         data: sessionFormData.data,
+        descricao: sessionFormData.descricao,
+        fotoAntes: sessionFormData.fotoAntes,
+        fotoDepois: sessionFormData.fotoDepois,
         assinado: true,
-        assinatura: sessionFormData.assinatura
+        assinatura: signatureDataUrl
       };
     }
     
@@ -170,6 +262,9 @@ export default function ConsultaPacotes({ initialClient }) {
         list[index] = {
           num,
           data: '',
+          descricao: '',
+          fotoAntes: '',
+          fotoDepois: '',
           assinado: false,
           assinatura: ''
         };
@@ -213,12 +308,47 @@ export default function ConsultaPacotes({ initialClient }) {
     
     let rowsHTML = '';
     sessoes.forEach(s => {
+      let fotosHTML = '';
+      if (s.fotoAntes || s.fotoDepois) {
+        fotosHTML = '<div style="display: flex; gap: 10px; margin-top: 5px;">';
+        if (s.fotoAntes) {
+          fotosHTML += `
+            <div style="text-align: center;">
+              <p style="margin: 0; font-size: 8px; color: #777; font-weight: bold;">Antes</p>
+              <img src="${s.fotoAntes}" style="max-height: 60px; border-radius: 4px; border: 1px solid #ddd;" />
+            </div>
+          `;
+        }
+        if (s.fotoDepois) {
+          fotosHTML += `
+            <div style="text-align: center;">
+              <p style="margin: 0; font-size: 8px; color: #777; font-weight: bold;">Depois</p>
+              <img src="${s.fotoDepois}" style="max-height: 60px; border-radius: 4px; border: 1px solid #ddd;" />
+            </div>
+          `;
+        }
+        fotosHTML += '</div>';
+      }
+
+      let sigImgHTML = '_________________________';
+      if (s.assinado) {
+        if (s.assinatura && s.assinatura.startsWith('data:image')) {
+          sigImgHTML = `<img src="${s.assinatura}" style="max-height: 40px; display: block; margin: 0 auto;" />`;
+        } else {
+          sigImgHTML = `<span style="font-weight: bold; color: #166534;">${s.assinatura || 'Confirmado'}</span>`;
+        }
+      }
+
       rowsHTML += `
         <tr style="border-bottom: 1px solid #ddd;">
-          <td style="padding: 12px; font-weight: bold; text-align: center; font-size: 14px; border: 1px solid #ddd;">Sessão ${s.num}</td>
-          <td style="padding: 12px; text-align: center; font-size: 14px; border: 1px solid #ddd;">${s.data ? formatDate(s.data) : '____/____/________'}</td>
-          <td style="padding: 12px; text-align: center; font-style: italic; color: #333; font-size: 14px; border: 1px solid #ddd;">
-            ${s.assinado ? (s.assinatura || 'Presença Confirmada') : '___________________________________'}
+          <td style="padding: 10px; font-weight: bold; text-align: center; font-size: 13px; border: 1px solid #ddd; vertical-align: middle;">Sessão ${s.num}</td>
+          <td style="padding: 10px; text-align: center; font-size: 13px; border: 1px solid #ddd; vertical-align: middle;">${s.data ? formatDate(s.data) : '____/____/________'}</td>
+          <td style="padding: 10px; font-size: 12px; border: 1px solid #ddd; text-align: left; vertical-align: middle;">
+            <div style="margin-bottom: 5px;">${s.descricao || '<span style="color: #999; font-style: italic;">Sem observações.</span>'}</div>
+            ${fotosHTML}
+          </td>
+          <td style="padding: 10px; text-align: center; border: 1px solid #ddd; vertical-align: middle;">
+            ${sigImgHTML}
           </td>
         </tr>
       `;
@@ -227,17 +357,17 @@ export default function ConsultaPacotes({ initialClient }) {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Cartão de Sessões - ${pacote.clientName || pacote.cliente}</title>
+          <title>Ficha de Sessões - ${pacote.clientName || pacote.cliente}</title>
           <style>
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; color: #333; }
-            .card { border: 2px solid #0f3d2e; padding: 30px; border-radius: 12px; max-width: 700px; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0f3d2e; padding-bottom: 15px; margin-bottom: 20px; }
-            .title { color: #0f3d2e; font-size: 26px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-            .info { margin-bottom: 25px; font-size: 15px; line-height: 1.6; }
-            .info p { margin: 6px 0; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            th { background-color: #0f3d2e; color: white; padding: 12px; border: 1px solid #0f3d2e; font-weight: bold; text-transform: uppercase; font-size: 13px; }
-            .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 15px; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 25px; color: #333; }
+            .card { border: 2px solid #0f3d2e; padding: 20px; border-radius: 12px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0f3d2e; padding-bottom: 10px; margin-bottom: 15px; }
+            .title { color: #0f3d2e; font-size: 22px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+            .info { margin-bottom: 15px; font-size: 14px; line-height: 1.5; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .info p { margin: 4px 0; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { background-color: #0f3d2e; color: white; padding: 10px; border: 1px solid #0f3d2e; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+            .footer { margin-top: 25px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #ddd; padding-top: 10px; }
             @media print {
               body { margin: 0; }
               .card { border: none; padding: 0; box-shadow: none; }
@@ -248,19 +378,25 @@ export default function ConsultaPacotes({ initialClient }) {
           <div class="card">
             <div class="header">
               <h1 class="title">CONTROLE DE SESSÕES</h1>
-              <span style="font-weight: 800; color: #0f3d2e; font-size: 18px; border: 2px solid #0f3d2e; padding: 4px 12px; border-radius: 6px;">PACOTE</span>
+              <span style="font-weight: 800; color: #0f3d2e; font-size: 16px; border: 2px solid #0f3d2e; padding: 4px 12px; border-radius: 6px;">CLÍNICA</span>
             </div>
             <div class="info">
-              <p><strong>Paciente:</strong> ${pacote.clientName || pacote.cliente}</p>
-              <p><strong>Procedimento/Pacote:</strong> ${pacote.pacote}</p>
-              <p><strong>Sessões Contratadas:</strong> ${pacote.total}</p>
+              <div>
+                <p><strong>Paciente:</strong> ${pacote.clientName || pacote.cliente}</p>
+                <p><strong>Procedimento/Pacote:</strong> ${pacote.pacote}</p>
+              </div>
+              <div style="text-align: right;">
+                <p><strong>Sessões Contratadas:</strong> ${pacote.total}</p>
+                <p><strong>Status:</strong> ${pacote.status}</p>
+              </div>
             </div>
             <table>
               <thead>
                 <tr>
-                  <th style="width: 15%;">Nº</th>
-                  <th style="width: 35%;">DATA DA VISITA</th>
-                  <th style="width: 50%;">ASSINATURA / CONFIRMAÇÃO</th>
+                  <th style="width: 10%;">Nº</th>
+                  <th style="width: 20%;">DATA DA VISITA</th>
+                  <th style="width: 45%;">PROCEDIMENTO / IMAGENS</th>
+                  <th style="width: 25%;">ASSINATURA DIGITAL</th>
                 </tr>
               </thead>
               <tbody>
@@ -569,13 +705,45 @@ export default function ConsultaPacotes({ initialClient }) {
                       </div>
 
                       {isRegistered ? (
-                        <div>
-                          <p style={{ margin: '0 0 4px 0', fontSize: '0.8rem', color: '#166534' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <p style={{ margin: '0', fontSize: '0.8rem', color: '#166534' }}>
                             📅 <strong>Data:</strong> {formatDate(s.data)}
                           </p>
-                          <p style={{ margin: 0, fontSize: '0.8rem', color: '#166534', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            ✍️ <strong>Assinatura:</strong> {s.assinatura || 'Presença Confirmada'}
-                          </p>
+                          {s.descricao && (
+                            <p style={{ margin: '0', fontSize: '0.8rem', color: '#374151', display: '-webkit-box', WebkitLineClamp: '3', WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }} title={s.descricao}>
+                              📝 <strong>Procedimento:</strong> {s.descricao}
+                            </p>
+                          )}
+                          
+                          {/* Photos thumbnails */}
+                          {(s.fotoAntes || s.fotoDepois) && (
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                              {s.fotoAntes && (
+                                <div style={{ border: '1px solid #dcfce7', borderRadius: '4px', overflow: 'hidden', width: '50px', height: '50px', background: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                  <img src={s.fotoAntes} style={{ maxHeight: '100%', maxWidth: '100%', cursor: 'pointer' }} onClick={() => window.open(s.fotoAntes, '_blank')} title="Clique para ver foto cheia" />
+                                </div>
+                              )}
+                              {s.fotoDepois && (
+                                <div style={{ border: '1px solid #dcfce7', borderRadius: '4px', overflow: 'hidden', width: '50px', height: '50px', background: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                  <img src={s.fotoDepois} style={{ maxHeight: '100%', maxWidth: '100%', cursor: 'pointer' }} onClick={() => window.open(s.fotoDepois, '_blank')} title="Clique para ver foto cheia" />
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Signature display */}
+                          {s.assinatura && (
+                            <div style={{ marginTop: '4px' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#166534', display: 'block', marginBottom: '2px' }}>✍️ Assinatura:</span>
+                              <div style={{ background: '#fff', border: '1px solid #dcfce7', borderRadius: '4px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px' }}>
+                                {s.assinatura.startsWith('data:image') ? (
+                                  <img src={s.assinatura} style={{ maxHeight: '100%' }} />
+                                ) : (
+                                  <span style={{ fontSize: '0.75rem', fontStyle: 'italic' }}>{s.assinatura}</span>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div style={{ color: '#9ca3af', fontSize: '0.8rem', fontStyle: 'italic' }}>
@@ -585,45 +753,7 @@ export default function ConsultaPacotes({ initialClient }) {
 
                       {/* Controls */}
                       <div>
-                        {registeringSessionNum === s.num ? (
-                          <div style={{ background: '#f9fafb', padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '5px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                              <label style={{ fontSize: '11px', fontWeight: '700', color: '#4b5563' }}>Data da Visita</label>
-                              <input 
-                                type="date" 
-                                value={sessionFormData.data} 
-                                onChange={(e) => setSessionFormData({...sessionFormData, data: e.target.value})}
-                                style={{ padding: '4px', fontSize: '0.85rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                              />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                              <label style={{ fontSize: '11px', fontWeight: '700', color: '#4b5563' }}>Assinatura (Nome)</label>
-                              <input 
-                                type="text" 
-                                value={sessionFormData.assinatura} 
-                                onChange={(e) => setSessionFormData({...sessionFormData, assinatura: e.target.value})}
-                                placeholder="Nome do paciente ou profissional"
-                                style={{ padding: '4px', fontSize: '0.85rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                              />
-                            </div>
-                            <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
-                              <button 
-                                type="button" 
-                                onClick={() => setRegisteringSessionNum(null)} 
-                                style={{ flex: 1, padding: '4px', fontSize: '0.75rem', background: '#e5e7eb', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                              >
-                                Cancelar
-                              </button>
-                              <button 
-                                type="button" 
-                                onClick={() => handleRegisterSession(selectedPacote, s.num)} 
-                                style={{ flex: 1, padding: '4px', fontSize: '0.75rem', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                              >
-                                Confirmar
-                              </button>
-                            </div>
-                          </div>
-                        ) : isRegistered ? (
+                        {isRegistered ? (
                           <button 
                             type="button" 
                             onClick={() => handleClearSession(selectedPacote, s.num)} 
@@ -638,7 +768,9 @@ export default function ConsultaPacotes({ initialClient }) {
                               setRegisteringSessionNum(s.num);
                               setSessionFormData({
                                 data: new Date().toISOString().split('T')[0],
-                                assinatura: 'Fabricia Rodrigues'
+                                descricao: '',
+                                fotoAntes: '',
+                                fotoDepois: ''
                               });
                             }} 
                             style={{ width: '100%', padding: '6px', fontSize: '0.75rem', background: '#ecfdf5', color: '#059669', border: '1px solid #059669', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
@@ -651,6 +783,168 @@ export default function ConsultaPacotes({ initialClient }) {
                   );
                 });
               })()}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Session Registration Sub-Modal */}
+      {registeringSessionNum !== null && selectedPacote && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '15px' }}>
+          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '600px', width: '100%', maxHeight: '95vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#0f3d2e' }}>
+                Registrar Atendimento - Sessão {registeringSessionNum}
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setRegisteringSessionNum(null)} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', color: '#9ca3af' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Date picker */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Data da Sessão</label>
+              <input 
+                type="date" 
+                value={sessionFormData.data} 
+                onChange={(e) => setSessionFormData({...sessionFormData, data: e.target.value})}
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }}
+              />
+            </div>
+
+            {/* Description / Clinical notes */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Descrição do Procedimento / Observações</label>
+              <textarea 
+                value={sessionFormData.descricao} 
+                onChange={(e) => setSessionFormData({...sessionFormData, descricao: e.target.value})}
+                placeholder="Descreva o procedimento realizado nesta sessão, materiais usados, evolução do caso..."
+                rows="3"
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+              />
+            </div>
+
+            {/* Photos upload (Before / After) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Foto Antes</label>
+                {sessionFormData.fotoAntes ? (
+                  <div style={{ position: 'relative', border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <img src={sessionFormData.fotoAntes} style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                    <button 
+                      type="button" 
+                      onClick={() => setSessionFormData({...sessionFormData, fotoAntes: ''})} 
+                      style={{ position: 'absolute', top: '5px', right: '5px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <label style={{ border: '1px dashed #d1d5db', borderRadius: '6px', height: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280', fontSize: '11px' }}>
+                    <span>📸 Enviar Foto</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          compressImage(file, (url) => setSessionFormData(prev => ({ ...prev, fotoAntes: url })));
+                        }
+                      }}
+                      style={{ display: 'none' }} 
+                    />
+                  </label>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Foto Depois</label>
+                {sessionFormData.fotoDepois ? (
+                  <div style={{ position: 'relative', border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <img src={sessionFormData.fotoDepois} style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                    <button 
+                      type="button" 
+                      onClick={() => setSessionFormData({...sessionFormData, fotoDepois: ''})} 
+                      style={{ position: 'absolute', top: '5px', right: '5px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <label style={{ border: '1px dashed #d1d5db', borderRadius: '6px', height: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280', fontSize: '11px' }}>
+                    <span>📸 Enviar Foto</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          compressImage(file, (url) => setSessionFormData(prev => ({ ...prev, fotoDepois: url })));
+                        }
+                      }}
+                      style={{ display: 'none' }} 
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Legal terms disclaimer box */}
+            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '10px', fontSize: '0.75rem', color: '#4b5563', lineHeight: '1.4' }}>
+              <strong>TERMO DE CONSENTIMENTO E PRESENÇA:</strong> Confirmo que compareci à sessão clínica na data informada e recebi o procedimento acima descrito. Autorizo o registro fotográfico para acompanhamento do tratamento.
+            </div>
+
+            {/* Digital Signature Canvas */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Assinatura Digital (Paciente/Responsável)</label>
+                <button 
+                  type="button" 
+                  onClick={clearSigCanvas} 
+                  style={{ background: '#f3f4f6', border: 'none', borderRadius: '4px', padding: '3px 8px', fontSize: '11px', fontWeight: 'bold', color: '#4b5563', cursor: 'pointer' }}
+                >
+                  Limpar Desenho
+                </button>
+              </div>
+              <div style={{ border: '1px solid #d1d5db', borderRadius: '6px', background: '#f9fafb', height: '120px', overflow: 'hidden', position: 'relative' }}>
+                <canvas 
+                  ref={sigCanvasRef}
+                  width={550}
+                  height={120}
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                  style={{ width: '100%', height: '100%', display: 'block', cursor: 'crosshair' }}
+                />
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button 
+                type="button" 
+                onClick={() => setRegisteringSessionNum(null)} 
+                style={{ flex: 1, padding: '12px', background: '#f3f4f6', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                onClick={() => handleRegisterSession(selectedPacote, registeringSessionNum)} 
+                style={{ flex: 1, padding: '12px', background: '#0f3d2e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Confirmar e Salvar
+              </button>
             </div>
 
           </div>
