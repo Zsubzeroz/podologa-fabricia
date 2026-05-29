@@ -107,6 +107,41 @@ function App() {
   const [appointments, setAppointments] = useState(() => AppointmentManager.getAll());
 
   useEffect(() => {
+    // Migration to ensure the 10 services requested exist in the DB
+    const currentServices = ServiceManager.getAll();
+    const newServicesList = [
+      { name: 'Pé Diabético', price: 'R$ 160,00', duration: '01:00' },
+      { name: 'Spa dos Pés', price: 'R$ 190,00', duration: '01:00' },
+      { name: 'Órtese Laminar', price: 'R$ 90,00', duration: '00:30' },
+      { name: 'Tratamento para Micoses', price: 'R$ 110,00', duration: '00:45' },
+      { name: 'Tratamento de Onicocriptose com Granuloma', price: 'R$ 130,00', duration: '00:45' },
+      { name: 'Podoprofilaxia — Podologia Tradicional', price: 'R$ 150,00', duration: '01:00' },
+      { name: 'Laserterapia e ILIB', price: 'R$ 100,00', duration: '00:30' },
+      { name: 'Reflexologia Podal', price: 'R$ 120,00', duration: '00:45' },
+      { name: 'Bandagem Terapêutica', price: 'R$ 60,00', duration: '00:20' },
+      { name: 'Parafina Terapêutica', price: 'R$ 80,00', duration: '00:30' }
+    ];
+
+    let addedAny = false;
+    const updatedServices = [...currentServices];
+
+    newServicesList.forEach(ns => {
+      const exists = currentServices.some(cs => cs.name.toLowerCase().trim() === ns.name.toLowerCase().trim());
+      if (!exists) {
+        updatedServices.push({
+          id: Date.now() + Math.random(),
+          ...ns
+        });
+        addedAny = true;
+      }
+    });
+
+    if (addedAny) {
+      ServiceManager.save(updatedServices);
+    }
+  }, []);
+
+  useEffect(() => {
     const load = () => setAppointments(AppointmentManager.getAll());
     load();
     window.addEventListener('storage', load);
