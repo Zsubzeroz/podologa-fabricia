@@ -530,7 +530,7 @@ export default function Clientes({ onSchedule, onGenerateReceipt, onViewPacotes,
                       <input 
                         type="text" 
                         value={editingClinicalInfo.alergias}
-                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, allergies: e.target.value })}
+                        onChange={(e) => setEditingClinicalInfo({ ...editingClinicalInfo, alergias: e.target.value })}
                         placeholder="Ex: Iodo, esparadrapo, látex, etc."
                         style={{ padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.85rem' }}
                       />

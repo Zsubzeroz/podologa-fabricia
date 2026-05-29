@@ -52,7 +52,28 @@ class EntityManager {
 
   getAll() {
     const data = window.localStorage.getItem(this.key);
-    return data ? JSON.parse(data) : [];
+    let items = data ? JSON.parse(data) : [];
+    
+    // Auto-migrate/inject default templates if missing
+    if (this.key === 'anamneses_list' && this.defaultItems && this.defaultItems.length > 0) {
+      let changed = false;
+      this.defaultItems.forEach(defItem => {
+        if (!items.some(item => String(item.id) === String(defItem.id))) {
+          items.push(defItem);
+          changed = true;
+        }
+      });
+      if (changed) {
+        window.localStorage.setItem(this.key, JSON.stringify(items));
+        try {
+          const docRef = doc(db, 'appData', this.key);
+          setDoc(docRef, { items }).catch(console.error);
+        } catch (e) {
+          console.warn("Failed to auto-migrate templates to firebase", e);
+        }
+      }
+    }
+    return items;
   }
 
   save(items) {
@@ -75,7 +96,10 @@ class EntityManager {
   }
 
   remove(id) {
-    const items = this.getAll().filter(item => String(item.id) !== String(id));
+    // Read directly from localStorage (NOT via getAll) to avoid re-injecting defaults before filtering
+    const raw = window.localStorage.getItem(this.key);
+    const current = raw ? JSON.parse(raw) : [];
+    const items = current.filter(item => String(item.id) !== String(id));
     this.save(items);
     return items;
   }
@@ -131,6 +155,12 @@ export const AnamnesisTemplateManager = new EntityManager('anamneses_list', [
     nome: 'FICHA DE ANAMNESE: SPA DOS PÉS & SAÚDE CLÍNICA',
     status: 'ATIVO',
     conteudo: `FICHA DE ANAMNESE: SPA DOS PÉS & SAÚDE CLÍNICA\n\n1. DADOS PESSOAIS\nNome Completo: __________________________________________________________________\nData de Nascimento: __/__/__ Idade: ________\nProfissão: _________________________ Telefone: ( ) ___________________________\n\n2. RASTREIO CLÍNICO E GRUPOS DE RISCO\n( ) Diabetes | Tipo: _______ Última HGT: ________\n( ) Gestante | Semanas: ______________\n( ) Hipertensão | ( ) Hipotensão\n( ) Neuropatias (Dormência, formigamento, queimação)\n( ) Alergias: ( ) Corantes ( ) Essências ( ) Cosméticos ( ) Aspirina/Ácido Salicílico\nTipo de calçado que utiliza hoje: ____________________________________________________\n\n3. AVALIAÇÃO VASCULAR PERIFÉRICA\nVarizes: ( ) Ausentes ( ) Pequenos Vasos ( ) Calibrosas/Salientes\nEdema (Inchaço): ( ) Ausente ( ) +/4+ ( ) ++/4+ ( ) +++/4+\nTemperatura dos Pés: ( ) Normal ( ) Frios (Isquemia?) ( ) Muito Quentes (Inflamação?)\nPerfusão (Enchimento Capilar): ( ) Normal (< 3 seg) ( ) Lentificado (> 3 seg)\nPulsos Pediosos: ( ) Presentes/Rítmicos ( ) Diminuídos ( ) Ausentes\nHistórico de TVP (Trombose Venosa Profunda): ( ) Sim ( ) Não\n\n4. AVALIAÇÃO ESTRUTURAL E NEUROLÓGICA (FOCO: PÉ DIABÉTICO)\nSensibilidade Térmica: ( ) Preservada ( ) Diminuída ( ) Ausente\nSensibilidade Tátil: ( ) Presente ( ) Ausente\nDeformidades: ( ) Dedos em garra/martelo ( ) Joanete ( ) Desabamento de arco\nIntegridade da Pele: ( ) Anidrose (Secura) ( ) Fissuras ( ) Micoses ( ) Úlceras\nSinais de Infecção: ( ) Vermelhidão ( ) Calor local ( ) Odor\nIntercorrências: Já teve feridas que demoraram a cicatrizar? ( ) Sim ( ) Não\n\n5. PROTOCOLO DE AROMATERAPIA & BEM-ESTAR\nSensibilidade Olfativa: ( ) Baixa ( ) Média ( ) Alta\nRestrições: ( ) Epilepsia ( ) Pressão Alta Descompensada\nObjetivo do Spa: ( ) Relaxamento ( ) Drenagem de Edema ( ) Energização\n\n6. TERMO DE RESPONSABILIDADE E CONSENTIMENTO\nDeclaro que as informações acima são verdadeiras. Estou ciente de que o Spa dos Pés é um procedimento de bem-estar. Como profissional graduanda em enfermagem e podóloga, informo que o protocolo será adaptado conforme as condições vasculares, neurológicas e sistêmicas identificadas para garantir minha segurança e integridade tecidual.\n\nData: __/__/__ Assinatura: ________________________________________________\nProfissional Responsável: Fabrícia Rodrigues | Podologia & Graduanda em Enfermagem`
+  },
+  {
+    id: 10,
+    nome: 'FICHA CLÍNICA DO PACIENTE',
+    status: 'ATIVO',
+    conteudo: `FICHA CLÍNICA DO PACIENTE\n\n👤 IDENTIFICAÇÃO:\nNome Completo: __________________________________________________\nData de Nascimento: ____/____/________   Idade: ______ anos\nCPF: ___________________                 RG: ___________________\nEndereço: _______________________________________________________\nTelefone: _________________              E-mail: ________________\n\n🩺 ANAMNESE (HISTÓRICO CLÍNICO):\nQueixa Principal: _______________________________________________\nHistórico de Doenças: ( ) Diabetes ( ) Hipertensão ( ) Cardiopatia ( ) Alergias\nUso de Medicamentos: ____________________________________________\nGestante? ( ) Não ( ) Sim | Semanas: ________\n\n👣 EXAME FÍSICO (AVALIAÇÃO DOS PÉS):\nPatologias Dermatológicas: ( ) Fissuras ( ) Micose ( ) Calos ( ) Onicocriptose\nFormatos Ungueais: ( ) Normal ( ) Involuta ( ) Funil ( ) Telha\nVascular/Neurológico: Pulsos Pediosos ( ) Presentes ( ) Ausentes\n\n📝 OBSERVAÇÕES:\n_________________________________________________________________\n_________________________________________________________________`
   }
 ]);
 export const FinanceManager = new EntityManager('financeiro_entries');
@@ -259,7 +289,7 @@ export const CompanySettingsManager = new SettingsManager('dados_empresa', {
   estado: 'SP',
   cep: '13164-114',
   email: 'fabriciapodologa@gmail.com',
-  telefone: '(19) 99722-2694',
+  telefone: '(19) 997270910',
   logo: '/logo.png',
   responsavel: 'Fabricia Rodrigues Pereira',
   coren: '',

@@ -118,6 +118,7 @@ const calculateAge = (birthdateStr) => {
 export default function Anamnese({ preSelectedClientName, setPreSelectedClientName, autoOpenFormId, setAutoOpenFormId }) {
   // Tabs: 'modelos' or 'pacientes'
   const [activeTab, setActiveTab] = useState('modelos');
+  const [expandedTemplate, setExpandedTemplate] = useState(null);
 
   // Templates State
   const [fichas, setFichas] = useState(() => AnamnesisTemplateManager.getAll());
@@ -157,6 +158,7 @@ export default function Anamnese({ preSelectedClientName, setPreSelectedClientNa
   const [showModal, setShowModal] = useState(false);
   const [showFillModal, setShowFillModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(null); // { message, onConfirm }
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [printItem, setPrintItem] = useState(null);
@@ -217,7 +219,11 @@ export default function Anamnese({ preSelectedClientName, setPreSelectedClientNa
       conteudo: form.conteudo
     });
     if (form.rawStructuredData) {
-      setStructuredData(form.rawStructuredData);
+      setStructuredData({
+        ...form.rawStructuredData,
+        alergias: form.rawStructuredData.alergias || 'NÃO',
+        alergiasDesc: form.rawStructuredData.alergiasDesc || ''
+      });
     } else {
       setStructuredData({
         calcado: 'Fechado',
@@ -233,6 +239,8 @@ export default function Anamnese({ preSelectedClientName, setPreSelectedClientNa
         gestanteSemanas: '',
         sensibilidade: 'NÃO',
         sensibilidadeDesc: '',
+        alergias: 'NÃO',
+        alergiasDesc: '',
         patologias: {
           fissuras: false,
           hiperidrose: false,
@@ -336,6 +344,8 @@ export default function Anamnese({ preSelectedClientName, setPreSelectedClientNa
     gestanteSemanas: '',
     sensibilidade: 'NÃO',
     sensibilidadeDesc: '',
+    alergias: 'NÃO',
+    alergiasDesc: '',
     patologias: {
       fissuras: false,
       hiperidrose: false,
@@ -407,26 +417,41 @@ export default function Anamnese({ preSelectedClientName, setPreSelectedClientNa
     setShowModal(false);
   };
 
+  const handleToggleStatus = (ficha) => {
+    const novoStatus = ficha.status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
+    AnamnesisTemplateManager.update(ficha.id, { ...ficha, status: novoStatus });
+    setFichas(AnamnesisTemplateManager.getAll());
+    SecurityManager.log('Status Alterado', 'SISTEMA', `Modelo: ${ficha.nome} → ${novoStatus}`);
+  };
+
   const handleDelete = (id) => {
-    if (window.confirm('Tem certeza de que deseja excluir este modelo?')) {
-      const ficha = fichas.find(f => f.id === id);
-      AnamnesisTemplateManager.remove(id);
-      setFichas(AnamnesisTemplateManager.getAll());
-      if (ficha) {
-        SecurityManager.log('Modelo Excluído', 'SISTEMA', `Modelo: ${ficha.nome}`);
+    setConfirmDialog({
+      message: 'Tem certeza de que deseja excluir este modelo?',
+      onConfirm: () => {
+        const ficha = fichas.find(f => f.id === id);
+        AnamnesisTemplateManager.remove(id);
+        setFichas(AnamnesisTemplateManager.getAll());
+        if (ficha) {
+          SecurityManager.log('Modelo Excluído', 'SISTEMA', `Modelo: ${ficha.nome}`);
+        }
+        setConfirmDialog(null);
       }
-    }
+    });
   };
 
   const handleDeletePatientForm = (id) => {
-    if (window.confirm('Tem certeza de que deseja excluir esta ficha de paciente?')) {
-      const form = patientForms.find(f => f.id === id);
-      PatientFormManager.remove(id);
-      setPatientForms(PatientFormManager.getAll());
-      if (form) {
-        SecurityManager.log('Ficha Excluída', form.clientName, `Ficha: ${form.templateName}`);
+    setConfirmDialog({
+      message: 'Tem certeza de que deseja excluir esta ficha de paciente?',
+      onConfirm: () => {
+        const form = patientForms.find(f => f.id === id);
+        PatientFormManager.remove(id);
+        setPatientForms(PatientFormManager.getAll());
+        if (form) {
+          SecurityManager.log('Ficha Excluída', form.clientName, `Ficha: ${form.templateName}`);
+        }
+        setConfirmDialog(null);
       }
-    }
+    });
   };
 
   const handleOpenFillModal = (templateId = '') => {
@@ -463,6 +488,8 @@ export default function Anamnese({ preSelectedClientName, setPreSelectedClientNa
       gestanteSemanas: '',
       sensibilidade: 'NÃO',
       sensibilidadeDesc: '',
+      alergias: 'NÃO',
+      alergiasDesc: '',
       patologias: {
         fissuras: false,
         hiperidrose: false,
@@ -559,6 +586,7 @@ AVALIAÇÃO FÍSICA E HÁBITOS:
 - Uso de Medicamentos: (${structuredData.medicamento === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.medicamento === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.medicamentoDesc ? `[${structuredData.medicamentoDesc}]` : ''}
 - Gestante: (${structuredData.gestante === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.gestante === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.gestanteSemanas ? `[${structuredData.gestanteSemanas} semanas]` : ''}
 - Sensibilidade a dor: (${structuredData.sensibilidade === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.sensibilidade === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.sensibilidadeDesc ? `[${structuredData.sensibilidadeDesc}]` : ''}
+- Alergias / Sensibilidade a substâncias: (${structuredData.alergias === 'SIM' ? 'X' : ' '}) SIM  (${structuredData.alergias === 'NÃO' ? 'X' : ' '}) NÃO  ${structuredData.alergiasDesc ? `[${structuredData.alergiasDesc}]` : ''}
 
 PATOLOGIAS IDENTIFICADAS:
 ${patologiasFormatadas}
@@ -726,45 +754,123 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
         </div>
 
         {/* List Content */}
-        <div style={{ overflowX: 'auto' }}>
-          <table className="sa-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-                <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>
-                  {activeTab === 'modelos' ? 'NOME DO MODELO' : 'PACIENTE / DOCUMENTO'}
-                </th>
-                <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>
-                  {activeTab === 'modelos' ? 'STATUS' : 'DATA'}
-                </th>
-                <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>AÇÕES</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activeTab === 'modelos' ? (
-                filteredModelos.length === 0 ? (
-                  <tr><td colSpan="3" style={{ textAlign: 'center', padding: '30px', color: '#6b7280' }}>Nenhum modelo encontrado.</td></tr>
-                ) : (
-                  filteredModelos.map((ficha) => (
-                    <tr key={ficha.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                      <td style={{ padding: '14px', color: '#111827', fontWeight: 'bold' }}>{ficha.nome}</td>
-                      <td style={{ padding: '14px', textAlign: 'center' }}>
-                        <span style={{ background: ficha.status === 'ATIVO' ? '#ecfdf5' : '#fef2f2', color: ficha.status === 'ATIVO' ? '#047857' : '#b91c1c', padding: '4px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                          {ficha.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                          <button onClick={() => handleOpenFillModal(ficha.id)} title="Preencher para Paciente" style={{ padding: '6px', cursor: 'pointer', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '6px' }}><User size={14} /></button>
-                          <button onClick={() => handleOpenPrintModal(ficha)} title="Imprimir Modelo Vazio" style={{ padding: '6px', cursor: 'pointer', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px' }}><Printer size={14} /></button>
-                          <button onClick={() => handleOpenEditModal(ficha)} title="Editar Modelo" style={{ padding: '6px', cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px' }}><Edit size={14} /></button>
-                          <button onClick={() => handleDelete(ficha.id)} title="Excluir Modelo" style={{ padding: '6px', cursor: 'pointer', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px' }}><Trash2 size={14} /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )
-              ) : (
-                filteredPatientForms.length === 0 ? (
+        {activeTab === 'modelos' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {filteredModelos.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #d1d5db' }}>
+                Nenhum modelo encontrado.
+              </div>
+            ) : filteredModelos.map((ficha) => (
+              <div key={ficha.id} style={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', transition: 'box-shadow 0.2s' }}>
+                {/* Card Header — sempre visível e clicável */}
+                <div 
+                  onClick={() => setExpandedTemplate(expandedTemplate === ficha.id ? null : ficha.id)}
+                  style={{ 
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px',
+                    background: expandedTemplate === ficha.id ? '#f0fdf4' : '#fff',
+                    cursor: 'pointer', borderBottom: expandedTemplate === ficha.id ? '1px solid #d1fae5' : 'none',
+                    transition: 'background 0.2s'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ background: '#0f3d2e', borderRadius: '8px', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FileText size={18} color="white" />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '700', color: '#111827', fontSize: '1rem' }}>{ficha.nome}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '2px' }}>
+                        {ficha.conteudo ? `${ficha.conteudo.split('\n').length} linhas` : 'Sem conteúdo'} • Clique para {expandedTemplate === ficha.id ? 'recolher' : 'expandir'}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span 
+                      onClick={(e) => { e.stopPropagation(); handleToggleStatus(ficha); }}
+                      title="Clique para alternar status"
+                      style={{ 
+                        background: ficha.status === 'ATIVO' ? '#ecfdf5' : '#fef2f2', 
+                        color: ficha.status === 'ATIVO' ? '#047857' : '#b91c1c', 
+                        padding: '4px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem',
+                        cursor: 'pointer', userSelect: 'none',
+                        border: `1px solid ${ficha.status === 'ATIVO' ? '#6ee7b7' : '#fca5a5'}`,
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {ficha.status === 'ATIVO' ? '✓ ATIVO' : '✗ INATIVO'}
+                    </span>
+                    <div style={{ color: '#6b7280', fontSize: '20px', userSelect: 'none' }}>{expandedTemplate === ficha.id ? '▲' : '▼'}</div>
+                  </div>
+                </div>
+
+                {/* Card Body — expande ao clicar */}
+                {expandedTemplate === ficha.id && (
+                  <div style={{ padding: '20px', background: '#fafafa' }}>
+                    {/* Conteúdo do documento com visual de documento oficial */}
+                    <div style={{
+                      background: '#fff', border: '1px solid #d1d5db', borderRadius: '8px',
+                      padding: '24px', marginBottom: '16px',
+                      fontFamily: 'Georgia, serif', fontSize: '13px', lineHeight: '1.8',
+                      whiteSpace: 'pre-wrap', color: '#1f2937',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      maxHeight: '380px', overflowY: 'auto',
+                      borderLeft: '4px solid #0f3d2e'
+                    }}>
+                      {ficha.conteudo || '(Sem conteúdo definido)'}
+                    </div>
+
+                    {/* Ações rápidas */}
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleOpenFillModal(ficha.id); }}
+                        style={{ 
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          padding: '10px 18px', background: '#0f3d2e', color: 'white',
+                          border: 'none', borderRadius: '8px', fontWeight: '700',
+                          cursor: 'pointer', fontSize: '0.9rem'
+                        }}
+                      >
+                        <User size={15} /> Usar com Paciente
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleOpenPrintModal(ficha); }}
+                        style={{ 
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          padding: '10px 18px', background: '#10b981', color: 'white',
+                          border: 'none', borderRadius: '8px', fontWeight: '700',
+                          cursor: 'pointer', fontSize: '0.9rem'
+                        }}
+                      >
+                        <Printer size={15} /> Imprimir Modelo Vazio
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDelete(ficha.id); }}
+                        style={{ 
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          padding: '10px 18px', background: '#fff', color: '#ef4444',
+                          border: '1px solid #ef4444', borderRadius: '8px', fontWeight: '700',
+                          cursor: 'pointer', fontSize: '0.9rem', marginLeft: 'auto'
+                        }}
+                      >
+                        <Trash2 size={15} /> Excluir
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table className="sa-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                  <th style={{ padding: '14px', textAlign: 'left', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>PACIENTE / DOCUMENTO</th>
+                  <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>DATA</th>
+                  <th style={{ padding: '14px', textAlign: 'center', color: '#374151', fontSize: '0.9rem', fontWeight: '700' }}>AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPatientForms.length === 0 ? (
                   <tr><td colSpan="3" style={{ textAlign: 'center', padding: '30px', color: '#6b7280' }}>Nenhuma ficha de paciente encontrada.</td></tr>
                 ) : (
                   filteredPatientForms.map((form) => (
@@ -778,19 +884,44 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                       </td>
                       <td style={{ padding: '14px', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                          <button onClick={() => handleOpenPrintModal(form, true)} title="Ver e Imprimir" style={{ padding: '6px', cursor: 'pointer', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px' }}><Printer size={14} /></button>
-                          <button onClick={() => handleEditPatientForm(form)} title="Editar Ficha" style={{ padding: '6px', cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px' }}><Edit size={14} /></button>
-                          <button onClick={() => handleDeletePatientForm(form.id)} title="Excluir Ficha" style={{ padding: '6px', cursor: 'pointer', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px' }}><Trash2 size={14} /></button>
+                          <button onClick={() => handleOpenPrintModal(form, true)} title="Ver e Imprimir" style={{ padding: '6px 10px', cursor: 'pointer', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: '600' }}><Printer size={14} /> Ver</button>
+                          <button onClick={() => handleEditPatientForm(form)} title="Editar Ficha" style={{ padding: '6px 10px', cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: '600' }}><Edit size={14} /> Editar</button>
+                          <button onClick={() => handleDeletePatientForm(form.id)} title="Excluir Ficha" style={{ padding: '6px 10px', cursor: 'pointer', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: '600' }}><Trash2 size={14} /> Excluir</button>
                         </div>
                       </td>
                     </tr>
                   ))
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
+      {/* Custom Confirm Dialog */}
+      {confirmDialog && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div style={{ background: 'white', borderRadius: '14px', padding: '32px 28px', maxWidth: '400px', width: '90%', boxShadow: '0 8px 32px rgba(0,0,0,0.18)', textAlign: 'center' }}>
+            <div style={{ fontSize: '38px', marginBottom: '12px' }}>⚠️</div>
+            <h3 style={{ margin: '0 0 10px 0', color: '#111827', fontSize: '1.1rem', fontWeight: '700' }}>Confirmar Exclusão</h3>
+            <p style={{ margin: '0 0 24px 0', color: '#6b7280', fontSize: '0.95rem', lineHeight: '1.5' }}>{confirmDialog.message}</p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={() => setConfirmDialog(null)}
+                style={{ padding: '10px 24px', background: '#f3f4f6', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', color: '#374151' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDialog.onConfirm}
+                style={{ padding: '10px 24px', background: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', fontSize: '0.95rem', color: 'white' }}
+              >
+                Sim, Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Add/Edit Template */}
       {showModal && (
@@ -973,6 +1104,16 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                           <input type="text" placeholder="Especifique..." value={structuredData.sensibilidadeDesc} onChange={(e) => handleStructuredChange('sensibilidadeDesc', e.target.value)} style={{ flex: 1, padding: '4px' }} />
                         </div>
                       </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Alergias / Sensibilidade a substâncias?</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <select value={structuredData.alergias || 'NÃO'} onChange={(e) => handleStructuredChange('alergias', e.target.value)} style={{ fontSize: '12px' }}>
+                            <option>NÃO</option>
+                            <option>SIM</option>
+                          </select>
+                          <input type="text" placeholder="Quais substâncias..." value={structuredData.alergiasDesc || ''} onChange={(e) => handleStructuredChange('alergiasDesc', e.target.value)} style={{ flex: 1, padding: '4px' }} />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1119,39 +1260,72 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
 
               {(() => {
                 const company = CompanySettings.get();
-                const pClient = printItem.isPatientForm 
+                const pClient = printItem.clientId 
                   ? clients.find(c => c.id.toString() === printItem.clientId.toString())
                   : null;
-                return printItem.isPatientForm && (
+                const formattedDate = printItem.date 
+                  ? new Date(printItem.date).toLocaleDateString('pt-BR') 
+                  : new Date().toLocaleDateString('pt-BR');
+                const hasPatient = !!pClient;
+                return (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px', border: '1px solid #000', padding: '12px', fontSize: '12px', background: '#f9fafb' }}>
                     {/* DADOS DO PROFISSIONAIS */}
                     <div style={{ borderRight: '1px solid #ccc', paddingRight: '15px' }}>
                       <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>• DADOS DO PROFISSIONAIS:</h4>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>-Clínica/Profissional Responsável:</strong> {company.nome}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>-COREN:</strong> {company.coren || '_______________________'}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>-CREFITO:</strong> {company.crefito || '_______________________'}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>-CPF:</strong> {company.cpf || '_______________________'}</p>
-                      <p style={{ margin: 0 }}><strong>-Telefone:</strong> {company.telefone}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>Data:</strong> {formattedDate}</p>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>-Clínica/Profissional Responsável:</strong> {company.nome || 'Fabrícia Rodrigues Saúde Bem-Estar'}</p>
+                      {(!hasPatient || company.coren) && <p style={{ margin: '0 0 4px 0' }}><strong>-COREN:</strong> {company.coren || '_______________________'}</p>}
+                      {(!hasPatient || company.crefito) && <p style={{ margin: '0 0 4px 0' }}><strong>-CREFITO:</strong> {company.crefito || '_______________________'}</p>}
+                      {(!hasPatient || company.cpf) && <p style={{ margin: '0 0 4px 0' }}><strong>-CPF:</strong> {company.cpf || '330.301.948-76'}</p>}
+                      {(!hasPatient || company.telefone) && <p style={{ margin: 0 }}><strong>-Telefone:</strong> {company.telefone || '(19) 997270910'}</p>}
                     </div>
 
                     {/* DADOS DO PACIENTE */}
                     <div>
                       <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#0f3d2e', textTransform: 'uppercase', borderBottom: '1px solid #ccc', paddingBottom: '3px' }}>• DADOS DO PACIENTE:</h4>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>• Nome:</strong> {printItem.clientName}</p>
-                      <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
-                        <span><strong>• CPF:</strong> {pClient && pClient.cpf ? pClient.cpf : '___________________'}</span>
-                        <span><strong>• RG:</strong> {pClient && pClient.rg ? pClient.rg : '___________________'}</span>
-                      </div>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> {pClient && pClient.dataNascimento ? new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '____/____/________'}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> {pClient && pClient.dataNascimento ? calculateAge(pClient.dataNascimento) : '______'}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> {pClient && pClient.endereco ? pClient.endereco : '________________________________________________'}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> {pClient && pClient.email ? pClient.email : '_______________________'}</p>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> {pClient && pClient.contato ? pClient.contato : '_______________________'}</p>
-                      <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                        <span><strong>• Tel para contato:</strong> {pClient && pClient.contatoEmergenciaTelefone ? pClient.contatoEmergenciaTelefone : '___________________'}</span>
-                        <span><strong>• Nome/Parentesco:</strong> {pClient && pClient.contatoEmergenciaNome ? pClient.contatoEmergenciaNome : '___________________'}</span>
-                      </div>
+                      <p style={{ margin: '0 0 4px 0' }}><strong>• Nome:</strong> {pClient ? pClient.nome : (printItem.clientName || '________________________________________________')}</p>
+                      
+                      {!hasPatient ? (
+                        <>
+                          <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
+                            <span><strong>• CPF:</strong> ___________________</span>
+                            <span><strong>• RG:</strong> ___________________</span>
+                          </div>
+                          <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> ____/____/________</p>
+                          <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> ______</p>
+                          <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> ________________________________________________</p>
+                          <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> _______________________</p>
+                          <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> _______________________</p>
+                          <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                            <span><strong>• Tel para contato:</strong> ___________________</span>
+                            <span><strong>• Nome/Parentesco:</strong> ___________________</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {(pClient.cpf || pClient.rg) && (
+                            <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
+                              {pClient.cpf && <span><strong>• CPF:</strong> {pClient.cpf}</span>}
+                              {pClient.rg && <span><strong>• RG:</strong> {pClient.rg}</span>}
+                            </div>
+                          )}
+                          {pClient.dataNascimento && (
+                            <>
+                              <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                              <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> {calculateAge(pClient.dataNascimento)} anos</p>
+                            </>
+                          )}
+                          {pClient.endereco && <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> {pClient.endereco}</p>}
+                          {pClient.email && <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> {pClient.email}</p>}
+                          {pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> {pClient.contato}</p>}
+                          {(pClient.contatoEmergenciaTelefone || pClient.contatoEmergenciaNome) && (
+                            <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                              {pClient.contatoEmergenciaTelefone && <span><strong>• Tel para contato:</strong> {pClient.contatoEmergenciaTelefone}</span>}
+                              {pClient.contatoEmergenciaNome && <span><strong>• Nome/Parentesco:</strong> {pClient.contatoEmergenciaNome}</span>}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -1161,32 +1335,12 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                 {printItem.conteudo || 'Este documento não possui conteúdo.'}
               </div>
 
-              {printItem.isPatientForm && (
-                <div style={{ marginTop: '30px', borderTop: '2px solid #000', paddingTop: '15px', fontSize: '11px', lineHeight: '1.6', textAlign: 'justify', color: '#111827' }}>
-                  <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', textTransform: 'uppercase', color: '#000' }}>• DECLARAÇÃO DE CONSENTIMENTO E RESPONSABILIDADE JURÍDICA</p>
-                  <p style={{ margin: 0 }}>
-                    Declaro, sob as penas da lei, que todas as informações clínicas prestadas neste documento são verdadeiras, completas e de minha inteira responsabilidade, não omitindo nenhum fato relevante sobre meu estado de saúde. Fui devidamente esclarecido(a) quanto ao diagnóstico podológico e concordo com os procedimentos e tratamentos propostos pela clínica/profissional responsável, autorizando a sua execução. Estou ciente de que o sucesso do tratamento podológico depende também do cumprimento rigoroso das orientações pós-atendimento recomendadas. Adicionalmente, autorizo o registro fotográfico dos meus pés para fins exclusivos de acompanhamento clínico, evolução do prontuário e arquivo profissional, resguardando a privacidade da minha identidade nos termos da legislação vigente.
-                  </p>
-                </div>
-              )}
-
-              {printItem.signature && (
-                <div style={{ marginTop: '40px', borderTop: '1px solid #000', paddingTop: '10px', maxWidth: '300px' }}>
-                  <img src={printItem.signature} alt="Assinatura" style={{ width: '100%', maxHeight: '100px', objectFit: 'contain' }} />
-                  <p style={{ margin: 0, fontSize: '12px', textAlign: 'center', fontWeight: 'bold' }}>ASSINATURA DO PACIENTE</p>
-                </div>
-              )}
-
-              {printItem.isPatientForm && !printItem.signature && (
-                <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between' }}>
-                  <div style={{ borderTop: '1px solid #000', width: '200px', textAlign: 'center', fontSize: '11px', paddingTop: '5px' }}>
-                    ASSINATURA DO PACIENTE
-                  </div>
-                  <div style={{ borderTop: '1px solid #000', width: '200px', textAlign: 'center', fontSize: '11px', paddingTop: '5px' }}>
-                    ASSINATURA DO PROFISSIONAL
-                  </div>
-                </div>
-              )}
+              <div style={{ marginTop: '30px', borderTop: '2px solid #000', paddingTop: '15px', fontSize: '11px', lineHeight: '1.6', textAlign: 'justify', color: '#111827' }}>
+                <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', textTransform: 'uppercase', color: '#000' }}>• DECLARAÇÃO DE CONSENTIMENTO E RESPONSABILIDADE JURÍDICA</p>
+                <p style={{ margin: 0 }}>
+                  Declaro, sob as penas da lei, que todas as informações clínicas prestadas neste documento são verdadeiras, completas e de minha inteira responsabilidade, não omitindo nenhum fato relevante sobre meu estado de saúde. Fui devidamente esclarecido(a) quanto ao diagnóstico podológico e concordo com os procedimentos e tratamentos propostos pela clínica/profissional responsável, autorizando a sua execução. Estou ciente de que o sucesso do tratamento podológico depende também do cumprimento rigoroso das orientações pós-atendimento recomendadas. Adicionalmente, autorizo o registro fotográfico dos meus pés para fins exclusivos de acompanhamento clínico, evolução do prontuário e arquivo profissional, resguardando a privacidade da minha identidade nos termos da legislação vigente.
+                </p>
+              </div>
 
               {(printItem.photoAntes || printItem.photoDepois) && (
                 <div style={{ marginTop: '30px', display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
@@ -1218,24 +1372,24 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
                 </div>
               )}
 
-              {!printItem.signature && printItem.isPatientForm && (
-                <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between', gap: '40px' }}>
-                  <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
-                    <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+              <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'space-between', gap: '40px', alignItems: 'flex-end' }}>
+                {printItem.signature ? (
+                  <div style={{ flex: 1, maxWidth: '300px', textAlign: 'center' }}>
+                    <img src={printItem.signature} alt="Assinatura" style={{ width: '100%', maxHeight: '60px', objectFit: 'contain', display: 'block', margin: '0 auto 5px auto' }} />
+                    <div style={{ borderTop: '1px solid #111', paddingTop: '5px', fontSize: '11px', fontWeight: 'bold' }}>
+                      ASSINATURA DO PACIENTE
+                    </div>
                   </div>
-                  <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
-                    <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+                ) : (
+                  <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px', fontSize: '11px', fontWeight: 'bold' }}>
+                    ASSINATURA DO PACIENTE
                   </div>
+                )}
+                
+                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px', fontSize: '11px', fontWeight: 'bold' }}>
+                  ASSINATURA DO PROFISSIONAL
                 </div>
-              )}
-
-              {printItem.signature && printItem.isPatientForm && (
-                <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'flex-end', gap: '40px' }}>
-                  <div style={{ width: '300px', borderTop: '1px solid #111', textAlign: 'center', paddingTop: '8px' }}>
-                    <p style={{ margin: 0, fontSize: '11px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -1266,39 +1420,72 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
 
             {(() => {
               const company = CompanySettings.get();
-              const pClient = printItem.isPatientForm 
+              const pClient = printItem.clientId 
                 ? clients.find(c => c.id.toString() === printItem.clientId.toString())
                 : null;
-              return printItem.isPatientForm && (
+              const formattedDate = printItem.date 
+                ? new Date(printItem.date).toLocaleDateString('pt-BR') 
+                : new Date().toLocaleDateString('pt-BR');
+              const hasPatient = !!pClient;
+              return (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px', border: '1px solid #000', padding: '15px', fontSize: '12px', background: '#fff' }}>
                   {/* DADOS DO PROFISSIONAIS */}
                   <div style={{ borderRight: '1px solid #000', paddingRight: '15px' }}>
                     <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>• DADOS DO PROFISSIONAIS:</h4>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>Data:</strong> {new Date(printItem.date).toLocaleDateString('pt-BR')}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>-Clínica/Profissional Responsável:</strong> {company.nome}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>-COREN:</strong> {company.coren || '_______________________'}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>-CREFITO:</strong> {company.crefito || '_______________________'}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>-CPF:</strong> {company.cpf || '_______________________'}</p>
-                    <p style={{ margin: 0 }}><strong>-Telefone:</strong> {company.telefone}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>Data:</strong> {formattedDate}</p>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>-Clínica/Profissional Responsável:</strong> {company.nome || 'Fabrícia Rodrigues Saúde Bem-Estar'}</p>
+                    {(!hasPatient || company.coren) && <p style={{ margin: '0 0 4px 0' }}><strong>-COREN:</strong> {company.coren || '_______________________'}</p>}
+                    {(!hasPatient || company.crefito) && <p style={{ margin: '0 0 4px 0' }}><strong>-CREFITO:</strong> {company.crefito || '_______________________'}</p>}
+                    {(!hasPatient || company.cpf) && <p style={{ margin: '0 0 4px 0' }}><strong>-CPF:</strong> {company.cpf || '330.301.948-76'}</p>}
+                    {(!hasPatient || company.telefone) && <p style={{ margin: 0 }}><strong>-Telefone:</strong> {company.telefone || '(19) 997270910'}</p>}
                   </div>
 
                   {/* DADOS DO PACIENTE */}
                   <div>
                     <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', borderBottom: '1px solid #000', paddingBottom: '3px' }}>• DADOS DO PACIENTE:</h4>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>• Nome:</strong> {printItem.clientName}</p>
-                    <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
-                      <span><strong>• CPF:</strong> {pClient && pClient.cpf ? pClient.cpf : '___________________'}</span>
-                      <span><strong>• RG:</strong> {pClient && pClient.rg ? pClient.rg : '___________________'}</span>
-                    </div>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> {pClient && pClient.dataNascimento ? new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '____/____/________'}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> {pClient && pClient.dataNascimento ? calculateAge(pClient.dataNascimento) : '______'}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> {pClient && pClient.endereco ? pClient.endereco : '________________________________________________'}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> {pClient && pClient.email ? pClient.email : '_______________________'}</p>
-                    <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> {pClient && pClient.contato ? pClient.contato : '_______________________'}</p>
-                    <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                      <span><strong>• Tel para contato:</strong> {pClient && pClient.contatoEmergenciaTelefone ? pClient.contatoEmergenciaTelefone : '___________________'}</span>
-                      <span><strong>• Nome/Parentesco:</strong> {pClient && pClient.contatoEmergenciaNome ? pClient.contatoEmergenciaNome : '___________________'}</span>
-                    </div>
+                    <p style={{ margin: '0 0 4px 0' }}><strong>• Nome:</strong> {pClient ? pClient.nome : (printItem.clientName || '________________________________________________')}</p>
+                    
+                    {!hasPatient ? (
+                      <>
+                        <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
+                          <span><strong>• CPF:</strong> ___________________</span>
+                          <span><strong>• RG:</strong> ___________________</span>
+                        </div>
+                        <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> ____/____/________</p>
+                        <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> ______</p>
+                        <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> ________________________________________________</p>
+                        <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> _______________________</p>
+                        <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> _______________________</p>
+                        <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                          <span><strong>• Tel para contato:</strong> ___________________</span>
+                          <span><strong>• Nome/Parentesco:</strong> ___________________</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {(pClient.cpf || pClient.rg) && (
+                          <div style={{ margin: '0 0 4px 0', display: 'flex', gap: '20px' }}>
+                            {pClient.cpf && <span><strong>• CPF:</strong> {pClient.cpf}</span>}
+                            {pClient.rg && <span><strong>• RG:</strong> {pClient.rg}</span>}
+                          </div>
+                        )}
+                        {pClient.dataNascimento && (
+                          <>
+                            <p style={{ margin: '0 0 4px 0' }}><strong>• Data de nascimento:</strong> {new Date(pClient.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                            <p style={{ margin: '0 0 4px 0' }}><strong>• Idade:</strong> {calculateAge(pClient.dataNascimento)} anos</p>
+                          </>
+                        )}
+                        {pClient.endereco && <p style={{ margin: '0 0 4px 0' }}><strong>• Endereço:</strong> {pClient.endereco}</p>}
+                        {pClient.email && <p style={{ margin: '0 0 4px 0' }}><strong>• E-mail:</strong> {pClient.email}</p>}
+                        {pClient.contato && <p style={{ margin: '0 0 4px 0' }}><strong>• Tel:</strong> {pClient.contato}</p>}
+                        {(pClient.contatoEmergenciaTelefone || pClient.contatoEmergenciaNome) && (
+                          <div style={{ margin: 0, display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                            {pClient.contatoEmergenciaTelefone && <span><strong>• Tel para contato:</strong> {pClient.contatoEmergenciaTelefone}</span>}
+                            {pClient.contatoEmergenciaNome && <span><strong>• Nome/Parentesco:</strong> {pClient.contatoEmergenciaNome}</span>}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               );
@@ -1308,14 +1495,12 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
               {printItem.conteudo}
             </div>
 
-            {printItem.isPatientForm && (
-              <div style={{ marginTop: '35px', borderTop: '2px solid #000', paddingTop: '15px', fontSize: '11px', lineHeight: '1.6', textAlign: 'justify', color: '#000' }}>
-                <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', textTransform: 'uppercase' }}>• DECLARAÇÃO DE CONSENTIMENTO E RESPONSABILIDADE JURÍDICA</p>
-                <p style={{ margin: 0 }}>
-                  Declaro, sob as penas da lei, que todas as informações clínicas prestadas neste documento são verdadeiras, completas e de minha inteira responsabilidade, não omitindo nenhum fato relevante sobre meu estado de saúde. Fui devidamente esclarecido(a) quanto ao diagnóstico podológico e concordo com os procedimentos e tratamentos propostos pela clínica/profissional responsável, autorizando a sua execução. Estou ciente de que o sucesso do tratamento podológico depende também do cumprimento rigoroso das orientações pós-atendimento recomendadas. Adicionalmente, autorizo o registro fotográfico dos meus pés para fins exclusivos de acompanhamento clínico, evolução do prontuário e arquivo profissional, resguardando a privacidade da minha identidade nos termos da legislação vigente.
-                </p>
-              </div>
-            )}
+            <div style={{ marginTop: '35px', borderTop: '2px solid #000', paddingTop: '15px', fontSize: '11px', lineHeight: '1.6', textAlign: 'justify', color: '#000' }}>
+              <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', textTransform: 'uppercase' }}>• DECLARAÇÃO DE CONSENTIMENTO E RESPONSABILIDADE JURÍDICA</p>
+              <p style={{ margin: 0 }}>
+                Declaro, sob as penas da lei, que todas as informações clínicas prestadas neste documento são verdadeiras, completas e de minha inteira responsabilidade, não omitindo nenhum fato relevante sobre meu estado de saúde. Fui devidamente esclarecido(a) quanto ao diagnóstico podológico e concordo com os procedimentos e tratamentos propostos pela clínica/profissional responsável, autorizando a sua execução. Estou ciente de que o sucesso do tratamento podológico depende também do cumprimento rigoroso das orientações pós-atendimento recomendadas. Adicionalmente, autorizo o registro fotográfico dos meus pés para fins exclusivos de acompanhamento clínico, evolução do prontuário e arquivo profissional, resguardando a privacidade da minha identidade nos termos da legislação vigente.
+              </p>
+            </div>
 
             {(printItem.photoAntes || printItem.photoDepois) && (
               <div style={{ marginTop: '30px', display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '30px' }}>
@@ -1347,31 +1532,24 @@ DATA: ${new Date().toLocaleDateString('pt-BR')}`;
               </div>
             )}
 
-            {printItem.signature && (
-              <div style={{ marginTop: '40px', borderTop: '1px solid #000', paddingTop: '10px', maxWidth: '300px' }}>
-                <img src={printItem.signature} alt="Assinatura" style={{ width: '100%', maxHeight: '100px', objectFit: 'contain' }} />
-                <p style={{ margin: 0, fontSize: '12px', textAlign: 'center', fontWeight: 'bold' }}>ASSINATURA DO PACIENTE</p>
-              </div>
-            )}
-
-            {!printItem.signature && printItem.isPatientForm && (
-              <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between', gap: '80px' }}>
-                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
-                  <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Paciente</p>
+            <div style={{ marginTop: '70px', display: 'flex', justifyContent: 'space-between', gap: '80px', alignItems: 'flex-end' }}>
+              {printItem.signature ? (
+                <div style={{ flex: 1, maxWidth: '300px', textAlign: 'center' }}>
+                  <img src={printItem.signature} alt="Assinatura" style={{ width: '100%', maxHeight: '60px', objectFit: 'contain', display: 'block', margin: '0 auto 5px auto' }} />
+                  <div style={{ borderTop: '1px solid #111', paddingTop: '5px', fontSize: '12px', fontWeight: 'bold' }}>
+                    Assinatura do Paciente
+                  </div>
                 </div>
-                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
-                  <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
+              ) : (
+                <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px', fontSize: '12px', fontWeight: 'bold' }}>
+                  Assinatura do Paciente
                 </div>
+              )}
+              
+              <div style={{ flex: 1, borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px', fontSize: '12px', fontWeight: 'bold' }}>
+                Assinatura do Profissional
               </div>
-            )}
-
-            {printItem.signature && printItem.isPatientForm && (
-              <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'flex-end', gap: '80px' }}>
-                <div style={{ width: '300px', borderTop: '1px solid #111', textAlign: 'center', paddingTop: '10px' }}>
-                  <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold' }}>Assinatura do Profissional</p>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       )}
