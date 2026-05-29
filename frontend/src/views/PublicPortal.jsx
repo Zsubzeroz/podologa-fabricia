@@ -460,6 +460,9 @@ export default function PublicPortal() {
                         durationMinutes = parseInt(serviceDuration.replace('min', '').trim());
                       }
 
+                      const blockedDays = BlockedDaysManager.getAll();
+                      const currentAppts = AppointmentManager.getAll();
+
                       const getWorkHoursForDay = (dateYMD) => {
                         if (!dateYMD) return { start: 8, end: 20 };
                         const d = new Date(dateYMD + 'T00:00:00');
@@ -489,10 +492,6 @@ export default function PublicPortal() {
                         }
                         slots.push(`${endH.toString().padStart(2, '0')}:00`);
                       }
-
-
-                      const blockedDays = BlockedDaysManager.getAll();
-                      const currentAppts = AppointmentManager.getAll();
 
                       const availableSlots = slots.filter(slot => {
                         const [sh, sm] = slot.split(':').map(Number);
