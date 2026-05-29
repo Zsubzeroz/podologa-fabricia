@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Mail, Phone, Camera, Calendar } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import { EMAIL_CONFIG } from '../utils/emailConfig';
-import { AppointmentManager, ClientManager, BlockedDaysManager, ServiceManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
+import { AppointmentManager, ClientManager, BlockedDaysManager, ServiceManager, GeneralSettings, CompanySettings, WorkingHours } from '../utils/EntityManager';
 
 export default function PublicPortal() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -251,7 +251,7 @@ export default function PublicPortal() {
                 const allApps = AppointmentManager.getAll();
                 const cleanedPhone = phone.replace(/\D/g, '');
                 const userApps = allApps.filter(app => {
-                  const appPhone = (app.clientPhone || app.cliente_contato || '').replace(/\D/g, '');
+                  const appPhone = (app.phone || app.clientPhone || app.cliente_contato || '').replace(/\D/g, '');
                   return appPhone === cleanedPhone && app.status !== 'Cancelado';
                 });
                 
@@ -464,11 +464,17 @@ export default function PublicPortal() {
                         if (!dateYMD) return { start: 8, end: 20 };
                         const d = new Date(dateYMD + 'T00:00:00');
                         const dow = d.getDay();
+                        
+                        // Check for weekly recurring blocks for this specific day of week
+                        const weeklyBlock = blockedDays.find(b => String(b.dayOfWeek) === String(dow) && b.type === 'Recorrente Semanal' && !b.startTime);
+                        if (weeklyBlock) return { start: 0, end: 0, closed: true };
+
                         if (dow === 0) return { start: 0, end: 0, closed: true };
-                        if (dow === 1 || dow === 2 || dow === 3) return { start: 9, end: 20 };
-                        if (dow === 4 || dow === 5) return { start: 8, end: 20 };
-                        if (dow === 6) return { start: 8, end: 12 };
-                        return { start: 8, end: 20 };
+                        
+                        const wHours = WorkingHours.get();
+                        const start = parseInt(wHours.start.split(':')[0], 10);
+                        const end = parseInt(wHours.end.split(':')[0], 10);
+                        return { start, end };
                       };
 
                       const workLimits = getWorkHoursForDay(selectedDate);
@@ -477,12 +483,11 @@ export default function PublicPortal() {
 
                       const slots = [];
                       if (!workLimits.closed) {
-                        for (let h = startH; h <= endH; h++) {
+                        for (let h = startH; h < endH; h++) {
                           slots.push(`${h.toString().padStart(2, '0')}:00`);
-                          if (!(h === endH && workLimits.end === 12)) {
-                            slots.push(`${h.toString().padStart(2, '0')}:30`);
-                          }
+                          slots.push(`${h.toString().padStart(2, '0')}:30`);
                         }
+                        slots.push(`${endH.toString().padStart(2, '0')}:00`);
                       }
 
 
