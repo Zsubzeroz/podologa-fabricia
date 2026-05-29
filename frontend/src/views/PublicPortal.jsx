@@ -495,7 +495,7 @@ export default function PublicPortal() {
                         const endTotal = startTotal + durationMinutes;
 
                         // 1. Check blocked times
-                        const matchingBlock = blockedDays.find(b => {
+                        const matchingBlocks = blockedDays.filter(b => {
                           if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
                             const d = new Date(selectedDate + 'T00:00:00');
                             return String(d.getDay()) === String(b.dayOfWeek);
@@ -504,12 +504,13 @@ export default function PublicPortal() {
                           const end = b.endDate || b.date;
                           return selectedDate >= start && selectedDate <= end;
                         });
-                        if (matchingBlock) {
-                          if (!matchingBlock.startTime && !matchingBlock.endTime) return false;
-                          const bStart = getMinutes(matchingBlock.startTime);
-                          const bEnd = getMinutes(matchingBlock.endTime, true);
-                          if (isOverlapping(startTotal, endTotal, bStart, bEnd)) return false;
-                        }
+                        const isBlocked = matchingBlocks.some(b => {
+                          if (!b.startTime && !b.endTime) return true;
+                          const bStart = getMinutes(b.startTime);
+                          const bEnd = getMinutes(b.endTime, true);
+                          return isOverlapping(startTotal, endTotal, bStart, bEnd);
+                        });
+                        if (isBlocked) return false;
 
                         // 2. Check existing appointments
                         const hasConflict = currentAppts.some(appt => {
@@ -619,7 +620,7 @@ export default function PublicPortal() {
 
                     // 2. Validate against blocked dates and times
                     const blockedDays = BlockedDaysManager.getAll();
-                    const matchingBlock = blockedDays.find(b => {
+                    const matchingBlocks = blockedDays.filter(b => {
                       if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
                         const d = new Date(selectedDate + 'T00:00:00');
                         return String(d.getDay()) === String(b.dayOfWeek);
@@ -628,15 +629,19 @@ export default function PublicPortal() {
                       const end = b.endDate || b.date;
                       return selectedDate >= start && selectedDate <= end;
                     });
-                    if (matchingBlock) {
-                      if (!matchingBlock.startTime && !matchingBlock.endTime) {
-                        alert(`Nesta data a clínica estará fechada por motivo de: ${matchingBlock.description}`);
-                        return;
-                      } else {
-                        const bStart = getMinutes(matchingBlock.startTime);
-                        const bEnd = getMinutes(matchingBlock.endTime, true);
+
+                    const fullDayBlock = matchingBlocks.find(b => !b.startTime && !b.endTime);
+                    if (fullDayBlock) {
+                      alert(`Nesta data a clínica estará fechada por motivo de: ${fullDayBlock.description}`);
+                      return;
+                    }
+
+                    for (const b of matchingBlocks) {
+                      if (b.startTime || b.endTime) {
+                        const bStart = getMinutes(b.startTime);
+                        const bEnd = getMinutes(b.endTime, true);
                         if (isOverlapping(startTotal, endTotal, bStart, bEnd)) {
-                          alert(`Este horário não está disponível. O profissional estará ausente das ${matchingBlock.startTime} às ${matchingBlock.endTime} por motivo de: ${matchingBlock.description}`);
+                          alert(`Este horário não está disponível. O profissional estará ausente das ${b.startTime} às ${b.endTime} por motivo de: ${b.description}`);
                           return;
                         }
                       }

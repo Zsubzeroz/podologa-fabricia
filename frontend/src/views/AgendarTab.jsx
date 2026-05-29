@@ -143,7 +143,7 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
 
     // Validate against blocked days/times
     const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
-    const matchingBlock = blockedDays.find(b => {
+    const matchingBlocks = blockedDays.filter(b => {
       if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
         const d = new Date(formData.date + 'T00:00:00');
         return String(d.getDay()) === String(b.dayOfWeek);
@@ -152,15 +152,19 @@ export default function AgendarTab({ onSave, currentDate, preSelectedTime, preSe
       const end = b.endDate || b.date;
       return formData.date >= start && formData.date <= end;
     });
-    if (matchingBlock) {
-      if (!matchingBlock.startTime && !matchingBlock.endTime) {
-        alert(`O profissional está ausente neste dia por motivo de: ${matchingBlock.description}`);
-        return;
-      } else {
-        const bStart = getMinutes(matchingBlock.startTime);
-        const bEnd = getMinutes(matchingBlock.endTime, true);
+
+    const fullDayBlock = matchingBlocks.find(b => !b.startTime && !b.endTime);
+    if (fullDayBlock) {
+      alert(`O profissional está ausente neste dia por motivo de: ${fullDayBlock.description}`);
+      return;
+    }
+
+    for (const b of matchingBlocks) {
+      if (b.startTime || b.endTime) {
+        const bStart = getMinutes(b.startTime);
+        const bEnd = getMinutes(b.endTime, true);
         if (isOverlapping(startTotal, endTotal, bStart, bEnd)) {
-          alert(`Este horário não está disponível. O profissional estará ausente das ${matchingBlock.startTime} às ${matchingBlock.endTime} por motivo de: ${matchingBlock.description}`);
+          alert(`Este horário não está disponível. O profissional estará ausente das ${b.startTime} às ${b.endTime} por motivo de: ${b.description}`);
           return;
         }
       }
