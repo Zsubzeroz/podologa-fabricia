@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Mail, Phone, Camera, Calendar } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import { EMAIL_CONFIG } from '../utils/emailConfig';
-import { GeneralSettings, CompanySettings } from '../utils/EntityManager';
+import { AppointmentManager, ClientManager, BlockedDaysManager, ServiceManager, GeneralSettings, CompanySettings } from '../utils/EntityManager';
 
 export default function PublicPortal() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -21,25 +21,14 @@ export default function PublicPortal() {
   const [selectedTime, setSelectedTime] = useState('');
 
   const [services, setServices] = useState(() => {
-    const saved = window.localStorage.getItem('services');
-    const allServices = saved ? JSON.parse(saved) : [
-      { id: 1, name: 'AVALIAÇÃO', duration: '1h 00min', price: 'R$ 50,00', professional: 'FABRICIA RODRIGUES' },
-      { id: 2, name: 'CALOS E CALOSIDADE', duration: '1h 00min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' },
-      { id: 3, name: 'ONICOCRIPTOSE (UNHA ENCRAVADA)', duration: '1h 00min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' },
-      { id: 4, name: 'PODOROFILAXIA (limpeza)', duration: '30min', price: 'R$ 70,00', professional: 'FABRICIA RODRIGUES' },
-      { id: 5, name: 'VERRUGA PLANTAR (olho de peixe)', duration: '30min', price: 'Consulte', professional: 'FABRICIA RODRIGUES' }
-    ];
-    // Filter out services that are only for admin
+    const allServices = ServiceManager.getAll();
     return allServices.filter(s => !s.onlyAdmin);
   });
 
   useEffect(() => {
     const handleSync = () => {
-      const saved = window.localStorage.getItem('services');
-      if (saved) {
-        const allServices = JSON.parse(saved);
-        setServices(allServices.filter(s => !s.onlyAdmin));
-      }
+      const allServices = ServiceManager.getAll();
+      setServices(allServices.filter(s => !s.onlyAdmin));
     };
     window.addEventListener('dataSync', handleSync);
     window.addEventListener('storage', handleSync);
@@ -259,7 +248,7 @@ export default function PublicPortal() {
                   alert('Por favor, informe seu celular.');
                   return;
                 }
-                const allApps = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+                const allApps = AppointmentManager.getAll();
                 const cleanedPhone = phone.replace(/\D/g, '');
                 const userApps = allApps.filter(app => {
                   const appPhone = (app.clientPhone || app.cliente_contato || '').replace(/\D/g, '');
@@ -406,7 +395,7 @@ export default function PublicPortal() {
 
                       // Auto-fill logic
                       if (cleaned.length >= 10) {
-                        const allClients = JSON.parse(window.localStorage.getItem('clientes') || '[]');
+                        const allClients = ClientManager.getAll();
                         const existingClient = allClients.find(c => (c.contato || '').replace(/\D/g, '') === cleaned);
                         if (existingClient) {
                           if (!clientName) setClientName(existingClient.nome);
@@ -494,8 +483,8 @@ export default function PublicPortal() {
                       }
 
 
-                      const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
-                      const currentAppts = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+                      const blockedDays = BlockedDaysManager.getAll();
+                      const currentAppts = AppointmentManager.getAll();
 
                       const availableSlots = slots.filter(slot => {
                         const [sh, sm] = slot.split(':').map(Number);
@@ -623,7 +612,7 @@ export default function PublicPortal() {
                     };
 
                     // 2. Validate against blocked dates and times
-                    const blockedDays = JSON.parse(window.localStorage.getItem('blockedDays') || '[]');
+                    const blockedDays = BlockedDaysManager.getAll();
                     const matchingBlock = blockedDays.find(b => {
                       if (b.dayOfWeek !== undefined && b.dayOfWeek !== '') {
                         const d = new Date(selectedDate + 'T00:00:00');
@@ -648,7 +637,7 @@ export default function PublicPortal() {
                     }
 
                     // 3. Validate against existing appointments on the same date
-                    const currentAppts = JSON.parse(window.localStorage.getItem('appointments') || '[]');
+                    const currentAppts = AppointmentManager.getAll();
                     const hasConflict = currentAppts.some(appt => {
                       if (appt.date !== selectedDate) return false;
                       const aStart = getMinutes(appt.startTime);
@@ -674,12 +663,11 @@ export default function PublicPortal() {
                       status: 'Agendado'
                     };
 
-                    const updated = [...currentAppts, newAppointment];
-                    window.localStorage.setItem('appointments', JSON.stringify(updated));
+                    AppointmentManager.add(newAppointment);
                     
                     // SYNC CLIENT TO DATABASE
-                    const currentClients = JSON.parse(window.localStorage.getItem('clientes') || '[]');
-                    const clientExists = currentClients.some(c => c.contato.replace(/\D/g, '') === clientPhone.replace(/\D/g, ''));
+                    const currentClients = ClientManager.getAll();
+                    const clientExists = currentClients.some(c => (c.contato || '').replace(/\D/g, '') === clientPhone.replace(/\D/g, ''));
                     if (!clientExists) {
                       const newClient = {
                         id: Date.now(),
@@ -688,7 +676,7 @@ export default function PublicPortal() {
                         email: clientEmail,
                         data: new Date().toLocaleDateString('pt-BR')
                       };
-                      window.localStorage.setItem('clientes', JSON.stringify([...currentClients, newClient]));
+                      ClientManager.add(newClient);
                     }
 
                     window.dispatchEvent(new Event('storage'));

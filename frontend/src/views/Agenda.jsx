@@ -173,8 +173,15 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
     
     const msg = `🌿 Olá *${clientName}*!\n\nVocê tem um compromisso na *Clínica Fabrícia Rodrigues*:\n\n📆 Data: *${dateStr}*. ${dayOfWeek} \n🕓 Horário: *${startTime}*.\n🦶🏼 Serviço: *${serviceName}*.\n\n📍Rua: Papa João Paulo ll, 256.\nBairro: Orlando Correia Barbosa.\nArtur Nogueira.\n\n📌 Só lembrando de vir com (calçado confortável/sem esmalte, se for o caso).\n📌 Qualquer imprevisto, por favor me avise com antecedência.`;
 
-    const phone = (appt.phone || appt.clientPhone || '').replace(/\D/g, '');
-    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    let phone = (appt.phone || appt.clientPhone || '').replace(/\D/g, '');
+    if (!phone) {
+      alert("Por favor, preencha o número de telefone do cliente para enviar a mensagem.");
+      return;
+    }
+    if (!phone.startsWith('55') || phone.length < 12) {
+      phone = `55${phone}`;
+    }
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const handleSendConfirmationWhatsApp = (appt) => {
@@ -196,8 +203,15 @@ export default function Agenda({ appointments, onCancelAppointment, onUpdateAppo
     msg = msg.replace(/@NOMESERVICO/g, serviceName);
     msg = msg.replace(/@NOMEEMPRESA/g, company.nome || 'Clínica Fabrícia Rodrigues');
 
-    const phone = (appt.phone || appt.clientPhone || '').replace(/\D/g, '');
-    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    let phone = (appt.phone || appt.clientPhone || '').replace(/\D/g, '');
+    if (!phone) {
+      alert("Por favor, preencha o número de telefone do cliente para enviar a mensagem.");
+      return;
+    }
+    if (!phone.startsWith('55') || phone.length < 12) {
+      phone = `55${phone}`;
+    }
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   // Funções para o Calendário Mensal

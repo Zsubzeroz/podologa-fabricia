@@ -28,9 +28,18 @@ export default function ConsultaAgendas() {
   });
 
   useEffect(() => {
-    const data = AppointmentManager.getAll();
-    setAppointments(data);
-    setFiltered(data);
+    const load = () => {
+      const data = AppointmentManager.getAll();
+      setAppointments(data);
+      setFiltered(data);
+    };
+    load();
+    window.addEventListener('dataSync', load);
+    window.addEventListener('storage', load);
+    return () => {
+      window.removeEventListener('dataSync', load);
+      window.removeEventListener('storage', load);
+    };
   }, []);
 
   const handleSearch = () => {

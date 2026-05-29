@@ -269,7 +269,8 @@ function App() {
                     PatientFormManager.add(newForm);
                   }
 
-                  const updated = AppointmentManager.add(newApptData);
+                  AppointmentManager.add(newApptData);
+                  const updated = AppointmentManager.getAll();
                   setAppointments(updated);
                   resetPreSelections();
                   setCurrentView('agenda');
